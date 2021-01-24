@@ -1,0 +1,52 @@
+{
+    "name": "quickrdf/in-memory-store-sqlite",
+    "type": "library",
+    "description": "TODO",
+    "keywords": ["rdf","sparql", "in-memory store"],
+    "homepage": "https://github.com/quickrdf/in-memory-store-sqlite",
+    "license": [],
+    "authors": [
+        {
+            "name": "Konrad Abicht",
+            "homepage": "https://inspirito.de",
+            "email": "hi@inspirito.de",
+            "role": "Maintainer, Developer"
+        }
+    ],
+    "require": {
+        "php": ">=8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.0"
+    },
+    "autoload": {
+        "classmap": ["parsers/", "serializers/", "store/"],
+        "files": [
+            "./ARC2.php",
+            "./ARC2_Class.php",
+            "./ARC2_getFormat.php",
+            "./ARC2_getPreferredFormat.php",
+            "./ARC2_Graph.php",
+            "./ARC2_Reader.php",
+            "./ARC2_Resource.php"
+        ],
+        "psr-4": {
+            "quickrdf\\InMemoryStoreSqlite\\": [
+                "src/"
+            ],
+            "ARC2\\": [
+                "src/ARC2/"
+            ]
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": [
+                "tests"
+            ]
+        }
+    },
+    "scripts": {
+        "phpunit": "vendor/bin/phpunit"
+    }
+}
