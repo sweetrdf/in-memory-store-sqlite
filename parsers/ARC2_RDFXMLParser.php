@@ -1,11 +1,15 @@
 <?php
-/**
- * ARC2 RDF/XML Parser.
+
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @author Benjamin Nowack <bnowack@semsol.com>
- * @license W3C Software License and GPL
- * @homepage <https://github.com/semsol/arc2>
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
+
 ARC2::inc('RDFParser');
 
 class ARC2_RDFXMLParser extends ARC2_RDFParser
@@ -71,7 +75,7 @@ class ARC2_RDFXMLParser extends ARC2_RDFParser
                 }
             }
         }
-        $this->target_encoding = xml_parser_get_option($this->xml_parser, XML_OPTION_TARGET_ENCODING);
+        $this->target_encoding = xml_parser_get_option($this->xml_parser, \XML_OPTION_TARGET_ENCODING);
         xml_parser_free($this->xml_parser);
         $this->reader->closeStream();
         unset($this->reader);
@@ -84,8 +88,8 @@ class ARC2_RDFXMLParser extends ARC2_RDFParser
         if (!isset($this->xml_parser)) {
             $enc = preg_match('/^(utf\-8|iso\-8859\-1|us\-ascii)$/i', $this->getEncoding(), $m) ? $m[1] : 'UTF-8';
             $parser = xml_parser_create_ns($enc, '');
-            xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 0);
-            xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+            xml_parser_set_option($parser, \XML_OPTION_SKIP_WHITE, 0);
+            xml_parser_set_option($parser, \XML_OPTION_CASE_FOLDING, 0);
             xml_set_element_handler($parser, 'open', 'close');
             xml_set_character_data_handler($parser, 'cdata');
             xml_set_start_namespace_decl_handler($parser, 'nsDecl');
@@ -613,7 +617,7 @@ class ARC2_RDFXMLParser extends ARC2_RDFParser
     {
         if ($s = $this->getParentS()) {
             if (isset($s['o_xml_data']) || preg_match("/[\n\r]/", $d) || trim($d)) {
-                $d = htmlspecialchars($d, ENT_NOQUOTES);
+                $d = htmlspecialchars($d, \ENT_NOQUOTES);
                 $s['o_xml_data'] = isset($s['o_xml_data']) ? $s['o_xml_data'].$d : $d;
             }
             $this->updateS($s);

@@ -1,5 +1,15 @@
 <?php
 
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
+ *
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
+
 namespace Tests\db_adapter_depended\store\query;
 
 use Tests\ARC2_TestCase;
@@ -83,7 +93,7 @@ class KnownNotWorkingSparqlQueriesTest extends ARC2_TestCase
     {
         $this->markTestSkipped(
             'ARC2: solving sameterm does not work properly. The result contains elements multiple times. '
-            .PHP_EOL.'Expected behavior is described here: https://www.w3.org/TR/rdf-sparql-query/#func-sameTerm'
+            .\PHP_EOL.'Expected behavior is described here: https://www.w3.org/TR/rdf-sparql-query/#func-sameTerm'
         );
 
         // test data

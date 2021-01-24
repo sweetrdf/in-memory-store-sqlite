@@ -1,11 +1,15 @@
 <?php
-/**
- * ARC2 Graph object.
+
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @author Benjamin Nowack <mail@bnowack.de>
- * @license W3C Software License
- * @homepage <https://github.com/semsol/arc2>
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
+
 ARC2::inc('Class');
 
 class ARC2_Graph extends ARC2_Class

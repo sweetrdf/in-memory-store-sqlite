@@ -1,13 +1,15 @@
 <?php
-/**
- * ARC2 CrunchBase API JSON Parser.
+
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @author Benjamin Nowack <bnowack@semsol.com>
- * @license W3C Software License and GPL
- * @homepage <https://github.com/semsol/arc2>
+ *  (c) Konrad Abicht <hi@inspirito.de>
  *
- * @version 2010-11-16
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
+
 ARC2::inc('JSONParser');
 
 class ARC2_CBJSONParser extends ARC2_JSONParser
@@ -334,7 +336,7 @@ class ARC2_CBJSONParser extends ARC2_JSONParser
         $r = '';
         foreach (['year', 'month', 'day'] as $suffix) {
             $val = $this->v1($prefix.'_'.$suffix, '00', $struct);
-            $r .= ($r ? '-' : '').str_pad($val, 2, '0', STR_PAD_LEFT);
+            $r .= ($r ? '-' : '').str_pad($val, 2, '0', \STR_PAD_LEFT);
         }
         if ('00-00-00' != $r) {
             $this->addT($s, $this->getPropertyURI($prefix.'_date'), $r, $s_type, 'literal');

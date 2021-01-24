@@ -1,5 +1,15 @@
 <?php
 
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
+ *
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
+
 namespace Tests\db_adapter_depended\sparql_1_1_tests;
 
 /**
@@ -209,7 +219,7 @@ class SyntaxUpdate1Test extends ComplianceTest
         // check result
         $this->markTestSkipped(
             'Query has to fail, but ARC2 returns an array as if query is considered valid. Query: '
-            .PHP_EOL
+            .\PHP_EOL
             .$this->makeQueryA1Liner($query)
         );
     }

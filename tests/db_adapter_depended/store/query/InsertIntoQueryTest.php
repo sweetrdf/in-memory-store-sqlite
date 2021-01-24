@@ -1,5 +1,15 @@
 <?php
 
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
+ *
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
+
 namespace Tests\db_adapter_depended\store\query;
 
 use Tests\ARC2_TestCase;
@@ -379,9 +389,9 @@ class InsertIntoQueryTest extends ARC2_TestCase
 
         $this->markTestSkipped(
             'ARC2 does not check the WHERE clause when inserting data. No data added at all.'
-            .PHP_EOL
-            .PHP_EOL.'FYI: https://www.w3.org/Submission/SPARQL-Update/#sec_examples and '
-            .PHP_EOL.'https://github.com/semsol/arc2/wiki/SPARQL-#insert-example'
+            .\PHP_EOL
+            .\PHP_EOL.'FYI: https://www.w3.org/Submission/SPARQL-Update/#sec_examples and '
+            .\PHP_EOL.'https://github.com/semsol/arc2/wiki/SPARQL-#insert-example'
         );
     }
 }

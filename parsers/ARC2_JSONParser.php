@@ -1,14 +1,15 @@
 <?php
-/**
- * ARC2 JSON Parser
- * Does not extract triples, needs sub-class for RDF extraction.
+
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @author Benjamin Nowack <bnowack@semsol.com>
- * @license W3C Software License and GPL
- * @homepage <https://github.com/semsol/arc2>
+ *  (c) Konrad Abicht <hi@inspirito.de>
  *
- * @version 2010-11-16
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
+
 ARC2::inc('RDFParser');
 
 class ARC2_JSONParser extends ARC2_RDFParser

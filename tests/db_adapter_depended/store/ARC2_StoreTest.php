@@ -1,5 +1,15 @@
 <?php
 
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
+ *
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
+
 namespace Tests\db_adapter_depended\store;
 
 use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
@@ -260,7 +270,7 @@ XML;
         ob_start();
         $this->fixture->dump();
         $dumpContent = ob_get_clean();
-        error_reporting(E_ALL);
+        error_reporting(\E_ALL);
 
         $expectedXML = <<<XML
 <?xml version="1.0"?>
@@ -584,7 +594,7 @@ XML;
     {
         $this->markTestSkipped(
             'Adding the same triple into two graphs does not work.'
-            .PHP_EOL.'Bug report: https://github.com/semsol/arc2/issues/114'
+            .\PHP_EOL.'Bug report: https://github.com/semsol/arc2/issues/114'
         );
 
         /*

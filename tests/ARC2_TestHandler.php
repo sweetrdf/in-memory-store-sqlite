@@ -1,12 +1,14 @@
 <?php
-/*
-homepage: http://arc.web-semantics.org/
-license:  http://arc.web-semantics.org/license
 
-class:    ARC2 DAWG Test Handler
-author:   Benjamin Nowack
-version:  2011-12-01
-*/
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
+ *
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
 
 ARC2::inc('Class');
 

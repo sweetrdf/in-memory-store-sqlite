@@ -1,13 +1,15 @@
 <?php
-/**
- * ARC2 Web Client.
+
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @author Benjamin Nowack
- * @license W3C Software License and GPL
- * @homepage <https://github.com/semsol/arc2>
+ *  (c) Konrad Abicht <hi@inspirito.de>
  *
- * @version 2010-11-16
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
+
 ARC2::inc('Class');
 
 class ARC2_Reader extends ARC2_Class
@@ -18,7 +20,11 @@ class ARC2_Reader extends ARC2_Class
     }
 
     public function __init()
-    {/* inc_path, proxy_host, proxy_port, proxy_skip, http_accept_header, http_user_agent_header, max_redirects */
+    {
+        /*
+            inc_path, proxy_host, proxy_port, proxy_skip, http_accept_header, http_user_agent_header,
+            max_redirects
+         */
         parent::__init();
         $this->http_method = $this->v('http_method', 'GET', $this->a);
         $this->message_body = $this->v('message_body', '', $this->a);
@@ -272,7 +278,7 @@ class ARC2_Reader extends ARC2_Class
                     stream_context_set_option($context, 'ssl', $m[1], $v);
                 }
             }
-            $s = stream_socket_client('ssl://'.$parts['host'].':'.$parts['port'], $errno, $errstr, $this->timeout, STREAM_CLIENT_CONNECT, $context);
+            $s = stream_socket_client('ssl://'.$parts['host'].':'.$parts['port'], $errno, $errstr, $this->timeout, \STREAM_CLIENT_CONNECT, $context);
         } elseif ('https' == $parts['scheme']) {
             $s = @fsockopen('ssl://'.$parts['host'], $parts['port'], $errno, $errstr, $this->timeout);
         } elseif ('http' == $parts['scheme']) {

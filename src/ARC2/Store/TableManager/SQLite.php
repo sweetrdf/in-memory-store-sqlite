@@ -1,13 +1,13 @@
 <?php
 
-/**
- * ARC2 RDF Store Table Manager.
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @license   W3C Software License and GPL
- * @author    Benjamin Nowack
- * @author    Konrad Abicht <hi@inspirito.de>
+ *  (c) Konrad Abicht <hi@inspirito.de>
  *
- * @version   2010-11-16
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
 
 namespace ARC2\Store\TableManager;

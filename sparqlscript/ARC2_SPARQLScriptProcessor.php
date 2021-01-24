@@ -1,12 +1,15 @@
 <?php
-/**
- * ARC2 SPARQLScript Processor.
+
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @author Benjamin Nowack <bnowack@semsol.com>
- * @license W3C Software License and GPL
+ *  (c) Konrad Abicht <hi@inspirito.de>
  *
- * @version 2010-11-16
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
+
 ARC2::inc('Class');
 
 class ARC2_SPARQLScriptProcessor extends ARC2_Class

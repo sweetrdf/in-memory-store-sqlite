@@ -1,12 +1,14 @@
 <?php
-/*
-@homepage <https://github.com/semsol/arc2>
-@license W3C Software License and GPL
 
-class:    ARC2 Atom Parser
-author:   Benjamin Nowack
-version:  2010-11-16
-*/
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
+ *
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
 
 ARC2::inc('LegacyXMLParser');
 
@@ -249,8 +251,8 @@ class ARC2_AtomParser extends ARC2_LegacyXMLParser
         if (!isset($this->xml_parser)) {
             $enc = preg_match('/^(utf\-8|iso\-8859\-1|us\-ascii)$/i', $this->getEncoding(), $m) ? $m[1] : 'UTF-8';
             $parser = xml_parser_create($enc);
-            xml_parser_set_option($parser, XML_OPTION_SKIP_WHITE, 0);
-            xml_parser_set_option($parser, XML_OPTION_CASE_FOLDING, 0);
+            xml_parser_set_option($parser, \XML_OPTION_SKIP_WHITE, 0);
+            xml_parser_set_option($parser, \XML_OPTION_CASE_FOLDING, 0);
             xml_set_element_handler($parser, 'open', 'close');
             xml_set_character_data_handler($parser, 'cData');
             xml_set_start_namespace_decl_handler($parser, 'nsDecl');

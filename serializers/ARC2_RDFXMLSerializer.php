@@ -1,13 +1,15 @@
 <?php
-/**
- * ARC2 RDF/XML Serializer.
+
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @author    Benjamin Nowack
- * @license   W3C Software License and GPL
- * @homepage  <https://github.com/semsol/arc2>
+ *  (c) Konrad Abicht <hi@inspirito.de>
  *
- * @version   2010-11-16
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
+
 ARC2::inc('RDFSerializer');
 
 class ARC2_RDFXMLSerializer extends ARC2_RDFSerializer

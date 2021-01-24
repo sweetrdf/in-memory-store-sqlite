@@ -1,12 +1,14 @@
 <?php
-/*
-@homepage <https://github.com/semsol/arc2>
-@license W3C Software License and GPL
 
-class:    ARC2 POSH RDF Serializer
-author:   Benjamin Nowack
-version:  2010-11-16
-*/
+/*
+ *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
+ *
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
+ */
 
 ARC2::inc('RDFSerializer');
 
