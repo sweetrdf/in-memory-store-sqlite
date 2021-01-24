@@ -2,7 +2,7 @@
 
 namespace Tests\integration\src\ARC2\Store\Adapter;
 
-use ARC2\Store\Adapter\PDOSQLiteAdapter;
+use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
 class PDOSQLiteAdapterTest extends AbstractAdapterTest
 {

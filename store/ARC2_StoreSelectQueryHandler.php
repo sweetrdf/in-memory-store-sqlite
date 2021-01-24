@@ -9,7 +9,7 @@
  * @version   2010-11-16
  */
 
-use ARC2\Store\Adapter\PDOSQLiteAdapter;
+use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
 ARC2::inc('StoreQueryHandler');
 

@@ -1,6 +1,6 @@
 <?php
 
-use ARC2\Store\Adapter\PDOSQLiteAdapter;
+use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
 /**
  * ARC2 base class.

@@ -2,7 +2,7 @@
 
 namespace Tests\db_adapter_depended\store;
 
-use ARC2\Store\Adapter\PDOSQLiteAdapter;
+use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
 
 class ARC2_StoreTest extends ARC2_TestCase

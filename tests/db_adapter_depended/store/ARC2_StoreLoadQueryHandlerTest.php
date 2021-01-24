@@ -2,7 +2,7 @@
 
 namespace Tests\db_adapter_depended\store\ARC2_StoreLoadQueryHandler;
 
-use ARC2\Store\Adapter\PDOSQLiteAdapter;
+use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use ARC2_StoreLoadQueryHandler;
 use PDO;
 use Tests\ARC2_TestCase;
