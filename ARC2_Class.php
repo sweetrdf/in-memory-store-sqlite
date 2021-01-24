@@ -1,4 +1,7 @@
 <?php
+
+use ARC2\Store\Adapter\PDOSQLiteAdapter;
+
 /**
  * ARC2 base class.
  *
@@ -591,14 +594,10 @@ class ARC2_Class
     public function getDBObjectFromARC2Class($con = null)
     {
         if (null == $this->db_object) {
-            if (false === class_exists('\\ARC2\\Store\\Adapter\\AdapterFactory')) {
-                require __DIR__.'/src/ARC2/Store/Adapter/AdapterFactory.php';
-            }
             if (false == isset($this->a['db_adapter'])) {
                 $this->a['db_adapter'] = 'mysqli';
             }
-            $factory = new \ARC2\Store\Adapter\AdapterFactory();
-            $this->db_object = $factory->getInstanceFor($this->a['db_adapter'], $this->a);
+            $this->db_object = new PDOSQLiteAdapter();
             if ($con) {
                 $this->db_object->connect($con);
             } else {

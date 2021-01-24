@@ -7,8 +7,6 @@
  * @homepage <https://github.com/semsol/arc2>
  */
 
-use ARC2\Store\Adapter\AbstractAdapter;
-use ARC2\Store\Adapter\AdapterFactory;
 use ARC2\Store\Adapter\PDOSQLiteAdapter;
 use ARC2\Store\TableManager\SQLite;
 
@@ -33,22 +31,6 @@ class ARC2_Store extends ARC2_Class
         $this->is_win = ('win' == strtolower(substr(PHP_OS, 0, 3))) ? true : false;
         $this->max_split_tables = $this->v('store_max_split_tables', 10, $this->a);
         $this->split_predicates = $this->v('store_split_predicates', [], $this->a);
-
-        /*
-         * setup cache instance, if required by the user.
-         */
-        if ($this->cacheEnabled()) {
-            // reuse existing cache instance, if it implements Psr\SimpleCache\CacheInterface
-            if (isset($this->a['cache_instance'])
-                && $this->a['cache_instance'] instanceof \Psr\SimpleCache\CacheInterface) {
-                $this->cache = $this->a['cache_instance'];
-
-            // create new cache instance
-            } else {
-                // FYI: https://symfony.com/doc/current/components/cache/adapters/filesystem_adapter.html
-                $this->cache = new \Symfony\Component\Cache\Simple\FilesystemCache('arc2', 0, null);
-            }
-        }
     }
 
     public function cacheEnabled()
@@ -85,14 +67,10 @@ class ARC2_Store extends ARC2_Class
 
         // connect
         try {
-            if (false === class_exists(AdapterFactory::class)) {
-                require __DIR__.'/../src/ARC2/Store/Adapter/AdapterFactory.php';
-            }
             if (false == isset($this->a['db_adapter'])) {
                 $this->a['db_adapter'] = 'mysqli';
             }
-            $factory = new AdapterFactory();
-            $this->db = $factory->getInstanceFor($this->a['db_adapter'], $this->a);
+            $this->db = new PDOSQLiteAdapter();
             $err = $this->db->connect();
             // stop here, if an error occoured
             if (is_string($err) && false !== empty($err)) {
@@ -111,7 +89,7 @@ class ARC2_Store extends ARC2_Class
         return true;
     }
 
-    public function getDBObject(): ?AbstractAdapter
+    public function getDBObject(): ?PDOSQLiteAdapter
     {
         return $this->db;
     }
