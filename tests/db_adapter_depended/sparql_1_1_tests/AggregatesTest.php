@@ -1,7 +1,7 @@
 <?php
 
 /*
- *  This file is part of the InMemoryStoreSqlite package and licensed under
+ *  This file is part of the quickrdf/InMemoryStoreSqlite package and licensed under
  *  the terms of the GPL-3 license.
  *
  *  (c) Konrad Abicht <hi@inspirito.de>
