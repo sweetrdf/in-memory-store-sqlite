@@ -434,15 +434,10 @@ class ARC2_Store extends ARC2_Class
     }
 
     /**
-     * Runs a SPARQL query. Dont use this function directly, use query instead.
+     * Uses a relevant QueryHandler class to handle given $query.
      */
-    public function runQuery($infos, $type, $keep_bnode_ids = 0, $q = '')
+    private function runQuery($infos, $type, $keep_bnode_ids = 0, $q = '')
     {
-        // invalidate cache, if enabled and a query is executed, which changes the store
-        if ($this->cacheEnabled() && in_array($type, ['load', 'insert', 'delete'])) {
-            $this->cache->clear();
-        }
-
         ARC2::inc('Store'.ucfirst($type).'QueryHandler');
         $cls = 'ARC2_Store'.ucfirst($type).'QueryHandler';
         $h = new $cls($this->a, $this);
