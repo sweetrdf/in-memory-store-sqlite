@@ -253,22 +253,6 @@ class ARC2_Store extends ARC2_Class
     }
 
     /**
-     * @todo required?
-     *
-     * @return int real process amount when using MySQL, 1 otherwise
-     */
-    public function countDBProcesses(): int
-    {
-        $amount = 1;
-
-        if (false === $this->getDBObject() instanceof PDOSQLiteAdapter) {
-            $amount = $this->db->getNumberOfRows('SHOW PROCESSLIST');
-        }
-
-        return $amount;
-    }
-
-    /**
      * Manipulating database processes using ARC2 is discouraged.
      *
      * @deprecated
@@ -332,14 +316,7 @@ class ARC2_Store extends ARC2_Class
     public function setUp($force = 0)
     {
         if (($force || !$this->isSetUp()) && false !== $this->getDBCon()) {
-            // PDO with SQLite
-            if ($this->a['db_object'] instanceof PDOSQLiteAdapter) {
-                (new SQLite($this->a, $this))->createTables();
-            } else {
-                // default way
-                ARC2::inc('StoreTableManager');
-                (new ARC2_StoreTableManager($this->a, $this))->createTables();
-            }
+            (new SQLite($this->a, $this))->createTables();
         }
     }
 
@@ -480,19 +457,6 @@ class ARC2_Store extends ARC2_Class
         }
     }
 
-    public function drop()
-    {
-        if (null == $this->db) {
-            $this->createDBCon();
-        }
-
-        $prefix = $this->getTablePrefix();
-        $tbls = $this->getTables();
-        foreach ($tbls as $tbl) {
-            $this->db->simpleQuery('DROP TABLE IF EXISTS '.$prefix.$tbl);
-        }
-    }
-
     public function insert($doc, $g, $keep_bnode_ids = 0)
     {
         $doc = is_array($doc) ? $this->toTurtle($doc) : $doc;
@@ -518,79 +482,9 @@ class ARC2_Store extends ARC2_Class
         }
     }
 
-    public function replace($doc, $g, $doc_2)
-    {
-        return [$this->delete($doc, $g), $this->insert($doc_2, $g)];
-    }
-
     public function dump()
     {
-        ARC2::inc('StoreDumper');
-        $d = new ARC2_StoreDumper($this->a, $this);
-        $d->dumpSPOG();
-    }
-
-    public function createBackup($path, $q = '')
-    {
-        ARC2::inc('StoreDumper');
-        $d = new ARC2_StoreDumper($this->a, $this);
-        $d->saveSPOG($path, $q);
-    }
-
-    public function renameTo($name)
-    {
-        $tbls = $this->getTables();
-        $old_prefix = $this->getTablePrefix();
-        $new_prefix = $this->v('db_table_prefix', '', $this->a);
-        $new_prefix .= $new_prefix ? '_' : '';
-        $new_prefix .= $name.'_';
-        foreach ($tbls as $tbl) {
-            if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-                $sql = 'ALTER TABLE '.$old_prefix.$tbl.' RENAME TO '.$new_prefix.$tbl;
-            } else {
-                $sql = 'RENAME TABLE '.$old_prefix.$tbl.' TO '.$new_prefix.$tbl;
-            }
-
-            $this->db->simpleQuery($sql);
-            if (!empty($this->db->getErrorMessage())) {
-                return $this->addError($this->db->getErrorMessage());
-            }
-        }
-        $this->a['store_name'] = $name;
-        unset($this->tbl_prefix);
-    }
-
-    public function replicateTo($name)
-    {
-        if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-            throw new Exception('replicateTo not supported with SQLite as DB adapter yet.');
-        }
-
-        $conf = array_merge($this->a, ['store_name' => $name]);
-        $new_store = ARC2::getStore($conf);
-        $new_store->setUp();
-        $new_store->reset();
-        $tbls = $this->getTables();
-        $old_prefix = $this->getTablePrefix();
-        $new_prefix = $new_store->getTablePrefix();
-
-        /*
-         * Use appropriate INSERT syntax, depending on the DBS.
-         */
-        if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-            $sqlHead = 'INSERT OR IGNORE INTO ';
-        } else {
-            $sqlHead = 'INSERT IGNORE INTO ';
-        }
-
-        foreach ($tbls as $tbl) {
-            $this->db->simpleQuery($sqlHead.$new_prefix.$tbl.' SELECT * FROM '.$old_prefix.$tbl);
-            if (!empty($this->db->getErrorMessage())) {
-                return $this->addError($this->db->getErrorMessage());
-            }
-        }
-
-        return $new_store->query('SELECT COUNT(*) AS t_count WHERE { ?s ?p ?o}', 'row');
+        throw new Exception('Implement dump by loading all triples and create a RDF file.');
     }
 
     /**
@@ -600,15 +494,11 @@ class ARC2_Store extends ARC2_Class
      * @param string $result_format  Possible values: infos, raw, rows, row
      * @param string $src
      * @param int    $keep_bnode_ids Keep blank node IDs? Default is 0
-     * @param int    $log_query      Log executed queries? Default is 0
      *
      * @return array|int array if query returned a result, 0 otherwise
      */
-    public function query($q, $result_format = '', $src = '', $keep_bnode_ids = 0, $log_query = 0)
+    public function query($q, $result_format = '', $src = '', $keep_bnode_ids = 0)
     {
-        if ($log_query) {
-            $this->logQuery($q);
-        }
         if (preg_match('/^dump/i', $q)) {
             $infos = ['query' => ['type' => 'dump']];
         } else {
@@ -872,69 +762,6 @@ class ARC2_Store extends ARC2_Class
     }
 
     /**
-     * @deprecated
-     */
-    public function processTables($level = 2, $operation = 'optimize')
-    {
-        // no processing required when using SQLite
-        if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-            return;
-        }
-
-        /*
-         * level:
-         *      1. triple + g2t
-         *      2. triple + *2val
-         *      3. all tables
-         */
-        $pre = $this->getTablePrefix();
-        $tbls = $this->getTables();
-        $sql = '';
-        foreach ($tbls as $tbl) {
-            if (($level < 3) && preg_match('/(backup|setting)$/', $tbl)) {
-                continue;
-            }
-            if (($level < 2) && preg_match('/(val)$/', $tbl)) {
-                continue;
-            }
-            $sql .= $sql ? ', ' : strtoupper($operation).' TABLE ';
-            $sql .= $pre.$tbl;
-        }
-        $this->db->simpleQuery($sql);
-        if (false == empty($this->db->getErrorMessage())) {
-            $this->addError($this->db->getErrorMessage().' in '.$sql);
-        }
-    }
-
-    /**
-     * @deprecated
-     */
-    public function optimizeTables($level = 2)
-    {
-        if ($this->v('ignore_optimization')) {
-            return 1;
-        }
-
-        return $this->processTables($level, 'optimize');
-    }
-
-    /**
-     * @deprecated
-     */
-    public function checkTables($level = 2)
-    {
-        return $this->processTables($level, 'check');
-    }
-
-    /**
-     * @deprecated
-     */
-    public function repairTables($level = 2)
-    {
-        return $this->processTables($level, 'repair');
-    }
-
-    /**
      * @param string $res           URI
      * @param string $unnamed_label How to label a resource without a name?
      *
@@ -1031,18 +858,5 @@ class ARC2_Store extends ARC2_Class
         $row = $this->query('SELECT ?val WHERE {<'.$p.'> rdfs:range ?val . } LIMIT 1', 'row');
 
         return $row ? $row['val'] : '';
-    }
-
-    /**
-     * @param string $q
-     *
-     * @todo make file path configurable
-     * @todo add try/catch in case file creation/writing fails
-     */
-    public function logQuery($q)
-    {
-        $fp = fopen('arc_query_log.txt', 'a');
-        fwrite($fp, date('Y-m-d\TH:i:s\Z', time()).' : '.$q.''."\n\n");
-        fclose($fp);
     }
 }

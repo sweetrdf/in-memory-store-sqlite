@@ -105,10 +105,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         }
         $this->store->releaseLock();
 
-        if ((1 == rand(1, 100))) {
-            $this->store->optimizeTables();
-        }
-
         $t2 = ARC2::mtime();
         $dur = round($t2 - $this->t_start, 4);
         $r = [

@@ -23,7 +23,6 @@ class ARC2_StoreAskQueryHandlerTest extends ARC2_TestCase
         parent::setUp();
 
         $this->store = \ARC2::getStore($this->dbConfig);
-        $this->store->drop();
         $this->store->setup();
 
         $this->fixture = new \ARC2_StoreAskQueryHandler($this->store->a, $this->store);

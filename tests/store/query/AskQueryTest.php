@@ -24,7 +24,6 @@ class AskQueryTest extends ARC2_TestCase
         parent::setUp();
 
         $this->fixture = \ARC2::getStore($this->dbConfig);
-        $this->fixture->drop();
         $this->fixture->setup();
     }
 
