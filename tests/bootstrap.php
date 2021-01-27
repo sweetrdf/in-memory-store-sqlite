@@ -12,10 +12,6 @@
 
 require_once __DIR__.'/../vendor/autoload.php';
 
-error_reporting(\E_ALL);
-
-require 'ARC2_TestHandler.php';
-
 global $dbConfig;
 
 $dbConfig = null;
