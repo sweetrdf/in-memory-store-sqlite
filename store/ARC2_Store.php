@@ -934,14 +934,6 @@ class ARC2_Store extends ARC2_Class
         return $this->processTables($level, 'repair');
     }
 
-    public function changeNamespaceURI($old_uri, $new_uri)
-    {
-        ARC2::inc('StoreHelper');
-        $c = new ARC2_StoreHelper($this->a, $this);
-
-        return $c->changeNamespaceURI($old_uri, $new_uri);
-    }
-
     /**
      * @param string $res           URI
      * @param string $unnamed_label How to label a resource without a name?
