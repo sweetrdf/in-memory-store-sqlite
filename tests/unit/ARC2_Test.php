@@ -74,24 +74,6 @@ class ARC2_Test extends ARC2_TestCase
         $_SERVER = $tmp;
     }
 
-    public function testInc()
-    {
-        $actual = \ARC2::inc('Class');
-        $this->assertNotEquals(0, $actual);
-
-        $actual = \ARC2::inc('RDFParser');
-        $this->assertNotEquals(0, $actual);
-
-        $actual = \ARC2::inc('ARC2_RDFParser');
-        $this->assertNotEquals(0, $actual);
-
-        $actual = \ARC2::inc('Foo');
-        $this->assertEquals(0, $actual);
-
-        $actual = \ARC2::inc('Vendor_Foo');
-        $this->assertEquals(0, $actual);
-    }
-
     public function testMtime()
     {
         $actual = \ARC2::mtime();
@@ -102,15 +84,6 @@ class ARC2_Test extends ARC2_TestCase
     {
         $actual = \ARC2::x('foo', '  foobar');
         $this->assertEquals('bar', $actual[1]);
-    }
-
-    public function testToUTF8()
-    {
-        $actual = \ARC2::toUTF8('foo');
-        $this->assertEquals('foo', $actual);
-
-        $actual = \ARC2::toUTF8(utf8_encode('Iñtërnâtiônàlizætiøn'));
-        $this->assertEquals('Iñtërnâtiônàlizætiøn', $actual);
     }
 
     public function testSplitURI()

@@ -211,36 +211,6 @@ class ARC2
         }
     }
 
-    public static function toUTF8($v)
-    {
-        if (urlencode($v) === $v) {
-            return $v;
-        }
-        //if (utf8_decode($v) == $v) return $v;
-        $v = (false === strpos(utf8_decode(str_replace('?', '', $v)), '?')) ? utf8_decode($v) : $v;
-        /* custom hacks, mainly caused by bugs in PHP's json_decode */
-        $mappings = [
-            '%18' => '‘',
-            '%19' => '’',
-            '%1C' => '“',
-            '%1D' => '”',
-            '%1E' => '„',
-            '%10' => '‐',
-            '%12' => '−',
-            '%13' => '–',
-            '%14' => '—',
-            '%26' => '&',
-        ];
-        $froms = array_keys($mappings);
-        $tos = array_values($mappings);
-        foreach ($froms as $i => $from) {
-            $froms[$i] = urldecode($from);
-        }
-        $v = str_replace($froms, $tos, $v);
-        /* utf8 tweaks */
-        return preg_replace_callback('/([\x00-\xdf][\x80-\xbf]|[\xe0-\xef][\x80-\xbf]{2}|[\xf0-\xf7][\x80-\xbf]{3}|[\xf8-\xfb][\x80-\xbf]{4}|[\xfc-\xfd][\x80-\xbf]{5}|[^\x00-\x7f])/', ['ARC2', 'getUTF8Char'], $v);
-    }
-
     public static function getUTF8Char($v)
     {
         $val = $v[1];
