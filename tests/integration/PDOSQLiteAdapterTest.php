@@ -26,7 +26,7 @@ class PDOSQLiteAdapterTest extends ARC2_TestCase
             $this->markTestSkipped('Test skipped, because extension pdo_sqlite is not installed.');
         }
 
-        $this->fixture = new PDOSQLiteAdapter(['db_adapter' => 'pdo', 'db_pdo_protocol' => 'sqlite',]);
+        $this->fixture = new PDOSQLiteAdapter(['db_adapter' => 'pdo', 'db_pdo_protocol' => 'sqlite']);
         $this->fixture->connect();
 
         // remove all tables
@@ -58,7 +58,7 @@ class PDOSQLiteAdapterTest extends ARC2_TestCase
         $this->fixture->disconnect();
 
         // do explicit reconnect
-        $this->fixture = new PDOSQLiteAdapter(['db_adapter' => 'pdo', 'db_pdo_protocol' => 'sqlite',]);
+        $this->fixture = new PDOSQLiteAdapter(['db_adapter' => 'pdo', 'db_pdo_protocol' => 'sqlite']);
         $this->fixture->connect();
 
         $this->fixture->exec('CREATE TABLE test (id INTEGER)');
