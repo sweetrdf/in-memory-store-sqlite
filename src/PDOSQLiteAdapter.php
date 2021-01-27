@@ -20,22 +20,22 @@ use PDO;
  *
  * This adapter doesn't support SQLite, please use PDOSQLiteAdapter instead.
  */
-class PDOSQLiteAdapter
+final class PDOSQLiteAdapter
 {
-    protected $configuration;
-    protected $db;
+    private $configuration;
+    private $db;
 
     /**
      * @var int
      */
-    protected $lastRowCount;
+    private $lastRowCount;
 
     /**
      * Sent queries.
      *
      * @var array
      */
-    protected $queries = [];
+    private $queries = [];
 
     /**
      * @param array $configuration Default is array(). Only use, if you have your own mysqli connection.
@@ -143,11 +143,6 @@ class PDOSQLiteAdapter
         }
 
         return $result;
-    }
-
-    public function getCollation()
-    {
-        return '';
     }
 
     public function getConfiguration(): array
@@ -295,15 +290,6 @@ class PDOSQLiteAdapter
         $stmt->closeCursor();
 
         return $rowCount;
-    }
-
-    public function getStoreName()
-    {
-        if (isset($this->configuration['store_name'])) {
-            return $this->configuration['store_name'];
-        }
-
-        return 'arc';
     }
 
     public function getTablePrefix()
