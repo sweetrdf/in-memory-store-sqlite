@@ -19,7 +19,7 @@ class ARC2_getPreferredFormatTest extends ARC2_TestCase
     protected function setUp(): void
     {
         // fix warning about unset SCRIPT_NAME index in PHPUnit
-        // Notice: Undefined index: SCRIPT_NAME in /var/www/html/ARC2/vendor/phpunit/phpunit/src/Util/Filter.php on line 27
+        // Notice: Undefined index: SCRIPT_NAME in /vendor/phpunit/phpunit/src/Util/Filter.php on line 27
         $_SERVER['SCRIPT_NAME'] = '';
     }
 
