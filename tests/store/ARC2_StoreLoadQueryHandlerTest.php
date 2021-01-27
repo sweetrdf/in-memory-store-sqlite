@@ -10,7 +10,7 @@
  *  file that was distributed with this source code.
  */
 
-namespace Tests\db_adapter_depended\store\ARC2_StoreLoadQueryHandler;
+namespace Tests\store\ARC2_StoreLoadQueryHandler;
 
 use ARC2_StoreLoadQueryHandler;
 use PDO;

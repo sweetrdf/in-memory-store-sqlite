@@ -10,7 +10,7 @@
  *  file that was distributed with this source code.
  */
 
-namespace Tests\db_adapter_depended\sparql_1_1_tests;
+namespace Tests\SPARQL11;
 
 use Tests\ARC2_TestCase;
 

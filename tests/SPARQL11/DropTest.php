@@ -10,7 +10,7 @@
  *  file that was distributed with this source code.
  */
 
-namespace Tests\db_adapter_depended\sparql_1_1_tests;
+namespace Tests\SPARQL11;
 
 /**
  * Runs tests which are based on W3C tests from https://www.w3.org/2009/sparql/docs/tests/.

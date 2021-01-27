@@ -10,11 +10,11 @@
  *  file that was distributed with this source code.
  */
 
-namespace Tests\db_adapter_depended\store;
+namespace Tests\store;
 
 use Tests\ARC2_TestCase;
 
-class ARC2_StoreInsertQueryHandlerTest extends ARC2_TestCase
+class ARC2_StoreAskQueryHandlerTest extends ARC2_TestCase
 {
     protected $store;
 
@@ -26,7 +26,7 @@ class ARC2_StoreInsertQueryHandlerTest extends ARC2_TestCase
         $this->store->drop();
         $this->store->setup();
 
-        $this->fixture = new \ARC2_StoreInsertQueryHandler($this->store->a, $this->store);
+        $this->fixture = new \ARC2_StoreAskQueryHandler($this->store->a, $this->store);
     }
 
     protected function tearDown(): void
@@ -40,7 +40,7 @@ class ARC2_StoreInsertQueryHandlerTest extends ARC2_TestCase
 
     public function testInit()
     {
-        $this->fixture = new \ARC2_StoreInsertQueryHandler($this->store->a, $this->store);
+        $this->fixture = new \ARC2_StoreAskQueryHandler($this->store->a, $this->store);
         $this->fixture->__init();
         $this->assertEquals($this->store, $this->fixture->store);
     }

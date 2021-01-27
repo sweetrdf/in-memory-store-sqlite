@@ -10,7 +10,7 @@
  *  file that was distributed with this source code.
  */
 
-namespace Tests\db_adapter_depended\store\query;
+namespace Tests\store\query;
 
 use Tests\ARC2_TestCase;
 

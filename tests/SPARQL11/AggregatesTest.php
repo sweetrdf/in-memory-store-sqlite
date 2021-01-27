@@ -10,7 +10,7 @@
  *  file that was distributed with this source code.
  */
 
-namespace Tests\db_adapter_depended\sparql_1_1_tests;
+namespace Tests\SPARQL11;
 
 use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
@@ -88,7 +88,7 @@ class AggregatesTest extends ComplianceTest
         /*
          * it seems the Turtle parser is not able to detect "1.0", but only "1"
          *
-         * see file db_adapter_depended/sparql_1_1_tests/w3c-tests/aggregates/agg-numeric.ttl
+         * see file db_adapter_depended/SPARQL11/w3c-tests/aggregates/agg-numeric.ttl
          */
 
         $this->assertTrue($this->runTestFor('agg-min-01'));

@@ -10,7 +10,7 @@
  *  file that was distributed with this source code.
  */
 
-namespace Tests\db_adapter_depended\store;
+namespace Tests\store;
 
 use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
@@ -73,46 +73,6 @@ class ARC2_StoreTest extends ARC2_TestCase
         $this->fixture->setup();
 
         $this->assertTrue($this->fixture->isSetup());
-    }
-
-    /*
-     * Tests for changeNamespaceURI
-     */
-
-    public function testChangeNamespaceURIEmptyStore()
-    {
-        $res = $this->fixture->changeNamespaceURI(
-            'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-            'urn:rdf'
-        );
-
-        $this->assertEquals(
-            [
-                'id_replacements' => 0,
-                'triple_updates' => 0,
-            ],
-            $res
-        );
-    }
-
-    public function testChangeNamespaceURIFilledStore()
-    {
-        $this->fixture->query('INSERT INTO <http://example.com/> {
-            <http://pref/s> <http://pref/p1> "baz" .
-        }');
-
-        $res = $this->fixture->changeNamespaceURI(
-            'http://pref/',
-            'urn:rdf'
-        );
-
-        $this->assertEquals(
-            [
-                'id_replacements' => 2,
-                'triple_updates' => 0,
-            ],
-            $res
-        );
     }
 
     /*
@@ -502,7 +462,7 @@ XML;
         $this->assertEquals(0, \count($res['result']['rows']));
 
         $this->fixture->insert(
-            file_get_contents(__DIR__.'/../../data/nt/saft-arc2-addition-regression1.nt'),
+            file_get_contents(__DIR__.'/../data/nt/saft-arc2-addition-regression1.nt'),
             'http://example.com/'
         );
 
