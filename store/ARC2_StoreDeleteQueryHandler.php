@@ -52,11 +52,6 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
             $this->cleanTableReferences();
         }
         // TODO What does this rand() call here? remove it and think about a cleaner way
-        //      when to trigger optimizeTables
-        if ($tc && (1 == rand(1, 100))) {
-            $this->store->optimizeTables();
-        }
-        // TODO What does this rand() call here? remove it and think about a cleaner way
         //      when to trigger cleanValueTables
         if ($tc && (1 == rand(1, 500))) {
             $this->cleanValueTables();

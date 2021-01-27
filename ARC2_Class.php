@@ -482,18 +482,6 @@ class ARC2_Class
 
         $r = $this->db_object->mysqliQuery($sql);
 
-        // TODO check if this is ever called. it seems not and therefore could be removed.
-        if (0) {
-            $t2 = ARC2::mtime() - $t1;
-            $call_obj = $this;
-            $call_path = '';
-            while ($call_obj) {
-                $call_path = get_class($call_obj).' / '.$call_path;
-                $call_obj = isset($call_obj->caller) ? $call_obj->caller : false;
-            }
-            echo "\n".$call_path.' needed '.$t2.' secs for '.str_replace("\n", ' ', $sql);
-        }
-
         if ($log_errors && !empty($this->db_object->getErrorMessage())) {
             $this->addError($this->db_object->getErrorMessage());
         }
