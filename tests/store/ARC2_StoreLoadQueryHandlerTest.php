@@ -13,8 +13,6 @@
 namespace Tests\store\ARC2_StoreLoadQueryHandler;
 
 use ARC2_StoreLoadQueryHandler;
-use PDO;
-use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
 
 class ARC2_StoreLoadQueryHandlerTest extends ARC2_TestCase
