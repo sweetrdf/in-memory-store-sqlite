@@ -24,17 +24,8 @@ class ARC2_StoreLoadQueryHandlerTest extends ARC2_TestCase
         parent::setUp();
 
         $this->store = \ARC2::getStore($this->dbConfig);
-        $this->store->createDBCon();
 
         $this->fixture = new ARC2_StoreLoadQueryHandler($this->store, $this);
-
-        // fresh setup of ARC2
-        $this->store->setup();
-    }
-
-    protected function tearDown(): void
-    {
-        $this->store->closeDBCon();
     }
 
     /*

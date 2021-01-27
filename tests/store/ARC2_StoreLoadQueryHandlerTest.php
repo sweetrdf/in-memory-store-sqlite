@@ -26,18 +26,8 @@ class ARC2_StoreLoadQueryHandlerTest extends ARC2_TestCase
         parent::setUp();
 
         $this->store = \ARC2::getStore($this->dbConfig);
-        $this->store->createDBCon();
-
-        // remove all tables
-        $this->store->getDBObject()->deleteAllTables();
-        $this->store->setUp();
 
         $this->fixture = new ARC2_StoreLoadQueryHandler($this->store, $this);
-    }
-
-    protected function tearDown(): void
-    {
-        $this->store->closeDBCon();
     }
 
     /**
@@ -50,13 +40,5 @@ class ARC2_StoreLoadQueryHandlerTest extends ARC2_TestCase
         $this->fixture->max_term_id = 16750001;
 
         $this->assertEquals(16750001, $this->fixture->getStoredTermID('', '', ''));
-
-        // PDO + SQLite
-        if ($this->store->getDBObject() instanceof PDOSQLiteAdapter) {
-        } else {
-            // MySQL
-            $table_fields = $this->store->getDBObject()->fetchList('DESCRIBE arc_g2t');
-            $this->assertEquals('int(10) unsigned', $table_fields[0]['Type']);
-        }
     }
 }

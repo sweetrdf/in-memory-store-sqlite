@@ -23,8 +23,7 @@ class InsertIntoQueryTest extends ARC2_TestCase
     {
         parent::setUp();
 
-        $this->fixture = \ARC2::getStore($this->dbConfig);
-        $this->fixture->setup();
+        $this->fixture = \ARC2::getStore();
     }
 
     public function testInsertInto()

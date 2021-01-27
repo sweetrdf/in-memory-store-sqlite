@@ -554,7 +554,7 @@ class ARC2
 
     public static function getStore($a = '', $caller = '')
     {
-        return self::getComponent('Store', $a, $caller);
+        return self::getComponent('Store', [], $caller);
     }
 
     public static function getStoreEndpoint($a = '', $caller = '')

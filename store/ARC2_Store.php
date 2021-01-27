@@ -1,16 +1,17 @@
 <?php
-/**
- * ARC2 RDF Store.
+
+/*
+ *  This file is part of the quickrdf/InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @author Benjamin Nowack <bnowack@semsol.com>
- * @license W3C Software License and GPL
- * @homepage <https://github.com/semsol/arc2>
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
 
 use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use ARC2\Store\TableManager\SQLite;
-
-ARC2::inc('Class');
 
 class ARC2_Store extends ARC2_Class
 {
@@ -78,26 +79,9 @@ class ARC2_Store extends ARC2_Class
         return true;
     }
 
-    /**
-     * @remove
-     */
-    public function closeDBCon()
-    {
-        $this->db = null;
-    }
-
     public function getDBVersion()
     {
-        if (!$this->v('db_version')) {
-            // connect, if no connection available
-            if (null == $this->db) {
-                $this->createDBCon();
-            }
-
-            $this->db_version = $this->db->getServerVersion();
-        }
-
-        return $this->db_version;
+        return $this->db->getServerVersion();
     }
 
     /**
@@ -183,98 +167,23 @@ class ARC2_Store extends ARC2_Class
         return $this->has_fulltext_index;
     }
 
+    /**
+     * @todo remove
+     */
     public function enableFulltextSearch()
     {
-        if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-            return;
-        }
-
-        if ($this->hasFulltextIndex()) {
-            return 1;
-        }
-        $tbl = $this->getTablePrefix().'o2val';
-        $this->db->simpleQuery('CREATE FULLTEXT INDEX vft ON '.$tbl.'(val(128))');
-    }
-
-    public function disableFulltextSearch()
-    {
-        if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-            return;
-        }
-
-        if (!$this->hasFulltextIndex()) {
-            return 1;
-        }
-        $tbl = $this->getTablePrefix().'o2val';
-        $this->db->simpleQuery('DROP INDEX vft ON '.$tbl);
-    }
-
-    /**
-     * Manipulating database processes using ARC2 is discouraged.
-     *
-     * @deprecated
-     */
-    public function killDBProcesses($needle = '', $runtime = 30)
-    {
-        /* make sure needle is sql */
-        if (preg_match('/\?.+ WHERE/i', $needle, $m)) {
-            $needle = $this->query($needle, 'sql');
-        }
-        $ref_tbl = $this->getTablePrefix().'triple';
-
-        $rows = $this->db->fetchList('SHOW FULL PROCESSLIST');
-        foreach ($rows as $row) {
-            if ($row['Time'] < $runtime) {
-                continue;
-            }
-            if (!preg_match('/^\s*(INSERT|SELECT) /s', $row['Info'])) {
-                continue;
-            } /* only basic queries */
-            if (!strpos($row['Info'], $ref_tbl.' ')) {
-                continue;
-            } /* only from this store */
-            $kill = 0;
-            if ($needle && (false !== strpos($row['Info'], $needle))) {
-                $kill = 1;
-            }
-            if (!$needle) {
-                $kill = 1;
-            }
-            if (!$kill) {
-                continue;
-            }
-            $this->db->simpleQuery('KILL '.$row['Id']);
-        }
-    }
-
-    public function getTables()
-    {
-        return ['triple', 'g2t', 'id2val', 's2val', 'o2val', 'setting'];
-    }
-
-    public function isSetUp()
-    {
-        if (null !== $this->db) {
-            $tbl = $this->getTablePrefix().'setting';
-
-            try {
-                // mysqli way
-                $this->db->fetchRow('SELECT 1 FROM '.$tbl.' LIMIT 1');
-
-                return true;
-            } catch (\Exception $e) {
-                // when using PDO, an exception gets thrown if $tbl does not exist.
-            }
-        }
-
-        return false;
     }
 
     /**
      * @todo remove
      */
-    public function setUp($force = 0)
+    public function disableFulltextSearch()
     {
+    }
+
+    public function getTables()
+    {
+        return ['triple', 'g2t', 'id2val', 's2val', 'o2val', 'setting'];
     }
 
     public function extendColumns()

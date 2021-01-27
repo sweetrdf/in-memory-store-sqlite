@@ -24,12 +24,6 @@ class LoadQueryTest extends ARC2_TestCase
         parent::setUp();
 
         $this->fixture = \ARC2::getStore($this->dbConfig);
-        $this->fixture->setup();
-    }
-
-    protected function tearDown(): void
-    {
-        $this->fixture->closeDBCon();
     }
 
     public function testLoad()

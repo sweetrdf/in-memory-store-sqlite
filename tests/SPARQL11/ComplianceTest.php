@@ -60,15 +60,6 @@ abstract class ComplianceTest extends ARC2_TestCase
          * Setup a store instance to load test information and data.
          */
         $this->store = \ARC2::getStore($this->dbConfig);
-        $this->store->setup();
-    }
-
-    protected function tearDown(): void
-    {
-        $this->store->reset();
-        $this->store->closeDBCon();
-
-        parent::tearDown();
     }
 
     /**

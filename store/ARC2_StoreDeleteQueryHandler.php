@@ -1,10 +1,13 @@
 <?php
-/**
- * ARC2 RDF Store DELETE Query Handler.
+
+/*
+ *  This file is part of the quickrdf/InMemoryStoreSqlite package and licensed under
+ *  the terms of the GPL-3 license.
  *
- * @author Benjamin Nowack <bnowack@semsol.com>
- * @license W3C Software License and GPL
- * @homepage <https://github.com/semsol/arc2>
+ *  (c) Konrad Abicht <hi@inspirito.de>
+ *
+ *  For the full copyright and license information, please view the LICENSE
+ *  file that was distributed with this source code.
  */
 
 use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
