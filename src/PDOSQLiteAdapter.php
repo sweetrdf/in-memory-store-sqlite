@@ -16,7 +16,7 @@ use Exception;
 use PDO;
 
 /**
- * PDO SQLite adapter
+ * PDO SQLite adapter.
  */
 final class PDOSQLiteAdapter
 {
