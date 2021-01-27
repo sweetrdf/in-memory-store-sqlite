@@ -333,7 +333,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             /* split tables ? */
             if (0 && $this->split_threshold && !($this->max_triple_id % $this->split_threshold)) {
                 $this->store->splitTables();
-                $this->dropMergeTable();
                 $this->createMergeTable();
             }
             /* upgrade tables ? // Thanks to patch by Mark Fichtner (https://github.com/Knurg) */

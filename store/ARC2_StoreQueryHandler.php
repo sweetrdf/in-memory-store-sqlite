@@ -86,13 +86,4 @@ class ARC2_StoreQueryHandler extends ARC2_Class
         //echo $sql;
         return $this->getDBObject()->query($sql);
     }
-
-    public function dropMergeTable()
-    {
-        return 1;
-        // TODO triple_all table seems not used anymore, therefore this function can be removed?
-        $sql = 'DROP TABLE IF EXISTS '.$this->store->getTablePrefix().'triple_all';
-        //echo $sql;
-        //return $this->queryDB($sql, $this->store->getDBCon());
-    }
 }

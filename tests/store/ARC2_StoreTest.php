@@ -68,24 +68,7 @@ class ARC2_StoreTest extends ARC2_TestCase
 
     public function testSetup()
     {
-        $this->fixture->reset();
-
-        $this->fixture->setup();
-
         $this->assertTrue($this->fixture->isSetup());
-    }
-
-    /*
-     * Tests for closeDBCon
-     */
-
-    public function testCloseDBCon()
-    {
-        $this->assertTrue(isset($this->fixture->a['db_object']));
-
-        $this->fixture->closeDBCon();
-
-        $this->assertFalse(isset($this->fixture->a['db_object']));
     }
 
     /*
@@ -108,28 +91,6 @@ class ARC2_StoreTest extends ARC2_TestCase
 
         $res = $this->fixture->query('SELECT * WHERE {?s ?p ?o.}');
         $this->assertEquals(0, \count($res['result']['rows']));
-    }
-
-    /*
-     * Tests for enableFulltextSearch
-     */
-
-    public function testEnableFulltextSearch()
-    {
-        $res1 = $this->fixture->enableFulltextSearch();
-        $res2 = $this->fixture->disableFulltextSearch();
-
-        $this->assertNull($res1);
-
-        if ($this->fixture->getDBObject() instanceof PDOSQLiteAdapter) {
-            // TODO remove that if else in the future, after ...FulltextSearch functions
-            //      got more clear return values.
-        } else {
-            $this->assertEquals(1, $res2);
-        }
-
-        $this->assertEquals(0, $this->fixture->a['db_object']->getErrorCode());
-        $this->assertEquals('', $this->fixture->a['db_object']->getErrorMessage());
     }
 
     /*

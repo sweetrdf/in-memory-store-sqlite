@@ -20,6 +20,10 @@ class ARC2_Store extends ARC2_Class
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
+
+        $this->db = new PDOSQLiteAdapter();
+
+        $this->a['db_object'] = $this->db;
     }
 
     public function __init()
@@ -45,47 +49,19 @@ class ARC2_Store extends ARC2_Class
         return $this->v('store_name', 'arc', $this->a);
     }
 
+    /**
+     * @todo remove
+     */
     public function getTablePrefix()
     {
-        if (!isset($this->tbl_prefix)) {
-            $r = $this->v('db_table_prefix', '', $this->a);
-            $r .= $r ? '_' : '';
-            $r .= $this->getName().'_';
-            $this->tbl_prefix = $r;
-        }
-
-        return $this->tbl_prefix;
+        return '';
     }
 
+    /**
+     * @todo remove
+     */
     public function createDBCon()
     {
-        // build connection credential array
-        $credentArr = ['db_host' => 'localhost', 'db_user' => '', 'db_pwd' => '', 'db_name' => ''];
-        foreach ($credentArr as $k => $v) {
-            $this->a[$k] = $this->v($k, $v, $this->a);
-        }
-
-        // connect
-        try {
-            if (false == isset($this->a['db_adapter'])) {
-                $this->a['db_adapter'] = 'mysqli';
-            }
-            $this->db = new PDOSQLiteAdapter();
-            $err = $this->db->connect();
-            // stop here, if an error occoured
-            if (is_string($err) && false !== empty($err)) {
-                throw new Exception($err);
-            }
-        } catch (Exception $e) {
-            return $this->addError($e->getMessage());
-        }
-
-        if ('mysqli' == $this->db->getAdapterName()) {
-            $this->a['db_con'] = $this->db->getConnection();
-        }
-
-        $this->a['db_object'] = $this->db;
-
         return true;
     }
 
@@ -95,38 +71,19 @@ class ARC2_Store extends ARC2_Class
     }
 
     /**
-     * @param int $force 1 if you want to force a connection
-     *
-     * @return mysqli mysqli-connection, only if mysqli adapter was selected. null otherwise,
-     *                because direct access to DB connection is not recommended.
+     * @todo remove
      */
     public function getDBCon($force = 0)
     {
-        if ($force || !isset($this->a['db_object'])) {
-            if (!$this->createDBCon()) {
-                return false;
-            }
-        }
-
-        if ('mysqli' == $this->a['db_adapter']) {
-            // for backward compatibility reasons only.
-            // TODO remove that in 3.x
-            return $this->a['db_con'];
-        } else {
-            return true;
-        }
+        return true;
     }
 
     /**
-     * @todo make property $a private, but provide access via a getter
+     * @remove
      */
     public function closeDBCon()
     {
-        if (isset($this->a['db_object'])) {
-            $this->db->disconnect();
-        }
-        unset($this->a['db_con']);
-        unset($this->a['db_object']);
+        $this->db = null;
     }
 
     public function getDBVersion()
@@ -313,17 +270,15 @@ class ARC2_Store extends ARC2_Class
         return false;
     }
 
+    /**
+     * @todo remove
+     */
     public function setUp($force = 0)
     {
-        if (($force || !$this->isSetUp()) && false !== $this->getDBCon()) {
-            (new SQLite($this->a, $this))->createTables();
-        }
     }
 
     public function extendColumns()
     {
-        $cfg = $this->getDBObject()->getConfiguration();
-
         if (false === $this->getDBObject() instanceof PDOSQLiteAdapter) {
             ARC2::inc('StoreTableManager');
             $mgr = new ARC2_StoreTableManager($this->a, $this);

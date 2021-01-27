@@ -27,11 +27,6 @@ class InsertIntoQueryTest extends ARC2_TestCase
         $this->fixture->setup();
     }
 
-    protected function tearDown(): void
-    {
-        $this->fixture->closeDBCon();
-    }
-
     public function testInsertInto()
     {
         // test data
@@ -304,8 +299,6 @@ class InsertIntoQueryTest extends ARC2_TestCase
             ],
             $res
         );
-
-        $this->markTestSkipped('ARC2 can not store long values, e.g. URIs with around 250 chars.');
     }
 
     public function testInsertIntoListMoreComplex()

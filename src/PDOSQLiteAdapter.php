@@ -16,19 +16,19 @@ use Exception;
 use PDO;
 
 /**
- * PDO Adapter - Handles database operations using PDO.
- *
- * This adapter doesn't support SQLite, please use PDOSQLiteAdapter instead.
+ * PDO SQLite adapter
  */
 final class PDOSQLiteAdapter
 {
-    private $configuration;
+    /**
+     * @var \PDO
+     */
     private $db;
 
     /**
      * @var int
      */
-    private $lastRowCount;
+    private $lastRowCount = 0;
 
     /**
      * Sent queries.
@@ -37,15 +37,53 @@ final class PDOSQLiteAdapter
      */
     private $queries = [];
 
-    /**
-     * @param array $configuration Default is array(). Only use, if you have your own mysqli connection.
-     */
-    public function __construct(array $configuration = [])
+    public function __construct(string $dbName = null)
     {
-        $this->configuration = $configuration;
-        $this->lastRowCount = 0;
-
         $this->checkRequirements();
+
+        // set path to SQLite file
+        if (!empty($dbName)) {
+            $dsn = 'sqlite:'.$dbName;
+        } else {
+            // use in-memory
+            $dsn = 'sqlite::memory:';
+        }
+
+        $this->db = new PDO($dsn);
+
+        $this->db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
+        // errors lead to exceptions
+        $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        // default fetch mode is associative
+        $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+        /*
+         * define CONCAT function (otherwise SQLite will throw an exception)
+         */
+        $this->db->sqliteCreateFunction('CONCAT', function ($pattern, $string) {
+            $result = '';
+
+            foreach (\func_get_args() as $str) {
+                $result .= $str;
+            }
+
+            return $result;
+        });
+
+        /*
+         * define REGEXP function (otherwise SQLite will throw an exception)
+         */
+        $this->db->sqliteCreateFunction('REGEXP', function ($pattern, $string) {
+            if (0 < preg_match('/'.$pattern.'/i', $string)) {
+                return true;
+            }
+
+            return false;
+        }, 2);
+
+        $this->createTables();
     }
 
     public function checkRequirements()
@@ -55,69 +93,6 @@ final class PDOSQLiteAdapter
         }
     }
 
-    /**
-     * Connect to server or storing a given connection.
-     *
-     * @param PDO $existingConnection default is null
-     */
-    public function connect($existingConnection = null)
-    {
-        // reuse a given existing connection.
-        // it assumes that $existingConnection is a PDO connection object
-        if (null !== $existingConnection) {
-            $this->db = $existingConnection;
-
-        // create your own connection
-        } elseif (false === $this->db instanceof PDO) {
-            // set path to SQLite file
-            if (
-                isset($this->configuration['db_name'])
-                && !empty($this->configuration['db_name'])
-            ) {
-                $dsn = 'sqlite:'.$this->configuration['db_name'];
-            } else {
-                // use in-memory
-                $dsn = 'sqlite::memory:';
-            }
-
-            $this->db = new PDO($dsn);
-
-            $this->db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
-
-            // errors lead to exceptions
-            $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-
-            // default fetch mode is associative
-            $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
-
-            /*
-             * define CONCAT function (otherwise SQLite will throw an exception)
-             */
-            $this->db->sqliteCreateFunction('CONCAT', function ($pattern, $string) {
-                $result = '';
-
-                foreach (\func_get_args() as $str) {
-                    $result .= $str;
-                }
-
-                return $result;
-            });
-
-            /*
-             * define REGEXP function (otherwise SQLite will throw an exception)
-             */
-            $this->db->sqliteCreateFunction('REGEXP', function ($pattern, $string) {
-                if (0 < preg_match('/'.$pattern.'/i', $string)) {
-                    return true;
-                }
-
-                return false;
-            }, 2);
-        }
-
-        return $this->db;
-    }
-
     public function deleteAllTables(): void
     {
         $this->exec(
@@ -125,6 +100,78 @@ final class PDOSQLiteAdapter
                FROM sqlite_master
               WHERE type = "table";'
         );
+    }
+
+    /**
+     * Creates all required tables.
+     */
+    private function createTables(): void
+    {
+        // triple
+        $sql = 'CREATE TABLE IF NOT EXISTS triple (
+            t INTEGER UNSIGNED NOT NULL UNIQUE,
+            s INTEGER UNSIGNED NOT NULL,
+            p INTEGER UNSIGNED NOT NULL,
+            o INTEGER UNSIGNED NOT NULL,
+            o_lang_dt INTEGER UNSIGNED NOT NULL,
+            o_comp TEXT NOT NULL,                       -- normalized value for ORDER BY operations
+            s_type INTEGER UNSIGNED NOT NULL DEFAULT 0, -- uri/bnode => 0/1
+            o_type INTEGER UNSIGNED NOT NULL DEFAULT 0, -- uri/bnode/literal => 0/1/2
+            misc INTEGER NOT NULL DEFAULT 0             -- temporary flags
+        )';
+
+        $this->exec($sql);
+
+        // g2t
+        $sql = 'CREATE TABLE IF NOT EXISTS g2t (
+            g INTEGER UNSIGNED NOT NULL,
+            t INTEGER UNSIGNED NOT NULL,
+            UNIQUE (g,t)
+        )';
+
+        $this->exec($sql);
+
+        // id2val
+        $sql = 'CREATE TABLE IF NOT EXISTS id2val (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            misc INTEGER UNSIGNED NOT NULL DEFAULT 0,
+            val TEXT NOT NULL,
+            val_type INTEGER NOT NULL DEFAULT 0,     -- uri/bnode/literal => 0/1/2
+            UNIQUE (id,val_type)
+        )';
+
+        $this->exec($sql);
+
+        // s2val
+        $sql = 'CREATE TABLE IF NOT EXISTS s2val (
+            id INTEGER UNSIGNED NOT NULL,
+            misc INTEGER NOT NULL DEFAULT 0,
+            val_hash TEXT NOT NULL,
+            val TEXT NOT NULL,
+            UNIQUE (id)
+        )';
+
+        $this->exec($sql);
+
+        // o2val
+        $sql = 'CREATE TABLE IF NOT EXISTS o2val (
+            id INTEGER NOT NULL,
+            misc INTEGER UNSIGNED NOT NULL DEFAULT 0,
+            val_hash TEXT NOT NULL,
+            val TEXT NOT NULL,
+            UNIQUE (id)
+        )';
+
+        $this->exec($sql);
+
+        // setting
+        $sql = 'CREATE TABLE IF NOT EXISTS setting (
+            k TEXT NOT NULL,
+            val TEXT NOT NULL,
+            UNIQUE (k)
+        )';
+
+        $this->exec($sql);
     }
 
     /**
@@ -143,11 +190,6 @@ final class PDOSQLiteAdapter
         }
 
         return $result;
-    }
-
-    public function getConfiguration(): array
-    {
-        return $this->configuration;
     }
 
     public function getConnectionId()

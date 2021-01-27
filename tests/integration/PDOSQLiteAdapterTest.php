@@ -21,32 +21,7 @@ class PDOSQLiteAdapterTest extends ARC2_TestCase
     {
         parent::setUp();
 
-        // stop, if extension is not available
-        if (false == \extension_loaded('pdo_sqlite')) {
-            $this->markTestSkipped('Test skipped, because extension pdo_sqlite is not installed.');
-        }
-
-        $this->fixture = new PDOSQLiteAdapter(['db_adapter' => 'pdo', 'db_pdo_protocol' => 'sqlite']);
-        $this->fixture->connect();
-
-        // remove all tables
-        $this->fixture->deleteAllTables();
-    }
-
-    protected function tearDown(): void
-    {
-        if (null !== $this->fixture) {
-            $this->fixture->disconnect();
-        }
-    }
-
-    protected function dropAllTables()
-    {
-        // remove all tables
-        $tables = $this->fixture->fetchList('SHOW TABLES');
-        foreach ($tables as $table) {
-            $this->fixture->exec('DROP TABLE '.$table['Tables_in_'.$this->dbConfig['db_name']]);
-        }
+        $this->fixture = new PDOSQLiteAdapter();
     }
 
     /*
@@ -58,8 +33,7 @@ class PDOSQLiteAdapterTest extends ARC2_TestCase
         $this->fixture->disconnect();
 
         // do explicit reconnect
-        $this->fixture = new PDOSQLiteAdapter(['db_adapter' => 'pdo', 'db_pdo_protocol' => 'sqlite']);
-        $this->fixture->connect();
+        $this->fixture = new PDOSQLiteAdapter();
 
         $this->fixture->exec('CREATE TABLE test (id INTEGER)');
         $this->assertEquals([], $this->fixture->fetchList('SELECT * FROM test;'));
@@ -145,7 +119,6 @@ class PDOSQLiteAdapterTest extends ARC2_TestCase
     public function testGetDBSName()
     {
         // connect and check
-        $this->fixture->connect();
         $this->assertEquals('sqlite', $this->fixture->getDBSName(), 'Found: '.$this->fixture->getDBSName());
     }
 

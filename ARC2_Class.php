@@ -457,11 +457,6 @@ class ARC2_Class
                 $this->a['db_adapter'] = 'mysqli';
             }
             $this->db_object = new PDOSQLiteAdapter();
-            if ($con) {
-                $this->db_object->connect($con);
-            } else {
-                $this->db_object->connect();
-            }
         }
 
         return $this->db_object;
