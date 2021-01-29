@@ -33,14 +33,8 @@ class ARC2_StoreTest extends ARC2_TestCase
      */
     protected function getGraphs()
     {
-        $g2t = $this->fixture->getTablePrefix().'g2t';
-        $id2val = $this->fixture->getTablePrefix().'id2val';
-
         // collects all values which have an ID (column g) in the g2t table.
-        $query = 'SELECT id2val.val AS graphUri
-            FROM '.$g2t.' g2t
-            LEFT JOIN '.$id2val.' id2val ON g2t.g = id2val.id
-            GROUP BY g';
+        $query = 'SELECT id2val.val AS graphUri FROM g2t LEFT JOIN id2val ON g2t.g = id2val.id GROUP BY g';
 
         // send SQL query
         $list = $this->fixture->getDBObject()->fetchList($query);

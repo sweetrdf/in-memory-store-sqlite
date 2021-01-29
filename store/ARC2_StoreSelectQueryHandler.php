@@ -125,9 +125,9 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
     public function createTempTable($q_sql)
     {
         if ($this->cache_results) {
-            $tbl = $this->store->getTablePrefix().'Q'.md5($q_sql);
+            $tbl = 'Q'.md5($q_sql);
         } else {
-            $tbl = $this->store->getTablePrefix().'Q'.md5($q_sql.time().uniqid(rand()));
+            $tbl = 'Q'.md5($q_sql.time().uniqid(rand()));
         }
         if (strlen($tbl) > 64) {
             $tbl = 'Q'.md5($tbl);
@@ -491,12 +491,12 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
     public function getValueTable($col)
     {
-        return $this->store->getTablePrefix().(preg_match('/^(s|o)$/', $col) ? $col.'2val' : 'id2val');
+        return (preg_match('/^(s|o)$/', $col) ? $col.'2val' : 'id2val');
     }
 
     public function getGraphTable()
     {
-        return $this->store->getTablePrefix().'g2t';
+        return 'g2t';
     }
 
     public function getQuerySQL()
@@ -646,7 +646,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $r = '';
         foreach ($from_ids as $from_id) {
             $r .= $r ? ', ' : '';
-            $r .= $this->getTripleTable($from_id).' T_'.$from_id;
+            $r .= 'triple T_'.$from_id;
         }
 
         return $r ? 'FROM '.$r : '';
@@ -739,7 +739,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $nl = "\n";
         foreach ($this->index['join'] as $id) {
             $sub_r = $this->getJoinConditionSQL($id);
-            $r[] = 'JOIN '.$this->getTripleTable($id).' T_'.$id.' ON ('.$sub_r.$nl.')';
+            $r[] = 'JOIN triple T_'.$id.' ON ('.$sub_r.$nl.')';
         }
         foreach (array_merge($this->index['from'], $this->index['join']) as $id) {
             if ($sub_r = $this->getRequiredSubJoinSQL($id)) {
@@ -756,7 +756,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $nl = "\n";
         foreach ($this->index['left_join'] as $id) {
             $sub_r = $this->getJoinConditionSQL($id);
-            $r[] = 'LEFT JOIN '.$this->getTripleTable($id).' T_'.$id.' ON ('.$sub_r.$nl.')';
+            $r[] = 'LEFT JOIN triple T_'.$id.' ON ('.$sub_r.$nl.')';
         }
         foreach ($this->index['left_join'] as $id) {
             if ($sub_r = $this->getRequiredSubJoinSQL($id, 'LEFT')) {

@@ -334,18 +334,6 @@ final class PDOSQLiteAdapter
         return $rowCount;
     }
 
-    public function getTablePrefix()
-    {
-        $prefix = '';
-        if (isset($this->configuration['db_table_prefix'])) {
-            $prefix = $this->configuration['db_table_prefix'].'_';
-        }
-
-        $prefix .= $this->getStoreName().'_';
-
-        return $prefix;
-    }
-
     /**
      * @param string $sql Query
      *

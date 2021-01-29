@@ -41,12 +41,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $this->keep_bnode_ids = $keep_bnode_ids;
         $cls = 'ARC2_StoreTurtleLoader';
         $loader = new $cls($this->a, $this);
-        /* lock */
-        if (!$this->store->getLock()) {
-            $l_name = $this->a['db_name'].'.'.$this->store->getTablePrefix().'.write_lock';
 
-            return $this->addError('Could not get lock in "runQuery" ('.$l_name.')');
-        }
         $this->has_lock = 1;
         /* logging */
         $this->t_count = 0;
@@ -73,7 +68,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 
         /* done */
         $this->checkSQLBuffers(1);
-        $this->store->releaseLock();
 
         $r = [
             't_count' => $this->t_count,
@@ -127,7 +121,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $sql = '';
         foreach (['id2val', 's2val', 'o2val'] as $tbl) {
             $sql .= $sql ? ' UNION ' : '';
-            $sql .= 'SELECT MAX(id) as id FROM '.$this->store->getTablePrefix().$tbl;
+            $sql .= 'SELECT MAX(id) as id FROM '.$tbl;
         }
         $r = 0;
 
@@ -149,7 +143,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
      */
     public function getMaxTripleID()
     {
-        $sql = 'SELECT MAX(t) AS `id` FROM '.$this->store->getTablePrefix().'triple';
+        $sql = 'SELECT MAX(t) AS `id` FROM triple';
 
         $row = $this->store->a['db_object']->fetchRow($sql);
         if (isset($row['id'])) {
@@ -176,7 +170,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             return $this->term_ids[$val][$tbl];
         }
         /* db */
-        $tbl_prefix = $this->store->getTablePrefix();
         $sub_tbls = ('id' == $tbl)
             ? ['id2val', 's2val', 'o2val']
             : ('s' == $tbl
@@ -188,9 +181,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             $id = 0;
             /* via hash */
             if (preg_match('/^(s2val|o2val)$/', $sub_tbl) && $this->hasHashColumn($sub_tbl)) {
-                $sql = 'SELECT id, val
-                    FROM '.$tbl_prefix.$sub_tbl.'
-                    WHERE val_hash = "'.$this->getValueHash($val).'"';
+                $sql = 'SELECT id, val FROM '.$sub_tbl.' WHERE val_hash = "'.$this->getValueHash($val).'"';
 
                 $rows = $this->store->a['db_object']->fetchList($sql);
                 if (is_array($rows)) {
@@ -204,9 +195,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             } else {
                 $binaryValue = $this->store->a['db_object']->escape($val);
                 if (false !== empty($binaryValue)) {
-                    $sql = 'SELECT id
-                        FROM '.$tbl_prefix.$sub_tbl."
-                        WHERE val = '".$binaryValue."'";
+                    $sql = 'SELECT id FROM '.$sub_tbl." WHERE val = '".$binaryValue."'";
 
                     $row = $this->store->a['db_object']->fetchRow($sql);
                     if (is_array($row) && isset($row['id'])) {
@@ -227,15 +216,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             $this->term_ids[$val] = [$tbl => $this->max_term_id];
             $this->bufferIDSQL($tbl, $this->max_term_id, $val, $type_id);
             ++$this->max_term_id;
-            /*
-             * upgrade tables ?
-             *
-             * TODO: on next major release, remove that and find a way to use bigger version automatically.
-             */
-            if (('mediumint' == $this->column_type) && ($this->max_term_id >= 16750000)) {
-                $this->store->extendColumns();
-                $this->column_type = 'int';
-            }
         }
 
         return $this->term_ids[$val][$tbl];
@@ -246,11 +226,12 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $val = serialize($t);
         /* buffered */
         if (isset($this->triple_ids[$val])) {
-            return [$this->triple_ids[$val]]; /* hack for "don't insert this triple" */
+            /* hack for "don't insert this triple" */
+            return [$this->triple_ids[$val]];
         }
         /* db */
         $sql = 'SELECT t
-                  FROM '.$this->store->getTablePrefix().'triple
+                  FROM triple
                  WHERE s = '.$t['s'].'
                     AND p = '.$t['p'].'
                     AND o = '.$t['o'].'
@@ -260,24 +241,13 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                  LIMIT 1';
         $row = $this->store->a['db_object']->fetchRow($sql);
         if (isset($row['t'])) {
-            $this->triple_ids[$val] = $row['t']; /* hack for "don't insert this triple" */
-
-            return [$row['t']]; /* hack for "don't insert this triple" */
+            /* hack for "don't insert this triple" */
+            $this->triple_ids[$val] = $row['t'];
+            return [$row['t']];
         } else {
             /* new */
             $this->triple_ids[$val] = $this->max_triple_id;
             ++$this->max_triple_id;
-            /* split tables ? */
-            if (0 && $this->split_threshold && !($this->max_triple_id % $this->split_threshold)) {
-                $this->store->splitTables();
-                $this->createMergeTable();
-            }
-            /* upgrade tables ? // Thanks to patch by Mark Fichtner (https://github.com/Knurg) */
-            if (('mediumint' == $this->column_type) && ($this->max_triple_id >= 16750000)) {
-                $this->store->extendColumns();
-                $this->column_type = 'int';
-            }
-
             return $this->triple_ids[$val];
         }
     }
@@ -338,7 +308,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 
         if (!isset($this->sql_buffers[$tbl])) {
             $this->sql_buffers[$tbl] = $sqlHead;
-            $this->sql_buffers[$tbl] .= $this->store->getTablePrefix().$tbl;
+            $this->sql_buffers[$tbl] .= $tbl;
             $this->sql_buffers[$tbl] .= ' (t, s, p, o, o_lang_dt, o_comp, s_type, o_type) VALUES';
             $sql = ' ';
         }
@@ -361,7 +331,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $sqlHead = 'INSERT OR IGNORE INTO ';
 
         if (!isset($this->sql_buffers[$tbl])) {
-            $this->sql_buffers[$tbl] = $sqlHead.$this->store->getTablePrefix().$tbl.' (g, t) VALUES';
+            $this->sql_buffers[$tbl] = $sqlHead.$tbl.' (g, t) VALUES';
             $sql = ' ';
         }
         $this->sql_buffers[$tbl] .= $sql.'('.$g2t['g'].', '.$g2t['t'].')';
@@ -384,7 +354,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             $this->sql_buffers[$tbl] = '';
             $sqlHead = 'INSERT OR IGNORE INTO ';
 
-            $sql = $sqlHead.$this->store->getTablePrefix().$tbl.'('.$cols.') VALUES ';
+            $sql = $sqlHead.$tbl.'('.$cols.') VALUES ';
         } else {
             $sql = ', ';
         }
@@ -392,11 +362,8 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $this->sql_buffers[$tbl] .= $sql;
     }
 
-    public function checkSQLBuffers(
-        $force_write = 0,
-        $reset_id_buffers = 0,
-        $refresh_lock = 0
-    ) {
+    public function checkSQLBuffers($force_write = 0, $reset_id_buffers = 0)
+    {
         foreach (['triple', 'g2t', 'id2val', 's2val', 'o2val'] as $tbl) {
             $buffer_size = isset($this->sql_buffers[$tbl]) ? 1 : 0;
             if ($buffer_size && $force_write) {
@@ -418,16 +385,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                 if ($reset_id_buffers) {
                     $this->term_ids = [];
                     $this->triple_ids = [];
-                }
-                /* refresh lock */
-                if ($refresh_lock) {
-                    $this->store->releaseLock();
-                    $this->has_lock = 0;
-                    sleep(1);
-                    if (!$this->store->getLock(5)) {
-                        return $this->addError('Could not re-obtain lock in "checkSQLBuffers"');
-                    }
-                    $this->has_lock = 1;
                 }
             }
         }

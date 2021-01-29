@@ -52,14 +52,6 @@ class ARC2_Store extends ARC2_Class
     /**
      * @todo remove
      */
-    public function getTablePrefix()
-    {
-        return '';
-    }
-
-    /**
-     * @todo remove
-     */
     public function createDBCon()
     {
         return true;
@@ -93,7 +85,7 @@ class ARC2_Store extends ARC2_Class
 
     public function getCollation()
     {
-        $row = $this->db->fetchRow('SHOW TABLE STATUS LIKE "'.$this->getTablePrefix().'setting"');
+        $row = $this->db->fetchRow('SHOW TABLE STATUS LIKE "setting"');
 
         return isset($row['Collation']) ? $row['Collation'] : '';
     }
@@ -111,11 +103,7 @@ class ARC2_Store extends ARC2_Class
     {
         $var_name = 'has_hash_column_'.$tbl;
         if (!isset($this->$var_name)) {
-            $tbl = $this->getTablePrefix().$tbl;
-
-            $value = true;
-
-            $this->$var_name = $value;
+            $this->$var_name = true;
         }
 
         return $this->$var_name;
@@ -168,7 +156,7 @@ class ARC2_Store extends ARC2_Class
             $this->createDBCon();
         }
 
-        $tbl = $this->getTablePrefix().'setting';
+        $tbl = 'setting';
 
         return $this->db->fetchRow('SELECT val FROM '.$tbl." WHERE k = '".md5($k)."'")
             ? 1
@@ -181,7 +169,7 @@ class ARC2_Store extends ARC2_Class
             $this->createDBCon();
         }
 
-        $tbl = $this->getTablePrefix().'setting';
+        $tbl = 'setting';
         $row = $this->db->fetchRow('SELECT val FROM '.$tbl." WHERE k = '".md5($k)."'");
         if (isset($row['val'])) {
             return unserialize($row['val']);
@@ -192,7 +180,7 @@ class ARC2_Store extends ARC2_Class
 
     public function setSetting($k, $v)
     {
-        $tbl = $this->getTablePrefix().'setting';
+        $tbl = 'setting';
         if ($this->hasSetting($k)) {
             $sql = 'UPDATE '.$tbl." SET val = '".$this->db->escape(serialize($v))."' WHERE k = '".md5($k)."'";
         } else {
@@ -204,7 +192,7 @@ class ARC2_Store extends ARC2_Class
 
     public function removeSetting($k)
     {
-        $tbl = $this->getTablePrefix().'setting';
+        $tbl = 'setting';
 
         return $this->db->simpleQuery('DELETE FROM '.$tbl." WHERE k = '".md5($k)."'");
     }
@@ -216,7 +204,7 @@ class ARC2_Store extends ARC2_Class
         }
         $t = 'ticket_'.substr(md5(uniqid(rand())), 0, 10);
         /* lock */
-        $this->db->simpleQuery('LOCK TABLES '.$this->getTablePrefix().'setting WRITE');
+        $this->db->simpleQuery('LOCK TABLES setting WRITE');
         /* queue */
         $queue = $this->getSetting('query_queue', []);
         $queue[] = $t;
@@ -226,13 +214,8 @@ class ARC2_Store extends ARC2_Class
         $lc = 0;
         $queue = $this->getSetting('query_queue', []);
         while ($queue && ($queue[0] != $t) && ($lc < 30)) {
-            if ($this->is_win) {
-                sleep(1);
-                ++$lc;
-            } else {
-                usleep(100000);
-                $lc += 0.1;
-            }
+            usleep(100000);
+            $lc += 0.1;
             $queue = $this->getSetting('query_queue', []);
         }
 
@@ -245,7 +228,7 @@ class ARC2_Store extends ARC2_Class
             return 1;
         }
         /* lock */
-        $this->db->simpleQuery('LOCK TABLES '.$this->getTablePrefix().'setting WRITE');
+        $this->db->simpleQuery('LOCK TABLES setting WRITE');
         /* queue */
         $vals = $this->getSetting('query_queue', []);
         $pos = array_search($t, $vals);
@@ -257,12 +240,11 @@ class ARC2_Store extends ARC2_Class
     public function reset($keep_settings = 0)
     {
         $tbls = $this->getTables();
-        $prefix = $this->getTablePrefix();
         /* remove split tables */
         $ps = $this->getSetting('split_predicates', []);
         foreach ($ps as $p) {
             $tbl = 'triple_'.abs(crc32($p));
-            $this->db->simpleQuery('DROP TABLE '.$prefix.$tbl);
+            $this->db->simpleQuery('DROP TABLE '.$tbl);
         }
         $this->removeSetting('split_predicates');
         /* truncate tables */
@@ -270,11 +252,7 @@ class ARC2_Store extends ARC2_Class
             if ($keep_settings && ('setting' == $tbl)) {
                 continue;
             }
-            if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-                $this->db->simpleQuery('DELETE FROM '.$prefix.$tbl);
-            } else {
-                $this->db->simpleQuery('TRUNCATE '.$prefix.$tbl);
-            }
+            $this->db->simpleQuery('DELETE FROM '.$tbl);
         }
     }
 
@@ -465,7 +443,7 @@ class ARC2_Store extends ARC2_Class
         /* via hash */
         if (preg_match('/^(s2val|o2val)$/', $tbl) && $this->hasHashColumn($tbl)) {
             $rows = $this->db->fetchList(
-                'SELECT id, val FROM '.$this->getTablePrefix().$tbl." WHERE val_hash = '".$this->getValueHash($val)."' ORDER BY id"
+                'SELECT id, val FROM '.$tbl." WHERE val_hash = '".$this->getValueHash($val)."' ORDER BY id"
             );
             if (is_array($rows) && 0 < count($rows)) {
                 foreach ($rows as $row) {
@@ -478,18 +456,7 @@ class ARC2_Store extends ARC2_Class
         }
         /* exact match */
         else {
-            if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-                $sql = 'SELECT id
-                    FROM '.$this->getTablePrefix().$tbl."
-                    WHERE val = '".$this->db->escape($val)."'
-                    LIMIT 1";
-            } else {
-                $sql = 'SELECT id
-                    FROM '.$this->getTablePrefix().$tbl."
-                    WHERE val = BINARY '".$this->db->escape($val)."'
-                    LIMIT 1";
-            }
-
+            $sql = 'SELECT id FROM '.$tbl." WHERE val = '".$this->db->escape($val)."' LIMIT 1";
             $row = $this->db->fetchRow($sql);
 
             if (null !== $row && isset($row['id'])) {
@@ -507,7 +474,7 @@ class ARC2_Store extends ARC2_Class
     {
         $tbl = preg_match('/^(s|o)$/', $term) ? $term.'2val' : 'id2val';
         $row = $this->db->fetchRow(
-            'SELECT val FROM '.$this->getTablePrefix().$tbl.' WHERE id = '.$this->db->escape($id).' LIMIT 1'
+            'SELECT val FROM '.$tbl.' WHERE id = '.$this->db->escape($id).' LIMIT 1'
         );
         if (isset($row['val'])) {
             return $row['val'];
@@ -516,65 +483,13 @@ class ARC2_Store extends ARC2_Class
         return 0;
     }
 
-    public function getLock($t_out = 10, $t_out_init = '')
-    {
-        /*
-         * We assume locks are not required when using SQLite.
-         * Either its an in memory database, which has no concurrent reads
-         * or its a file and SQLite takes care of it.
-         */
-        if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-            return 1;
-        }
-
-        if (!$t_out_init) {
-            $t_out_init = $t_out;
-        }
-
-        $l_name = $this->a['db_name'].'.'.$this->getTablePrefix().'.write_lock';
-        $row = $this->db->fetchRow('SELECT IS_FREE_LOCK("'.$l_name.'") AS success');
-
-        if (is_array($row)) {
-            if (!$row['success']) {
-                if ($t_out) {
-                    sleep(1);
-
-                    return $this->getLock($t_out - 1, $t_out_init);
-                }
-            } else {
-                $row = $this->db->fetchRow('SELECT GET_LOCK("'.$l_name.'", '.$t_out_init.') AS success');
-                if (isset($row['success'])) {
-                    return $row['success'];
-                }
-            }
-        }
-
-        return 0;
-    }
-
-    public function releaseLock()
-    {
-        /*
-         * We assume locks are not required when using SQLite.
-         * Either its an in memory database, which has no concurrent reads
-         * or its a file and SQLite takes care of it.
-         */
-        if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-            return true;
-        }
-
-        $sql = 'DO RELEASE_LOCK("'.$this->a['db_name'].'.'.$this->getTablePrefix().'.write_lock")';
-
-        return $this->db->simpleQuery($sql);
-    }
-
     /**
      * @param string $res           URI
      * @param string $unnamed_label How to label a resource without a name?
      *
      * @return string
      */
-    public function getResourceLabel($res, $unnamed_label = 'An unnamed resource')
+    public function getResourceLabel($res)
     {
         // init local label cache, if not set
         if (!isset($this->resource_labels)) {
