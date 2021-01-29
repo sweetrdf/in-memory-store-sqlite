@@ -23,16 +23,29 @@ final class NamespaceHelper
     const NAMESPACE_XML = 'http://www.w3.org/XML/1998/namespace';
     const NAMESPACE_XSD = 'http://www.w3.org/2001/XMLSchema#';
 
+    private $namespaces = [
+        'owl:' => 'http://www.w3.org/2002/07/owl#',
+        'rdf:' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+        'rdfs:' => 'http://www.w3.org/2000/01/rdf-schema#',
+        'xsd:' => 'http://www.w3.org/2001/XMLSchema#',
+    ];
+
     /**
-     * @todo make it un-static and move it to class constructor
+     * @return array<string, string>
      */
-    public static function getPrefixes(): array
+    public function getNamespaces(): array
     {
-        return [
-            'owl:' => 'http://www.w3.org/2002/07/owl#',
-            'rdf:' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-            'rdfs:' => 'http://www.w3.org/2000/01/rdf-schema#',
-            'xsd:' => 'http://www.w3.org/2001/XMLSchema#',
-        ];
+        return $this->namespaces;
+    }
+
+    public function getPrefix($namespace): ?string
+    {
+        foreach ($this->namespaces as $prefix => $ns) {
+            if ($namespace == $ns) {
+                return $prefix;
+            }
+        }
+
+        return null;
     }
 }

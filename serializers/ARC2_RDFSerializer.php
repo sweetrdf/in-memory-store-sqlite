@@ -10,11 +10,20 @@
  *  file that was distributed with this source code.
  */
 
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+
 class ARC2_RDFSerializer extends ARC2_Class
 {
+    private $namespaceHelper;
+
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
+
+        /*
+         * @todo make it a constructor param
+         */
+        $this->namespaceHelper = new NamespaceHelper();
     }
 
     public function __init()
@@ -33,7 +42,7 @@ class ARC2_RDFSerializer extends ARC2_Class
             return $v;
         }
         if (preg_match('/^(.*[\/\#])([a-z\_][a-z0-9\-\_]*)$/i', $v, $m)) {
-            return $this->getPrefix($m[1]).':'.$m[2];
+            return $this->namespaceHelper->getPrefix($m[1]).':'.$m[2];
         }
 
         return 0;

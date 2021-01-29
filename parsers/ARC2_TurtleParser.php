@@ -51,11 +51,6 @@ class ARC2_TurtleParser extends ARC2_RDFParser
         ++$this->t_count;
     }
 
-    public function getTriples()
-    {
-        return $this->triples;
-    }
-
     public function countTriples()
     {
         return $this->t_count;

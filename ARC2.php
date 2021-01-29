@@ -26,6 +26,9 @@ class ARC2
         return preg_match("/^\s*".$re.'(.*)$/'.$options, $v, $m) ? $m : false;
     }
 
+    /**
+     * @todo remove
+     */
     public static function getFormat($v, $mtype = '', $ext = '')
     {
         $r = false;
@@ -85,6 +88,9 @@ class ARC2
         return $r;
     }
 
+    /**
+     * @todo remove
+     */
     public static function getPreferredFormat($default = 'plain')
     {
         $formats = [
@@ -215,141 +221,6 @@ class ARC2
         return $r;
     }
 
-    public static function getTriplesFromIndex($index)
-    {
-        $r = [];
-        foreach ($index as $s => $ps) {
-            foreach ($ps as $p => $os) {
-                foreach ($os as $o) {
-                    $r[] = [
-                        's' => $s,
-                        'p' => $p,
-                        'o' => $o['value'],
-                        's_type' => preg_match('/^\_\:/', $s) ? 'bnode' : 'uri',
-                        'o_type' => $o['type'],
-                        'o_datatype' => isset($o['datatype']) ? $o['datatype'] : '',
-                        'o_lang' => isset($o['lang']) ? $o['lang'] : '',
-                    ];
-                }
-            }
-        }
-
-        return $r;
-    }
-
-    public static function getMergedIndex()
-    {
-        $r = [];
-        foreach (func_get_args() as $index) {
-            foreach ($index as $s => $ps) {
-                if (!isset($r[$s])) {
-                    $r[$s] = [];
-                }
-                foreach ($ps as $p => $os) {
-                    if (!isset($r[$s][$p])) {
-                        $r[$s][$p] = [];
-                    }
-                    foreach ($os as $o) {
-                        if (!in_array($o, $r[$s][$p])) {
-                            $r[$s][$p][] = $o;
-                        }
-                    }
-                }
-            }
-        }
-
-        return $r;
-    }
-
-    public static function getCleanedIndex()
-    {/* removes triples from a given index */
-        $indexes = func_get_args();
-        $r = $indexes[0];
-        for ($i = 1, $i_max = count($indexes); $i < $i_max; ++$i) {
-            $index = $indexes[$i];
-            foreach ($index as $s => $ps) {
-                if (!isset($r[$s])) {
-                    continue;
-                }
-                foreach ($ps as $p => $os) {
-                    if (!isset($r[$s][$p])) {
-                        continue;
-                    }
-                    $r_os = $r[$s][$p];
-                    $new_os = [];
-                    foreach ($r_os as $r_o) {
-                        $r_o_val = is_array($r_o) ? $r_o['value'] : $r_o;
-                        $keep = 1;
-                        foreach ($os as $o) {
-                            $del_o_val = is_array($o) ? $o['value'] : $o;
-                            if ($del_o_val == $r_o_val) {
-                                $keep = 0;
-                                break;
-                            }
-                        }
-                        if ($keep) {
-                            $new_os[] = $r_o;
-                        }
-                    }
-                    if ($new_os) {
-                        $r[$s][$p] = $new_os;
-                    } else {
-                        unset($r[$s][$p]);
-                    }
-                }
-            }
-        }
-        /* check r */
-        $has_data = 0;
-        foreach ($r as $s => $ps) {
-            if ($ps) {
-                $has_data = 1;
-                break;
-            }
-        }
-
-        return $has_data ? $r : [];
-    }
-
-    public static function getStructType($v)
-    {
-        /* string */
-        if (is_string($v)) {
-            return 'string';
-        }
-        /* flat array, numeric keys */
-        if (in_array(0, array_keys($v))) {/* numeric keys */
-            /* simple array */
-            if (!is_array($v[0])) {
-                return 'array';
-            }
-            /* triples */
-            //if (isset($v[0]) && isset($v[0]['s']) && isset($v[0]['p'])) return 'triples';
-            if (in_array('p', array_keys($v[0]))) {
-                return 'triples';
-            }
-        }
-        /* associative array */
-        else {
-            /* index */
-            foreach ($v as $s => $ps) {
-                if (!is_array($ps)) {
-                    break;
-                }
-                foreach ($ps as $p => $os) {
-                    if (!is_array($os) || !is_array($os[0])) {
-                        break;
-                    }
-                    if (in_array('value', array_keys($os[0]))) {
-                        return 'index';
-                    }
-                }
-            }
-        }
-        /* array */
-        return 'array';
-    }
-
     public static function getComponent($name, $a = '', $caller = '')
     {
         $prefix = 'ARC2';
@@ -363,20 +234,6 @@ class ARC2
         }
 
         return new $cls($a, $caller);
-    }
-
-    /* graph */
-
-    public static function getGraph($a = '')
-    {
-        return self::getComponent('Graph', $a);
-    }
-
-    /* resource */
-
-    public static function getResource($a = '')
-    {
-        return self::getComponent('Resource', $a);
     }
 
     /* reader */
@@ -393,64 +250,9 @@ class ARC2
         return self::getComponent($prefix.'Parser', $a);
     }
 
-    public static function getRDFParser($a = '')
-    {
-        return self::getParser('RDF', $a);
-    }
-
-    public static function getRDFXMLParser($a = '')
-    {
-        return self::getParser('RDFXML', $a);
-    }
-
     public static function getTurtleParser($a = '')
     {
         return self::getParser('Turtle', $a);
-    }
-
-    public static function getRSSParser($a = '')
-    {
-        return self::getParser('RSS', $a);
-    }
-
-    public static function getSemHTMLParser($a = '')
-    {
-        return self::getParser('SemHTML', $a);
-    }
-
-    public static function getSPARQLParser($a = '')
-    {
-        return self::getComponent('SPARQLParser', $a);
-    }
-
-    public static function getSPARQLPlusParser($a = '')
-    {
-        return self::getParser('SPARQLPlus', $a);
-    }
-
-    public static function getSPARQLXMLResultParser($a = '')
-    {
-        return self::getParser('SPARQLXMLResult', $a);
-    }
-
-    public static function getJSONParser($a = '')
-    {
-        return self::getParser('JSON', $a);
-    }
-
-    public static function getSGAJSONParser($a = '')
-    {
-        return self::getParser('SGAJSON', $a);
-    }
-
-    public static function getCBJSONParser($a = '')
-    {
-        return self::getParser('CBJSON', $a);
-    }
-
-    public static function getSPARQLScriptParser($a = '')
-    {
-        return self::getParser('SPARQLScript', $a);
     }
 
     /* store */
@@ -458,74 +260,5 @@ class ARC2
     public static function getStore($a = '', $caller = '')
     {
         return self::getComponent('Store', [], $caller);
-    }
-
-    public static function getStoreEndpoint($a = '', $caller = '')
-    {
-        return self::getComponent('StoreEndpoint', $a, $caller);
-    }
-
-    public static function getRemoteStore($a = '', $caller = '')
-    {
-        return self::getComponent('RemoteStore', $a, $caller);
-    }
-
-    public static function getMemStore($a = '')
-    {
-        return self::getComponent('MemStore', $a);
-    }
-
-    /* serializers */
-
-    public static function getSer($prefix, $a = '')
-    {
-        return self::getComponent($prefix.'Serializer', $a);
-    }
-
-    public static function getTurtleSerializer($a = '')
-    {
-        return self::getSer('Turtle', $a);
-    }
-
-    public static function getRDFXMLSerializer($a = '')
-    {
-        return self::getSer('RDFXML', $a);
-    }
-
-    public static function getNTriplesSerializer($a = '')
-    {
-        return self::getSer('NTriples', $a);
-    }
-
-    public static function getRDFJSONSerializer($a = '')
-    {
-        return self::getSer('RDFJSON', $a);
-    }
-
-    public static function getPOSHRDFSerializer($a = '')
-    {/* deprecated */
-        return self::getSer('POSHRDF', $a);
-    }
-
-    public static function getMicroRDFSerializer($a = '')
-    {
-        return self::getSer('MicroRDF', $a);
-    }
-
-    public static function getRSS10Serializer($a = '')
-    {
-        return self::getSer('RSS10', $a);
-    }
-
-    public static function getJSONLDSerializer($a = '')
-    {
-        return self::getSer('JSONLD', $a);
-    }
-
-    /* sparqlscript */
-
-    public static function getSPARQLScriptProcessor($a = '')
-    {
-        return self::getComponent('SPARQLScriptProcessor', $a);
     }
 }

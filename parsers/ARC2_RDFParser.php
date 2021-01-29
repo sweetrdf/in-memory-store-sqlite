@@ -47,12 +47,21 @@ class ARC2_RDFParser extends ARC2_Class
         parent::__construct($a, $caller);
 
         $this->reader = new ARC2_Reader($this->a, $this);
-        $this->prefixes = NamespaceHelper::getPrefixes();
+
+        /*
+         * @todo make it a constructor param
+         */
+        $this->prefixes = (new NamespaceHelper())->getNamespaces();
 
         // generates random prefix for blank nodes
         $this->bnode_prefix = bin2hex(random_bytes(4)).'b';
 
         $this->bnode_id = 0;
+    }
+
+    public function getTriples()
+    {
+        return $this->triples;
     }
 
     public function setReader(&$reader)
@@ -79,26 +88,73 @@ class ARC2_RDFParser extends ARC2_Class
     {
     }
 
-    public function createBnodeID()
+    private function createBnodeID()
     {
         ++$this->bnode_id;
 
         return '_:'.$this->bnode_prefix.$this->bnode_id;
     }
 
-    public function getTriples()
+    public function getSimpleIndex($flatten_objects = 1, $vals = ''): array
     {
-        return $this->v('parser') ? $this->m('getTriples', false, [], $this->v('parser')) : [];
+        return $this->_getSimpleIndex($this->getTriples(), $flatten_objects, $vals);
     }
 
-    public function countTriples()
+    /**
+     * @todo port from ARC2::getSimpleIndex; refactor and merge it with $this->getSimpleIndex
+     */
+    private function _getSimpleIndex($triples, $flatten_objects = 1, $vals = ''): array
     {
-        return $this->v('parser') ? $this->m('countTriples', false, 0, $this->v('parser')) : 0;
-    }
+        $r = [];
+        foreach ($triples as $t) {
+            $skip_t = 0;
+            foreach (['s', 'p', 'o'] as $term) {
+                $$term = $t[$term];
+                /* template var */
+                if (isset($t[$term.'_type']) && ('var' == $t[$term.'_type'])) {
+                    $val = isset($vals[$$term]) ? $vals[$$term] : '';
+                    $skip_t = isset($vals[$$term]) ? $skip_t : 1;
+                    $type = '';
+                    $type = !$type && isset($vals[$$term.' type']) ? $vals[$$term.' type'] : $type;
+                    $type = !$type && preg_match('/^\_\:/', $val) ? 'bnode' : $type;
+                    if ('o' == $term) {
+                        $type = !$type && (preg_match('/\s/s', $val) || !preg_match('/\:/', $val)) ? 'literal' : $type;
+                        $type = !$type && !preg_match('/[\/]/', $val) ? 'literal' : $type;
+                    }
+                    $type = !$type ? 'uri' : $type;
+                    $t[$term.'_type'] = $type;
+                    $$term = $val;
+                }
+            }
+            if ($skip_t) {
+                continue;
+            }
+            if (!isset($r[$s])) {
+                $r[$s] = [];
+            }
+            if (!isset($r[$s][$p])) {
+                $r[$s][$p] = [];
+            }
+            if ($flatten_objects) {
+                if (!in_array($o, $r[$s][$p])) {
+                    $r[$s][$p][] = $o;
+                }
+            } else {
+                $o = ['value' => $o];
+                foreach (['lang', 'type', 'datatype'] as $suffix) {
+                    if (isset($t['o_'.$suffix]) && $t['o_'.$suffix]) {
+                        $o[$suffix] = $t['o_'.$suffix];
+                    } elseif (isset($t['o '.$suffix]) && $t['o '.$suffix]) {
+                        $o[$suffix] = $t['o '.$suffix];
+                    }
+                }
+                if (!in_array($o, $r[$s][$p])) {
+                    $r[$s][$p][] = $o;
+                }
+            }
+        }
 
-    public function getSimpleIndex($flatten_objects = 1, $vals = '')
-    {
-        return ARC2::getSimpleIndex($this->getTriples(), $flatten_objects, $vals);
+        return $r;
     }
 
     public function reset()

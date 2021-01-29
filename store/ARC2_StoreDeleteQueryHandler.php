@@ -143,19 +143,37 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
     {
         $h = new ARC2_StoreConstructQueryHandler($this->a, $this->store);
         $sub_r = $h->runQuery($this->infos);
-        $triples = ARC2::getTriplesFromIndex($sub_r);
+        $triples = $this->getTriplesFromIndex($sub_r);
         $tgs = $this->infos['query']['target_graphs'];
         $this->infos = ['query' => ['construct_triples' => $triples, 'target_graphs' => $tgs]];
 
         return $this->deleteTriples();
     }
 
+    private function getTriplesFromIndex(array $index): array
+    {
+        $r = [];
+        foreach ($index as $s => $ps) {
+            foreach ($ps as $p => $os) {
+                foreach ($os as $o) {
+                    $r[] = [
+                        's' => $s,
+                        'p' => $p,
+                        'o' => $o['value'],
+                        's_type' => preg_match('/^\_\:/', $s) ? 'bnode' : 'uri',
+                        'o_type' => $o['type'],
+                        'o_datatype' => isset($o['datatype']) ? $o['datatype'] : '',
+                        'o_lang' => isset($o['lang']) ? $o['lang'] : '',
+                    ];
+                }
+            }
+        }
+
+        return $r;
+    }
+
     public function cleanTableReferences()
     {
-        /* lock */
-        if (!$this->store->getLock()) {
-            return $this->addError('Could not get lock in "cleanTableReferences"');
-        }
         $tbl_prefix = $this->store->getTablePrefix();
         $dbv = $this->store->getDBVersion();
         /* check for unconnected triples */

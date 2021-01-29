@@ -110,34 +110,6 @@ class ARC2_Class
     }
 
     /**
-     * Tries to extract a somewhat human-readable label from a URI.
-     */
-    public function extractTermLabel($uri, $loops = 0)
-    {
-        list($ns, $r) = $this->splitURI($uri);
-        /* encode apostrophe + s */
-        $r = str_replace('%27s', '_apostrophes_', $r);
-        /* normalize */
-        $r = $this->deCamelCase($this->camelCase($r, 1, 1));
-        /* decode apostrophe + s */
-        $r = str_replace(' apostrophes ', "'s ", $r);
-        /* typical RDF non-info URI */
-        if (($loops < 1) && preg_match('/^(self|it|this|me|id)$/i', $r)) {
-            return $this->extractTermLabel(preg_replace('/\#.+$/', '', $uri), $loops + 1);
-        }
-        /* trailing hash or slash */
-        if ($uri && !$r && ($loops < 2)) {
-            return $this->extractTermLabel(preg_replace('/[\#\/]$/', '', $uri), $loops + 1);
-        }
-        /* a de-camel-cased URL (will look like "www example com") */
-        if (preg_match('/^www (.+ [a-z]{2,4})$/', $r, $m)) {
-            return $this->getPrettyURL($uri);
-        }
-
-        return $r;
-    }
-
-    /**
      * Generates a less ugly in-your-face URL.
      */
     public function getPrettyURL($r)
@@ -149,7 +121,7 @@ class ARC2_Class
     }
 
     /**
-     * @todo handle 51+ exception being thrown during execution?!
+     * @todo handle 51+ exceptions being thrown during execution?!
      */
     public function addError($v)
     {

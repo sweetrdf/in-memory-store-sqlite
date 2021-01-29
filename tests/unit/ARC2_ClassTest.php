@@ -69,13 +69,4 @@ class ARC2_ClassTest extends PHPUnit\Framework\TestCase
         $o->cats = 0;
         $this->assertSame('blackjack', $this->arc2->v1('cats', 'blackjack', $o));
     }
-
-    public function testExtractTermLabel()
-    {
-        $this->assertSame('bar', $this->arc2->extractTermLabel('http://example.com/foo#bar'));
-        $this->assertSame('bar cats', $this->arc2->extractTermLabel('http://example.com/foo#bar?cats'));
-        $this->assertSame('bar', $this->arc2->extractTermLabel('#bar'));
-        $this->assertSame('bar', $this->arc2->extractTermLabel('http://example.com/bar'));
-        $this->assertSame('bar', $this->arc2->extractTermLabel('http://example.com/bar/'));
-    }
 }
