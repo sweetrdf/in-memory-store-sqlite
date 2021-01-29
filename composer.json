@@ -1,9 +1,9 @@
 {
-    "name": "quickrdf/in-memory-store-sqlite",
+    "name": "sweetrdf/in-memory-store-sqlite",
     "type": "library",
     "description": "TODO",
     "keywords": ["rdf","sparql", "in-memory store"],
-    "homepage": "https://github.com/quickrdf/in-memory-store-sqlite",
+    "homepage": "https://github.com/sweetrdf/in-memory-store-sqlite",
     "license": [],
     "authors": [
         {
