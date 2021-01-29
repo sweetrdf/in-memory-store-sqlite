@@ -30,22 +30,22 @@ ARC2 currently has a bug in the `SUM` ([link](https://github.com/sweetrdf/in-mem
 
 #### Supported aggregate functions
 
-|           | AVG                                                                           | COUNT   | MIN   | MAX   | SUM   |
-|-----------|-------------------------------------------------------------------------------|---------|-------|-------|-------|
-| Support   | x (but [bugged](https://github.com/sweetrdf/in-memory-store-sqlite/issues/4)) | x       | x     | x     | x     |
+|         | AVG                                                                           | COUNT | MIN | MAX | SUM                                                                         |
+|---------|-------------------------------------------------------------------------------|-------|-----|-----|-----------------------------------------------------------------------------|
+| Support | x (but [bugged](https://github.com/sweetrdf/in-memory-store-sqlite/issues/4)) | x     | x   | x   | (but [bugged](https://github.com/sweetrdf/in-memory-store-sqlite/issues/4)) |
 
 
 ### Supported relational terms
 
-|           | =   | !=   | <   | >   |
-|-----------|-----|------|-----|-----|
-| Support   | x   | x    | x   | x   |
+|         | = | != | < | > |
+|---------|---|----|---|---|
+| Support | x | x  | x | x |
 
 ### Supported FILTER functions
 
-|           | bound   | datatype   | isBlank   | isIri   | isLiteral   | isUri   | lang   | langMatches   | regex   | str   |
-|-----------|---------|------------|-----------|---------|-------------|---------|--------|---------------|---------|-------|
-| Support   | x       | x          | x         | x       | x           | x       | x      | x             | x       | x     |
+|         | bound | datatype | isBlank | isIri | isLiteral | isUri | lang | langMatches | regex | str |
+|---------|-------|----------|---------|-------|-----------|-------|------|-------------|-------|-----|
+| Support | x     | x        | x       | x     | x         | x     | x    | x           | x     | x   |
 
 ## INSERT INTO
 ```sql
