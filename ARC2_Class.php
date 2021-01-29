@@ -38,12 +38,9 @@ class ARC2_Class
         $this->used_ns = [$rdf];
         $this->ns = array_merge(['rdf' => $rdf], $this->v('ns', [], $this->a));
 
-        $this->base = $this->v('base', ARC2::getRequestURI(), $this->a);
+        $this->base = ARC2::getRequestURI();
         $this->errors = [];
         $this->warnings = [];
-        $this->adjust_utf8 = $this->v('adjust_utf8', 0, $this->a);
-        $this->max_errors = $this->v('max_errors', 25, $this->a);
-        $this->has_pcre_unicode = @preg_match('/\pL/u', 'test'); /* \pL = block/point which is a Letter */
     }
 
     public function v($name, $default = false, $o = false)
@@ -71,7 +68,8 @@ class ARC2_Class
     }
 
     public function m($name, $a = false, $default = false, $o = false)
-    {/* call method */
+    {
+        /* call method */
         if (false === $o) {
             $o = $this;
         }
@@ -149,6 +147,9 @@ class ARC2_Class
         return $r;
     }
 
+    /**
+     * @todo handle 51+ exception being thrown during execution?!
+     */
     public function addError($v)
     {
         if (!in_array($v, $this->errors)) {
@@ -157,9 +158,6 @@ class ARC2_Class
         if ($this->caller && method_exists($this->caller, 'addError')) {
             $glue = strpos($v, ' in ') ? ' via ' : ' in ';
             $this->caller->addError($v.$glue.static::class);
-        }
-        if (count($this->errors) > $this->max_errors) {
-            exit('Too many errors (limit: '.$this->max_errors.'): '.print_r($this->errors, 1));
         }
 
         return false;
@@ -405,11 +403,6 @@ class ARC2_Class
         $ser = new ARC2_TurtleSerializer(array_merge($this->a, ['ns' => $ns]), $this);
 
         return (isset($v[0]) && isset($v[0]['s'])) ? $ser->getSerializedTriples($v, $raw) : $ser->getSerializedIndex($v, $raw);
-    }
-
-    public function toUTF8($str)
-    {
-        return $this->adjust_utf8 ? ARC2::toUTF8($str) : $str;
     }
 
     public function toDataURI($str)

@@ -348,7 +348,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 
         /* any other string: remove tags, linebreaks etc., but keep MB-chars */
         // [\PL\s]+ ( = non-Letters) kills digits
-        $re = $this->has_pcre_unicode ? '/[\PL\s]+/isu' : '/[\s\'\"\´\`]+/is';
+        $re = '/[\PL\s]+/isu';
         $re = '/[\s\'\"\´\`]+/is';
         $val = trim(preg_replace($re, '-', strip_tags($val)));
         if (strlen($val) > 35) {
@@ -359,7 +359,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             $val = urldecode(preg_replace('/\%[0-9A-F]{2}/', '', urlencode($val)));
         }
 
-        return $this->toUTF8($val);
+        return $val;
     }
 
     public function bufferTripleSQL($t)

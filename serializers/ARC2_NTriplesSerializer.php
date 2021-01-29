@@ -33,7 +33,7 @@ class ARC2_NTriplesSerializer extends ARC2_RDFSerializer
                 return $this->getTerm(['value' => $v, 'type' => 'bnode']);
             }
             // uri
-            if (preg_match('/^[a-z0-9]+\:[^\s\"]*$/is'.($this->has_pcre_unicode ? 'u' : ''), $v)) {
+            if (preg_match('/^[a-z0-9]+\:[^\s\"]*$/isu', $v)) {
                 return $this->getTerm(['value' => $v, 'type' => 'uri']);
             }
             // fallback for non-unicode environments: subjects and predicates can't be literals.

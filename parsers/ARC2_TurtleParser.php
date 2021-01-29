@@ -614,7 +614,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
             }
         } while ($proceed);
         if (false !== $r) {
-            return [['value' => $this->toUTF8($r), 'type' => 'literal', 'sub_type' => $sub_type], $rest];
+            return [['value' => $r, 'type' => 'literal', 'sub_type' => $sub_type], $rest];
         }
 
         return [0, $v];

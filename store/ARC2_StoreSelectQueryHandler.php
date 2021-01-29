@@ -133,16 +133,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             $tbl = 'Q'.md5($tbl);
         }
 
-        if ($this->store->getDBObject() instanceof PDOSQLiteAdapter) {
-            $tmp_sql = 'CREATE TABLE '.$tbl.' ( ';
-            $tmp_sql .= $this->getTempTableDefForSQLite($q_sql).')';
-        } else {
-            $tmp_sql = 'CREATE TEMPORARY TABLE '.$tbl.' ( ';
-            $tmp_sql .= $this->getTempTableDefForMySQL($q_sql);
-            /* HEAP doesn't support AUTO_INCREMENT, and MySQL breaks on MEMORY sometimes */
-            $tmp_sql .= ') ENGINE='.$this->engine_type;
-        }
-
+        $tmp_sql = 'CREATE TABLE '.$tbl.' ( '.$this->getTempTableDefForSQLite($q_sql).')';
         $tmpSql2 = str_replace('CREATE TEMPORARY', 'CREATE', $tmp_sql);
 
         if (
