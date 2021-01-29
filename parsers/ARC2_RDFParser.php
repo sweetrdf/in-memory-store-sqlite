@@ -15,6 +15,8 @@ class ARC2_RDFParser extends ARC2_Class
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
+
+        $this->reader = new ARC2_Reader($this->a, $this);
     }
 
     public function __init()
@@ -38,10 +40,6 @@ class ARC2_RDFParser extends ARC2_Class
 
     public function parse($path, $data = '')
     {
-        /* reader */
-        if (!isset($this->reader)) {
-            $this->reader = new ARC2_Reader($this->a, $this);
-        }
         $this->reader->activate($path, $data);
         /* format detection */
         $mappings = [

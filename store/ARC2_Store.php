@@ -10,7 +10,7 @@
  *  file that was distributed with this source code.
  */
 
-use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
 class ARC2_Store extends ARC2_Class
 {

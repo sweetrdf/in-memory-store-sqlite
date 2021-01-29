@@ -29,7 +29,7 @@
             "./ARC2_Resource.php"
         ],
         "psr-4": {
-            "quickrdf\\InMemoryStoreSqlite\\": [
+            "sweetrdf\\InMemoryStoreSqlite\\": [
                 "src/"
             ],
             "ARC2\\": [

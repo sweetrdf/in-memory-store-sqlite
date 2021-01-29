@@ -10,7 +10,7 @@
  *  file that was distributed with this source code.
  */
 
-namespace quickrdf\InMemoryStoreSqlite;
+namespace sweetrdf\InMemoryStoreSqlite;
 
 use Exception;
 use PDO;

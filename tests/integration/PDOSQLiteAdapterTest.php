@@ -12,7 +12,7 @@
 
 namespace Tests\integration;
 
-use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
 
 class PDOSQLiteAdapterTest extends ARC2_TestCase

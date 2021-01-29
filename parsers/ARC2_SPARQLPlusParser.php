@@ -134,7 +134,7 @@ class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
 
     /* +6 */
 
-    public function xDeleteQuery($v)
+    public function xDeleteQuery($v): array
     {
         if ($sub_r = $this->x('DELETE\s+', $v)) {
             $r = [
@@ -182,7 +182,7 @@ class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
 
     /* +7 */
 
-    public function xSolutionModifier($v)
+    public function xSolutionModifier($v): array
     {
         $r = [];
         if ((list($sub_r, $sub_v) = $this->xGroupClause($v)) && $sub_r) {
@@ -200,7 +200,7 @@ class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
 
     /* +8 */
 
-    public function xGroupClause($v)
+    public function xGroupClause($v): array
     {
         if ($sub_r = $this->x('GROUP BY\s+', $v)) {
             $sub_v = $sub_r[1];

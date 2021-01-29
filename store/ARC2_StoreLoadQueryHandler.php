@@ -7,7 +7,7 @@
  * @homepage <https://github.com/semsol/arc2>
  */
 
-use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
 class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 {
