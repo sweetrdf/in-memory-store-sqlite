@@ -25,7 +25,8 @@ return PhpCsFixer\Config::create()
         '@Symfony' => true,
         '@Symfony:risky' => true,
         'header_comment' => ['header' => $header],
-     ])
+        'array_indentation' => true,
+    ])
     ->setRiskyAllowed(true)
     ->setFinder(
         PhpCsFixer\Finder::create()

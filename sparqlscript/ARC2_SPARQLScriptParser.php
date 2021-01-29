@@ -100,9 +100,7 @@ class ARC2_SPARQLScriptParser extends ARC2_SPARQLPlusParser
                 'type' => 'query',
                 'query_type' => $r['type'],
                 'query' => $q,
-                //'prefixes' => $this->prefixes,
                 'base' => $this->base,
-                //'infos' => $r
             ]);
 
             return [$r, $v];
@@ -170,7 +168,15 @@ class ARC2_SPARQLScriptParser extends ARC2_SPARQLPlusParser
         /* try String */
         list($r, $sub_v) = $this->xString($sub_v);
         if ($r) {
-            return [['type' => 'assignment', 'var' => $var, 'sub_type' => 'string', 'string' => $r], ltrim($sub_v, '; ')];
+            return [
+                [
+                    'type' => 'assignment',
+                    'var' => $var,
+                    'sub_type' => 'string',
+                    'string' => $r,
+                ],
+                ltrim($sub_v, '; '),
+            ];
         }
         /* try VarMerge */
         list($r, $sub_v) = $this->xVarMerge($sub_v);

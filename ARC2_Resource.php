@@ -76,8 +76,8 @@ class ARC2_Resource extends ARC2_Class
     {
         if (!is_array($r)) {
             $uri = [
-            'type' => 'uri',
-            'value' => $this->expandPName($r), ];
+                'type' => 'uri',
+                'value' => $this->expandPName($r), ];
             $this->setProp($p, $uri, $s);
         } else {
             if (!$s) {
@@ -86,8 +86,8 @@ class ARC2_Resource extends ARC2_Class
             foreach ($r as $i => $x) {
                 if (!is_array($x)) {
                     $uri = [
-            'type' => 'uri',
-            'value' => $this->expandPName($x), ];
+                        'type' => 'uri',
+                        'value' => $this->expandPName($x), ];
                     $r[$i] = $uri;
                 }
             }
@@ -99,8 +99,8 @@ class ARC2_Resource extends ARC2_Class
     public function setPropXSDdateTime($p, $dt, $s = '')
     {
         $datecreated = ['value' => $dt,
-        'type' => 'literal',
-        'datatype' => 'http://www.w3.org/2001/XMLSchema#dateTime', ];
+            'type' => 'literal',
+            'datatype' => 'http://www.w3.org/2001/XMLSchema#dateTime', ];
         $this->setProp($p, $datecreated, $s);
     }
 

@@ -37,7 +37,6 @@ class ARC2_TurtleParser extends ARC2_RDFParser
         }
 
         return ARC2::x($re, $v, $options);
-        //$this->unparsed_code = ($sub_r && count($sub_r)) ? $sub_r[count($sub_r) - 1] : '';
     }
 
     public function createBnodeID()
@@ -120,18 +119,23 @@ class ARC2_TurtleParser extends ARC2_RDFParser
                     if ((list($sub_r, $sub_v) = $this->xPrologue($sub_v)) && $sub_r) {
                         $loops = 0;
                         $sub_v .= $this->reader->readStream(0, 128);
-                        /* we might have missed the final DOT in the previous prologue loop */
+                        /* in case we missed the final DOT in the previous prologue loop */
                         if ($sub_r = $this->x('\.', $sub_v)) {
                             $sub_v = $sub_r[1];
                         }
-                        if ($this->x("\@?(base|prefix)", $sub_v)) {/* more prologue to come, use outer loop */
+                        /* more prologue to come, use outer loop */
+                        if ($this->x("\@?(base|prefix)", $sub_v)) {
                             $proceed = 0;
                         }
                     } else {
                         $prologue_done = 1;
                     }
                 }
-                if ($prologue_done && (list($sub_r, $sub_v, $more_triples, $sub_v2) = $this->xTriplesBlock($sub_v)) && is_array($sub_r)) {
+                if (
+                    $prologue_done
+                    && (list($sub_r, $sub_v, $more_triples, $sub_v2) = $this->xTriplesBlock($sub_v))
+                    && is_array($sub_r)
+                ) {
                     $proceed = 1;
                     $loops = 0;
                     foreach ($sub_r as $t) {
