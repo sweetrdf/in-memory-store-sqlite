@@ -12,6 +12,16 @@
 
 class ARC2_SPARQLScriptParser extends ARC2_SPARQLPlusParser
 {
+    /**
+     * @var string
+     */
+    private $base;
+
+    /**
+     * @var array
+     */
+    private $blocks;
+
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
@@ -36,6 +46,7 @@ class ARC2_SPARQLScriptParser extends ARC2_SPARQLPlusParser
             }
             $this->unparsed_code = trim($v);
         } while ($proceed);
+
         if (trim($this->unparsed_code) && !$this->getErrors()) {
             $rest = preg_replace('/[\x0a|\x0d]/i', ' ', substr($this->unparsed_code, 0, 30));
             $msg = trim($rest) ? 'Could not properly handle "'.$rest.'"' : 'Syntax Error';
@@ -43,9 +54,9 @@ class ARC2_SPARQLScriptParser extends ARC2_SPARQLPlusParser
         }
     }
 
-    public function getScriptBlocks()
+    public function getScriptBlocks(): array
     {
-        return $this->v('blocks', []);
+        return $this->blocks;
     }
 
     public function xScriptBlock($v)

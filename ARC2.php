@@ -16,39 +16,6 @@ if (function_exists('date_default_timezone_get')) {
  */
 class ARC2
 {
-    public static function getScriptURI()
-    {
-        if (isset($_SERVER) && (isset($_SERVER['SERVER_NAME']) || isset($_SERVER['HTTP_HOST']))) {
-            $proto = preg_replace('/^([a-z]+)\/.*$/', '\\1', strtolower($_SERVER['SERVER_PROTOCOL']));
-            $port = $_SERVER['SERVER_PORT'];
-            $server = isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME'];
-            $script = $_SERVER['SCRIPT_NAME'];
-            /* https */
-            if (('http' == $proto) && 443 == $port) {
-                $proto = 'https';
-                $port = 80;
-            }
-
-            return $proto.'://'.$server.(80 != $port ? ':'.$port : '').$script;
-        } elseif (isset($_SERVER['SCRIPT_FILENAME'])) {
-            return 'file://'.realpath($_SERVER['SCRIPT_FILENAME']);
-        }
-
-        return 'http://localhost/unknown_path';
-    }
-
-    public static function getRequestURI()
-    {
-        if (isset($_SERVER) && isset($_SERVER['REQUEST_URI'])) {
-            return preg_replace('/^([a-z]+)\/.*$/', '\\1', strtolower($_SERVER['SERVER_PROTOCOL'])).
-        '://'.(isset($_SERVER['HTTP_HOST']) ? $_SERVER['HTTP_HOST'] : $_SERVER['SERVER_NAME']).
-        (80 != $_SERVER['SERVER_PORT'] ? ':'.$_SERVER['SERVER_PORT'] : '').
-        $_SERVER['REQUEST_URI'];
-        }
-
-        return self::getScriptURI();
-    }
-
     public static function mtime()
     {
         return microtime(true);

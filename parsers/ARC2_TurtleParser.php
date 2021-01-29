@@ -48,17 +48,8 @@ class ARC2_TurtleParser extends ARC2_RDFParser
 
     public function addT($t)
     {
-        if ($this->skip_dupes) {
-            $h = md5(serialize($t));
-            if (!isset($this->added_triples[$h])) {
-                $this->triples[$this->t_count] = $t;
-                ++$this->t_count;
-                $this->added_triples[$h] = true;
-            }
-        } else {
-            $this->triples[$this->t_count] = $t;
-            ++$this->t_count;
-        }
+        $this->triples[$this->t_count] = $t;
+        ++$this->t_count;
     }
 
     public function getTriples()

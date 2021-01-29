@@ -10,6 +10,8 @@
  *  file that was distributed with this source code.
  */
 
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+
 class ARC2_RDFParser extends ARC2_Class
 {
     public function __construct($a, &$caller)
@@ -69,7 +71,7 @@ class ARC2_RDFParser extends ARC2_Class
 
     public function parseData($data)
     {
-        return $this->parse(ARC2::getScriptURI(), $data);
+        return $this->parse(NamespaceHelper::BASE_NAMESPACE, $data);
     }
 
     public function done()

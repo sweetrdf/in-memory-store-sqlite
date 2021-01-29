@@ -16,51 +16,6 @@ use Tests\ARC2_TestCase;
 
 class ARC2_Test extends ARC2_TestCase
 {
-    public function testGetScriptURI()
-    {
-        $tmp = $_SERVER;
-        unset($_SERVER);
-        $actual = \ARC2::getScriptURI();
-        $this->assertEquals('http://localhost/unknown_path', $actual);
-        $_SERVER = $tmp;
-
-        $_SERVER = [
-            'SERVER_PROTOCOL' => 'http',
-            'SERVER_PORT' => 443,
-            'HTTP_HOST' => 'example.com',
-            'SCRIPT_NAME' => '/foo',
-        ];
-        $actual = \ARC2::getScriptURI();
-        $this->assertEquals('https://example.com/foo', $actual);
-        $_SERVER = $tmp;
-
-        unset($_SERVER['HTTP_HOST']);
-        unset($_SERVER['SERVER_NAME']);
-        $_SERVER['SCRIPT_FILENAME'] = __FILE__;
-        $actual = \ARC2::getScriptURI();
-        $this->assertEquals('file://'.__FILE__, $actual);
-        $_SERVER = $tmp;
-    }
-
-    public function testGetRequestURI()
-    {
-        $tmp = $_SERVER;
-        unset($_SERVER);
-        $actual = \ARC2::getRequestURI();
-        $this->assertEquals(\ARC2::getScriptURI(), $actual);
-        $_SERVER = $tmp;
-
-        $_SERVER = [
-            'SERVER_PROTOCOL' => 'http',
-            'SERVER_PORT' => 1234,
-            'HTTP_HOST' => 'example.com',
-            'REQUEST_URI' => '/foo',
-        ];
-        $actual = \ARC2::getRequestURI();
-        $this->assertEquals('http://example.com:1234/foo', $actual);
-        $_SERVER = $tmp;
-    }
-
     public function testMtime()
     {
         $actual = \ARC2::mtime();

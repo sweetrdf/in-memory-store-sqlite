@@ -10,6 +10,7 @@
  *  file that was distributed with this source code.
  */
 
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
 /**
@@ -38,7 +39,7 @@ class ARC2_Class
         $this->used_ns = [$rdf];
         $this->ns = array_merge(['rdf' => $rdf], $this->v('ns', [], $this->a));
 
-        $this->base = ARC2::getRequestURI();
+        $this->base = NamespaceHelper::BASE_NAMESPACE;
         $this->errors = [];
         $this->warnings = [];
     }

@@ -10,6 +10,8 @@
  *  file that was distributed with this source code.
  */
 
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+
 class ARC2_SPARQLParser extends ARC2_TurtleParser
 {
     public function __construct($a, &$caller)
@@ -28,7 +30,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
     public function parse($q, $src = '', $iso_fallback = 'ignore')
     {
         $this->setDefaultPrefixes();
-        $this->base = $src ? $this->calcBase($src) : ARC2::getRequestURI();
+        $this->base = $src ? $this->calcBase($src) : NamespaceHelper::BASE_NAMESPACE;
         $this->r = [
             'base' => '',
             'vars' => [],

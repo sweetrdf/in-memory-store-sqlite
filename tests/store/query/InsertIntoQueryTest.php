@@ -12,6 +12,7 @@
 
 namespace Tests\store\query;
 
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use Tests\ARC2_TestCase;
 
 /**
@@ -54,12 +55,6 @@ class InsertIntoQueryTest extends ARC2_TestCase
 
         $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
 
-        // using <#foo> in query makes ARC2 using the phpunit path as prefix
-        // e.g. file:///var/www/html/pier-and-peer/ARC2/vendor/phpunit/phpunit/phpunit#
-        // therefore we build this prefix manually to check later
-        $filePrefix = 'file://'.str_replace('tests/store/query', '', __DIR__);
-        $filePrefix .= 'vendor/phpunit/phpunit/phpunit#';
-
         $this->assertEquals(
             [
                 [
@@ -71,11 +66,11 @@ class InsertIntoQueryTest extends ARC2_TestCase
                     'o type' => 'uri',
                 ],
                 [
-                    's' => $filePrefix.'make',
+                    's' => NamespaceHelper::BASE_NAMESPACE.'#make',
                     's type' => 'uri',
-                    'p' => $filePrefix.'me',
+                    'p' => NamespaceHelper::BASE_NAMESPACE.'#me',
                     'p type' => 'uri',
-                    'o' => $filePrefix.'happy',
+                    'o' => NamespaceHelper::BASE_NAMESPACE.'#happy',
                     'o type' => 'uri',
                 ],
                 [
@@ -384,26 +379,5 @@ class InsertIntoQueryTest extends ARC2_TestCase
             .\PHP_EOL.'FYI: https://www.w3.org/Submission/SPARQL-Update/#sec_examples and '
             .\PHP_EOL.'https://github.com/semsol/arc2/wiki/SPARQL-#insert-example'
         );
-    }
-
-    /**
-     * Test handling if it has to add 5 million triples.
-     */
-    public function testInsertInto5MioEntries()
-    {
-        $amount = 2;
-
-        // add test data
-        for ($i = 0; $i < $amount; ++$i) {
-            // generate unique string
-            $str = 'text '.$i;
-
-            $this->fixture->query('INSERT INTO <http://example.com/> {
-                <http://test/entry> <http://has> "'.$str.'" .
-            }');
-        }
-
-        $res = $this->fixture->query('SELECT ?s ?p ?o FROM <http://example.com/> {?s ?p ?o.}');
-        $this->assertEquals($amount, \count($res['result']['rows']));
     }
 }
