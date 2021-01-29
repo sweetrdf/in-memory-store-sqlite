@@ -11,7 +11,6 @@
  */
 
 use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
-use ARC2\Store\TableManager\SQLite;
 
 class ARC2_Store extends ARC2_Class
 {
@@ -102,20 +101,7 @@ class ARC2_Store extends ARC2_Class
     public function getColumnType()
     {
         if (!$this->v('column_type')) {
-            // SQLite
-            if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-                $this->column_type = 'INTEGER';
-            } else {
-                // MySQL
-                $tbl = $this->getTablePrefix().'g2t';
-
-                $row = $this->db->fetchRow('SHOW COLUMNS FROM '.$tbl.' LIKE "t"');
-                if (null == $row) {
-                    $row = ['Type' => 'mediumint'];
-                }
-
-                $this->column_type = preg_match('/mediumint/', $row['Type']) ? 'mediumint' : 'int';
-            }
+            $this->column_type = 'INTEGER';
         }
 
         return $this->column_type;
@@ -129,42 +115,18 @@ class ARC2_Store extends ARC2_Class
 
             $value = true;
 
-            // only check if SQLite is NOT being used
-            if (false === $this->getDBObject() instanceof PDOSQLiteAdapter) {
-                $row = $this->db->fetchRow('SHOW COLUMNS FROM '.$tbl.' LIKE "val_hash"');
-                $value = null !== $row;
-            }
-
             $this->$var_name = $value;
         }
 
         return $this->$var_name;
     }
 
+    /**
+     * @todo remove
+     */
     public function hasFulltextIndex()
     {
-        if ($this->getDBObject() instanceof PDOSQLiteAdapter) {
-            return true;
-        }
-
-        if (!isset($this->has_fulltext_index)) {
-            $this->has_fulltext_index = 0;
-            $tbl = $this->getTablePrefix().'o2val';
-
-            $rows = $this->db->fetchList('SHOW INDEX FROM '.$tbl);
-            foreach ($rows as $row) {
-                if ('val' != $row['Column_name']) {
-                    continue;
-                }
-                if ('FULLTEXT' != $row['Index_type']) {
-                    continue;
-                }
-                $this->has_fulltext_index = 1;
-                break;
-            }
-        }
-
-        return $this->has_fulltext_index;
+        return true;
     }
 
     /**
@@ -186,23 +148,18 @@ class ARC2_Store extends ARC2_Class
         return ['triple', 'g2t', 'id2val', 's2val', 'o2val', 'setting'];
     }
 
+    /**
+     * @todo remove
+     */
     public function extendColumns()
     {
-        if (false === $this->getDBObject() instanceof PDOSQLiteAdapter) {
-            ARC2::inc('StoreTableManager');
-            $mgr = new ARC2_StoreTableManager($this->a, $this);
-            $mgr->extendColumns();
-            $this->column_type = 'int';
-        }
     }
 
+    /**
+     * @todo remove
+     */
     public function splitTables()
     {
-        if (false === $this->getDBObject() instanceof PDOSQLiteAdapter) {
-            ARC2::inc('StoreTableManager');
-            $mgr = new ARC2_StoreTableManager($this->a, $this);
-            $mgr->splitTables();
-        }
     }
 
     public function hasSetting($k)
@@ -325,7 +282,6 @@ class ARC2_Store extends ARC2_Class
     {
         $doc = is_array($doc) ? $this->toTurtle($doc) : $doc;
         $infos = ['query' => ['url' => $g, 'target_graph' => $g]];
-        ARC2::inc('StoreLoadQueryHandler');
         $h = new ARC2_StoreLoadQueryHandler($this->a, $this);
         $r = $h->runQuery($infos, $doc, $keep_bnode_ids);
         $this->processTriggers('insert', $infos);
@@ -337,7 +293,6 @@ class ARC2_Store extends ARC2_Class
     {
         if (!$doc) {
             $infos = ['query' => ['target_graphs' => [$g]]];
-            ARC2::inc('StoreDeleteQueryHandler');
             $h = new ARC2_StoreDeleteQueryHandler($this->a, $this);
             $r = $h->runQuery($infos);
             $this->processTriggers('delete', $infos);
@@ -373,7 +328,6 @@ class ARC2_Store extends ARC2_Class
                 $errors = $this->cache->get($key.'_errors');
             // no entry found
             } else {
-                ARC2::inc('SPARQLPlusParser');
                 $p = new ARC2_SPARQLPlusParser($this->a, $this);
                 $p->parse($q, $src);
                 $infos = $p->getQueryInfos();
@@ -438,7 +392,6 @@ class ARC2_Store extends ARC2_Class
      */
     private function runQuery($infos, $type, $keep_bnode_ids = 0, $q = '')
     {
-        ARC2::inc('Store'.ucfirst($type).'QueryHandler');
         $cls = 'ARC2_Store'.ucfirst($type).'QueryHandler';
         $h = new $cls($this->a, $this);
         $ticket = 1;
@@ -456,7 +409,7 @@ class ARC2_Store extends ARC2_Class
         if ($q && ('select' == $type)) {
             $this->removeQueueTicket($ticket);
         }
-        $trigger_r = $this->processTriggers($type, $infos);
+        $this->processTriggers($type, $infos);
 
         return $r;
     }
@@ -470,16 +423,13 @@ class ARC2_Store extends ARC2_Class
         if ($triggers) {
             $r['trigger_results'] = [];
             $triggers = is_array($triggers) ? $triggers : [$triggers];
-            $trigger_inc_path = $this->v('store_triggers_path', '', $this->a);
             foreach ($triggers as $trigger) {
                 $trigger .= !preg_match('/Trigger$/', $trigger) ? 'Trigger' : '';
-                if (ARC2::inc(ucfirst($trigger), $trigger_inc_path)) {
-                    $cls = 'ARC2_'.ucfirst($trigger);
-                    $config = array_merge($this->a, ['query_infos' => $infos]);
-                    $trigger_obj = new $cls($config, $this);
-                    if (method_exists($trigger_obj, 'go')) {
-                        $r['trigger_results'][] = $trigger_obj->go();
-                    }
+                $cls = 'ARC2_'.ucfirst($trigger);
+                $config = array_merge($this->a, ['query_infos' => $infos]);
+                $trigger_obj = new $cls($config, $this);
+                if (method_exists($trigger_obj, 'go')) {
+                    $r['trigger_results'][] = $trigger_obj->go();
                 }
             }
         }

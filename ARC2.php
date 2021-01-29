@@ -49,10 +49,6 @@ class ARC2
         return self::getScriptURI();
     }
 
-    public static function inc()
-    {
-    }
-
     public static function mtime()
     {
         return microtime(true);
@@ -165,19 +161,6 @@ class ARC2
         }
     }
 
-    public static function getUTF8Char($v)
-    {
-        $val = $v[1];
-        if (1 === strlen(trim($val))) {
-            return utf8_encode($val);
-        }
-        if (preg_match('/^([\x00-\x7f])(.+)/', $val, $m)) {
-            return $m[1].self::toUTF8($m[2]);
-        }
-
-        return $val;
-    }
-
     public static function splitURI($v)
     {
         /* the following namespaces may lead to conflated URIs,
@@ -190,7 +173,7 @@ class ARC2
                 'http://www.w3.org/1999/xhtml',
             ];
             foreach ($specials as $ns) {
-                if (0 === strpos($v, $ns)) {
+                if (str_contains($v, $ns)) {
                     $local_part = substr($v, strlen($ns));
                     if (!preg_match('/^[\/\#]/', $local_part)) {
                         return [$ns, $local_part];
@@ -402,7 +385,6 @@ class ARC2
 
     public static function getComponent($name, $a = '', $caller = '')
     {
-        self::inc($name);
         $prefix = 'ARC2';
         if (preg_match('/^([^\_]+)\_(.+)$/', $name, $m)) {
             $prefix = $m[1];

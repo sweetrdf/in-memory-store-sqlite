@@ -10,8 +10,6 @@
  *  file that was distributed with this source code.
  */
 
-ARC2::inc('TurtleParser');
-
 class ARC2_SPARQLParser extends ARC2_TurtleParser
 {
     public function __construct($a, &$caller)

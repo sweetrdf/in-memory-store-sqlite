@@ -10,8 +10,6 @@
  *  file that was distributed with this source code.
  */
 
-ARC2::inc('Class');
-
 class ARC2_RDFParser extends ARC2_Class
 {
     public function __construct($a, &$caller)
@@ -42,7 +40,6 @@ class ARC2_RDFParser extends ARC2_Class
     {
         /* reader */
         if (!isset($this->reader)) {
-            ARC2::inc('Reader');
             $this->reader = new ARC2_Reader($this->a, $this);
         }
         $this->reader->activate($path, $data);
@@ -65,7 +62,6 @@ class ARC2_RDFParser extends ARC2_Class
         $this->format = $format;
         /* format parser */
         $suffix = $mappings[$format].'Parser';
-        ARC2::inc($suffix);
         $cls = 'ARC2_'.$suffix;
         $this->parser = new $cls($this->a, $this);
         $this->parser->setReader($this->reader);

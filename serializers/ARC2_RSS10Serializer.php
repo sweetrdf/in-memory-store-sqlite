@@ -10,8 +10,6 @@
  *  file that was distributed with this source code.
  */
 
-ARC2::inc('RDFXMLSerializer');
-
 class ARC2_RSS10Serializer extends ARC2_RDFXMLSerializer
 {
     public function __construct($a, &$caller)

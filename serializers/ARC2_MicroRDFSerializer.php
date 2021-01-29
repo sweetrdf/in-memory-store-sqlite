@@ -10,8 +10,6 @@
  *  file that was distributed with this source code.
  */
 
-ARC2::inc('RDFSerializer');
-
 class ARC2_MicroRDFSerializer extends ARC2_RDFSerializer
 {
     public function __construct($a, &$caller)

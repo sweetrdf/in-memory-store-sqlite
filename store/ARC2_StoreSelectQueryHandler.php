@@ -12,8 +12,6 @@
 
 use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
-ARC2::inc('StoreQueryHandler');
-
 class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 {
     public function __construct($a, &$caller)

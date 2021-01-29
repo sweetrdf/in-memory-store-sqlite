@@ -8,8 +8,6 @@ author:   Benjamin Nowack
 version:  2010-11-16
 */
 
-ARC2::inc('StoreSelectQueryHandler');
-
 class ARC2_StoreConstructQueryHandler extends ARC2_StoreSelectQueryHandler
 {
     public function __construct($a, &$caller)

@@ -8,8 +8,6 @@ author:   Benjamin Nowack
 version:  2010-11-16
 */
 
-ARC2::inc('TurtleParser');
-
 class ARC2_StoreTurtleLoader extends ARC2_TurtleParser
 {
     public function __construct($a, &$caller)

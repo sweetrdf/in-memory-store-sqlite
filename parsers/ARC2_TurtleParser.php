@@ -10,8 +10,6 @@
  *  file that was distributed with this source code.
  */
 
-ARC2::inc('RDFParser');
-
 class ARC2_TurtleParser extends ARC2_RDFParser
 {
     public function __construct($a, &$caller)
@@ -99,7 +97,6 @@ class ARC2_TurtleParser extends ARC2_RDFParser
         $this->setDefaultPrefixes();
         /* reader */
         if (!$this->v('reader')) {
-            ARC2::inc('Reader');
             $this->reader = new ARC2_Reader($this->a, $this);
         }
         $this->reader->setAcceptHeader('Accept: application/x-turtle; q=0.9, */*; q=0.1');
