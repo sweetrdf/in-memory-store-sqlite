@@ -176,13 +176,6 @@ class ARC2_RDFParser extends ARC2_Class
         }
     }
 
-    public function getEncoding($src = 'config')
-    {
-        if (method_exists($this->parser, 'getEncoding')) {
-            return $this->parser->getEncoding($src);
-        }
-    }
-
     /**
      * returns the array of namespace prefixes encountered during parsing.
      *

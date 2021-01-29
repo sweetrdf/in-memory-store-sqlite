@@ -39,34 +39,6 @@ class ARC2_Reader extends ARC2_Class
         $this->auth_infos = $this->v('reader_auth_infos', [], $this->a);
     }
 
-    public function setHTTPMethod($v)
-    {
-        $this->http_method = $v;
-    }
-
-    public function setMessageBody($v)
-    {
-        $this->message_body = $v;
-    }
-
-    public function setAcceptHeader($v)
-    {
-        $this->http_accept_header = $v;
-    }
-
-    public function setCustomHeaders($v)
-    {
-        $this->http_custom_headers = $v;
-    }
-
-    public function addCustomHeaders($v)
-    {
-        if ($this->http_custom_headers) {
-            $this->http_custom_headers .= "\r\n";
-        }
-        $this->http_custom_headers .= $v;
-    }
-
     public function activate($path, $data = '', $ping_only = 0, $timeout = 0)
     {
         $this->ping_only = $ping_only;
@@ -152,15 +124,16 @@ class ARC2_Reader extends ARC2_Class
         return true;
     }
 
-    public function createStream($path, $data = '')
-    {
-        $this->base = $this->calcBase($path);
-        $this->stream = ($data) ? $this->getDataStream($data) : $this->getSocketStream($this->base);
-    }
-
     public function getDataStream($data)
     {
-        return ['type' => 'data', 'pos' => 0, 'headers' => [], 'size' => strlen($data), 'data' => $data, 'buffer' => ''];
+        return [
+            'type' => 'data',
+            'pos' => 0,
+            'headers' => [],
+            'size' => strlen($data),
+            'data' => $data,
+            'buffer' => '',
+        ];
     }
 
     public function getSocketStream($url)
@@ -186,152 +159,9 @@ class ARC2_Reader extends ARC2_Class
         return ['type' => 'socket', 'socket' => &$s, 'headers' => [], 'pos' => 0, 'size' => filesize($parts['path']), 'buffer' => ''];
     }
 
-    public function getHTTPSocket($url, $redirs = 0, $prev_parts = '')
-    {
-        $parts = $this->getURIPartsFromURIAndPreviousURIParts($url, $prev_parts);
-
-        if (!is_array($parts)) {
-            return false;
-        }
-
-        $nl = "\r\n";
-        $http_mthd = strtoupper($this->http_method);
-        if ($this->v1('user', 0, $parts) || $this->useProxy($url)) {
-            $h_code = $http_mthd.' '.$url;
-        } else {
-            $h_code = $http_mthd.' '.$this->v1('path', '/', $parts).(($v = $this->v1('query', 0, $parts)) ? '?'.$v : '').(($v = $this->v1('fragment', 0, $parts)) ? '#'.$v : '');
-        }
-        $scheme_default_port = ('https' == $parts['scheme']) ? 443 : 80;
-        $port_code = ($parts['port'] != $scheme_default_port) ? ':'.$parts['port'] : '';
-        $h_code .= ' HTTP/1.0'.$nl.
-      'Host: '.$parts['host'].$port_code.$nl.
-      (($v = $this->http_accept_header) ? $v.$nl : '').
-      (($v = $this->http_user_agent_header) && !preg_match('/User\-Agent\:/', $this->http_custom_headers) ? $v.$nl : '').
-      (('POST' == $http_mthd) ? 'Content-Length: '.strlen($this->message_body).$nl : '').
-      ($this->http_custom_headers ? trim($this->http_custom_headers).$nl : '').
-      $nl.
-    '';
-        /* post body */
-        if ('POST' == $http_mthd) {
-            $h_code .= $this->message_body.$nl;
-        }
-        /* connect */
-        if ($this->useProxy($url)) {
-            $s = @fsockopen($this->a['proxy_host'], $this->a['proxy_port'], $errno, $errstr, $this->timeout);
-        } elseif (('https' == $parts['scheme']) && function_exists('stream_socket_client')) {
-            // SSL options via config array, code by Hannes Muehleisen (muehleis@informatik.hu-berlin.de)
-            $context = stream_context_create();
-            foreach ($this->a as $k => $v) {
-                if (preg_match('/^arc_reader_ssl_(.+)$/', $k, $m)) {
-                    stream_context_set_option($context, 'ssl', $m[1], $v);
-                }
-            }
-            $s = stream_socket_client('ssl://'.$parts['host'].':'.$parts['port'], $errno, $errstr, $this->timeout, \STREAM_CLIENT_CONNECT, $context);
-        } elseif ('https' == $parts['scheme']) {
-            $s = @fsockopen('ssl://'.$parts['host'], $parts['port'], $errno, $errstr, $this->timeout);
-        } elseif ('http' == $parts['scheme']) {
-            $s = @fsockopen($parts['host'], $parts['port'], $errno, $errstr, $this->timeout);
-        }
-        if (!$s) {
-            return $this->addError('Socket error: Could not connect to "'.$url.'" (proxy: '.($this->useProxy($url) ? '1' : '0').'): '.$errstr);
-        }
-        /* request */
-        fwrite($s, $h_code);
-        /* timeout */
-        if ($this->timeout) {
-            //stream_set_blocking($s, false);
-            stream_set_timeout($s, $this->timeout);
-        }
-        /* response headers */
-        $h = [];
-        $this->response_headers = $h;
-        if (!$this->ping_only) {
-            do {
-                $line = trim(fgets($s, 4096));
-                $info = stream_get_meta_data($s);
-                if (preg_match("/^HTTP[^\s]+\s+([0-9]{1})([0-9]{2})(.*)$/i", $line, $m)) {/* response code */
-                    $error = in_array($m[1], ['4', '5']) ? $m[1].$m[2].' '.$m[3] : '';
-                    $error = ($m[1].$m[2] == '304') ? '304 '.$m[3] : $error;
-                    $h['response-code'] = $m[1].$m[2];
-                    $h['error'] = $error;
-                    $h['redirect'] = ('3' == $m[1]) ? true : false;
-                } elseif (preg_match('/^([^\:]+)\:\s*(.*)$/', $line, $m)) {/* header */
-                    $h_name = strtolower($m[1]);
-                    if (!isset($h[$h_name])) {/* 1st value */
-                        $h[$h_name] = trim($m[2]);
-                    } elseif (!is_array($h[$h_name])) {/* 2nd value */
-                        $h[$h_name] = [$h[$h_name], trim($m[2])];
-                    } else {/* more values */
-                        $h[$h_name][] = trim($m[2]);
-                    }
-                }
-            } while (!$info['timed_out'] && !feof($s) && $line);
-            $h['format'] = strtolower(preg_replace('/^([^\s]+).*$/', '\\1', $this->v('content-type', '', $h)));
-            $h['encoding'] = preg_match('/(utf\-8|iso\-8859\-1|us\-ascii)/', $this->v('content-type', '', $h), $m) ? strtoupper($m[1]) : '';
-            $h['encoding'] = preg_match('/charset=\s*([^\s]+)/si', $this->v('content-type', '', $h), $m) ? strtoupper($m[1]) : $h['encoding'];
-            $this->response_headers = $h;
-            /* result */
-            if ($info['timed_out']) {
-                return $this->addError('Connection timed out after '.$this->timeout.' seconds');
-            }
-            /* error */
-            if ($v = $this->v('error', 0, $h)) {
-                /* digest auth */
-                /* 401 received */
-                if (preg_match('/Digest/i', $this->v('www-authenticate', '', $h)) && !$this->digest_auth) {
-                    $this->setCredentials($url);
-                    $this->digest_auth = 1;
-
-                    return $this->getHTTPSocket($url);
-                }
-
-                return $this->addError($error.' "'.(!feof($s) ? trim(strip_tags(fread($s, 128))).'..."' : ''));
-            }
-            /* redirect */
-            if ($this->v('redirect', 0, $h) && ($new_url = $this->v1('location', 0, $h))) {
-                fclose($s);
-                $this->redirects[$url] = $new_url;
-                $this->base = $new_url;
-                if ($redirs > $this->max_redirects) {
-                    return $this->addError('Max numbers of redirects exceeded.');
-                }
-
-                return $this->getHTTPSocket($new_url, $redirs + 1, $parts);
-            }
-        }
-        if ($this->timeout) {
-            stream_set_blocking($s, true);
-        }
-
-        return ['type' => 'socket', 'url' => $url, 'socket' => &$s, 'headers' => $h, 'pos' => 0, 'size' => $this->v('content-length', 0, $h), 'buffer' => ''];
-    }
-
-    public function getURIPartsFromURIAndPreviousURIParts($uri, $previous_uri_parts)
-    {
-        $parts = parse_url($uri);
-
-        /* relative redirect */
-        if (!isset($parts['port']) && $previous_uri_parts && (!isset($parts['scheme']) || $parts['scheme'] == $previous_uri_parts['scheme'])) {
-            /* only set the port if the scheme has not changed. If the scheme changes to https assuming the port will stay as port 80 is a bad idea */
-            $parts['port'] = $previous_uri_parts['port'];
-        }
-        if (!isset($parts['scheme']) && $previous_uri_parts) {
-            $parts['scheme'] = $previous_uri_parts['scheme'];
-        }
-        if (!isset($parts['host']) && $previous_uri_parts) {
-            $parts['host'] = $previous_uri_parts['host'];
-        }
-
-        /* no scheme */
-        if (!$this->v('scheme', '', $parts)) {
-            return $this->addError('Socket error: Missing URI scheme.');
-        }
-        /* port tweaks */
-        $parts['port'] = ('https' == $parts['scheme']) ? $this->v1('port', 443, $parts) : $this->v1('port', 80, $parts);
-
-        return $parts;
-    }
-
+    /**
+     * @todo port it to a simple line reader
+     */
     public function readStream($buffer_xml = true, $d_size = 1024)
     {
         //if (!$s = $this->v('stream')) return '';
@@ -378,33 +208,9 @@ class ARC2_Reader extends ARC2_Class
     {
         if (isset($this->stream)) {
             if ('socket' == $this->v('type', 0, $this->stream) && !empty($this->stream['socket'])) {
-                @fclose($this->stream['socket']);
+                fclose($this->stream['socket']);
             }
             unset($this->stream);
         }
-    }
-
-    public function getResponseHeaders()
-    {
-        if (isset($this->stream) && isset($this->stream['headers'])) {
-            return $this->stream['headers'];
-        }
-
-        return $this->response_headers;
-    }
-
-    public function getEncoding($default = 'UTF-8')
-    {
-        return $this->v1('encoding', $default, $this->stream['headers']);
-    }
-
-    public function getRedirects()
-    {
-        return $this->redirects;
-    }
-
-    public function getAuthInfos()
-    {
-        return $this->auth_infos;
     }
 }

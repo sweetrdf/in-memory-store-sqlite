@@ -265,7 +265,7 @@ class ARC2_Class
 
     /* central DB query hook */
 
-    public function getDBObjectFromARC2Class($con = null)
+    public function getDBObjectFromARC2Class()
     {
         if (null == $this->db_object) {
             if (false == isset($this->a['db_adapter'])) {

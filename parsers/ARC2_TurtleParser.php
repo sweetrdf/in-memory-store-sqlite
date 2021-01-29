@@ -64,7 +64,6 @@ class ARC2_TurtleParser extends ARC2_RDFParser
     public function parse($path, $data = '', $iso_fallback = false)
     {
         $this->reader = new ARC2_Reader($this->a, $this);
-        $this->reader->setAcceptHeader('Accept: application/x-turtle; q=0.9, */*; q=0.1');
         $this->reader->activate($path, $data);
         $this->base = $this->v1('base', $this->reader->base, $this->a);
         $this->r = ['vars' => []];
