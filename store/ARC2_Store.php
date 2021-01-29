@@ -352,8 +352,6 @@ class ARC2_Store extends ARC2_Class
             if (!in_array($qt, ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'])) {
                 return $this->addError('Unsupported query type "'.$qt.'"');
             }
-            $t1 = ARC2::mtime();
-
             // if cache is enabled, get/store result
             $key = hash('sha1', $q);
             if ($this->cacheEnabled() && $this->cache->has($key)) {
@@ -368,7 +366,7 @@ class ARC2_Store extends ARC2_Class
             }
 
             $r = ['query_type' => $qt, 'result' => $result];
-            $r['query_time'] = ARC2::mtime() - $t1;
+            $r['query_time'] = 0;
 
             /* query result */
             if ('raw' == $result_format) {

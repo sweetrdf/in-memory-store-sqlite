@@ -50,7 +50,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $this->has_lock = 1;
         /* logging */
         $this->t_count = 0;
-        $this->t_start = ARC2::mtime();
+        $this->t_start = 0;
         $this->log_inserts = $this->v('store_log_inserts', 0, $this->a);
         if ($this->log_inserts) {
             if (file_exists('arc_insert_log.txt')) {
@@ -73,22 +73,12 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 
         /* done */
         $this->checkSQLBuffers(1);
-        if ($this->log_inserts) {
-            $this->logInserts();
-        }
         $this->store->releaseLock();
 
-        $t2 = ARC2::mtime();
-        $dur = round($t2 - $this->t_start, 4);
         $r = [
             't_count' => $this->t_count,
-            'load_time' => $dur,
+            'load_time' => 0,
         ];
-
-        if ($this->log_inserts) {
-            $r['inserts'] = $this->inserts;
-            $r['insert_times'] = $this->insert_times;
-        }
 
         return $r;
     }
@@ -128,9 +118,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             $reset_buffers = (0 == ($this->t_count % ($this->write_buffer_size * 2)));
             $refresh_lock = (0 == ($this->t_count % 25000));
             $split_tables = (0 == ($this->t_count % ($this->write_buffer_size * 10)));
-            if ($this->log_inserts) {
-                $this->logInserts();
-            }
             $this->checkSQLBuffers($force_write, $reset_buffers, $refresh_lock, $split_tables);
         }
     }
@@ -413,7 +400,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         foreach (['triple', 'g2t', 'id2val', 's2val', 'o2val'] as $tbl) {
             $buffer_size = isset($this->sql_buffers[$tbl]) ? 1 : 0;
             if ($buffer_size && $force_write) {
-                $t1 = ARC2::mtime();
                 $this->store->a['db_object']->simpleQuery($this->sql_buffers[$tbl]);
                 /* table error */
                 $error = $this->store->a['db_object']->getErrorMessage();
@@ -422,22 +408,11 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                 }
                 unset($this->sql_buffers[$tbl]);
                 if ($this->log_inserts) {
-                    $t2 = ARC2::mtime();
                     $this->inserts[$tbl] = $this->v(
                         $tbl,
                         0,
                         $this->inserts
                     ) + max(0, $this->store->a['db_object']->getAffectedRows());
-
-                    $dur = round($t2 - $t1, 4);
-                    $this->insert_times[$tbl] = isset($this->insert_times[$tbl])
-                        ? $this->insert_times[$tbl]
-                        : ['min' => $dur, 'max' => $dur, 'sum' => $dur];
-                    $this->insert_times[$tbl] = [
-                        'min' => min($dur, $this->insert_times[$tbl]['min']),
-                        'max' => max($dur, $this->insert_times[$tbl]['max']),
-                        'sum' => $dur + $this->insert_times[$tbl]['sum'],
-                    ];
                 }
                 /* reset term id buffers */
                 if ($reset_id_buffers) {
@@ -478,31 +453,5 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                 }
             }
         }
-    }
-
-    /* speed log */
-
-    public function logInserts()
-    {
-        $t_start = $this->t_start;
-        $t_prev = $this->t_prev;
-        $t_now = ARC2::mtime();
-        $tc_prev = $this->t_count_prev;
-        $tc_now = $this->t_count;
-        $tc_diff = $tc_now - $tc_prev;
-
-        $dur_full = $t_now - $t_start;
-        $dur_diff = $t_now - $t_prev;
-
-        $speed_full = round($tc_now / $dur_full);
-        $speed_now = round($tc_diff / $dur_diff);
-
-        $r = $tc_diff.' in '.round($dur_diff, 5).' = '.$speed_now.' t/s  ('.$tc_now.' in '.round($dur_full, 5).' = '.$speed_full.' t/s )';
-        $fp = fopen(__DIR__.'/../arc_insert_log.txt', 'a');
-        fwrite($fp, $r."\r\n");
-        fclose($fp);
-
-        $this->t_prev = $t_now;
-        $this->t_count_prev = $tc_now;
     }
 }

@@ -78,48 +78,6 @@ class ARC2_Class
         return method_exists($o, $name) ? $o->$name($a) : $default;
     }
 
-    public function camelCase($v, $lc_first = 0, $keep_boundaries = 0)
-    {
-        $r = ucfirst($v);
-        while (preg_match('/^(.*)[^a-z0-9](.*)$/si', $r, $m)) {
-            /* don't fuse 2 upper-case chars */
-            if ($keep_boundaries && $m[1]) {
-                $boundary = substr($m[1], -1);
-                if (strtoupper($boundary) == $boundary) {
-                    $m[1] .= 'CAMELCASEBOUNDARY';
-                }
-            }
-            $r = $m[1].ucfirst($m[2]);
-        }
-        $r = str_replace('CAMELCASEBOUNDARY', '_', $r);
-        if ((strlen($r) > 1) && $lc_first && !preg_match('/[A-Z]/', $r[1])) {
-            $r = strtolower($r[0]).substr($r, 1);
-        }
-
-        return $r;
-    }
-
-    public function deCamelCase($v, $uc_first = 0)
-    {
-        $r = str_replace('_', ' ', $v);
-        $r = preg_replace_callback('/([a-z0-9])([A-Z])/', function ($matches) {
-            return $matches[1].' '.strtolower($matches[2]);
-        }, $r);
-
-        return $uc_first ? ucfirst($r) : $r;
-    }
-
-    /**
-     * Generates a less ugly in-your-face URL.
-     */
-    public function getPrettyURL($r)
-    {
-        $r = rtrim($r, '/');
-        $r = preg_replace('/^https?\:\/\/(www\.)?/', '', $r);
-
-        return $r;
-    }
-
     /**
      * @todo handle 51+ exceptions being thrown during execution?!
      */
@@ -149,9 +107,6 @@ class ARC2_Class
     public function resetErrors()
     {
         $this->errors = [];
-        if ($this->caller && method_exists($this->caller, 'resetErrors')) {
-            $this->caller->resetErrors();
-        }
     }
 
     public function splitURI($v)

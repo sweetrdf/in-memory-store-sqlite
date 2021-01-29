@@ -16,12 +16,6 @@ use Tests\ARC2_TestCase;
 
 class ARC2_Test extends ARC2_TestCase
 {
-    public function testMtime()
-    {
-        $actual = \ARC2::mtime();
-        $this->assertTrue(\is_float($actual));
-    }
-
     public function testX()
     {
         $actual = \ARC2::x('foo', '  foobar');

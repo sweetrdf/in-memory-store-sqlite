@@ -233,8 +233,6 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $r = ['variables' => $vars];
         $v_sql = $this->getValueSQL($tmp_tbl, $q_sql);
 
-        $t1 = ARC2::mtime();
-
         try {
             $entries = []; // in case an exception gets thrown
 

@@ -19,30 +19,6 @@ class ARC2_ClassTest extends PHPUnit\Framework\TestCase
         $this->arc2 = new ARC2_Class($array, $stdClass);
     }
 
-    public function testCamelCase()
-    {
-        $this->assertSame('Fish', $this->arc2->camelCase('fish'));
-        $this->assertSame('fish', $this->arc2->camelCase('fish', true));
-        $this->assertSame('fish', $this->arc2->camelCase('fish', true, true));
-
-        $this->assertSame('FishHeads', $this->arc2->camelCase('fish_heads'));
-        $this->assertSame('fishHeads', $this->arc2->camelCase('fish_heads', true));
-        $this->assertSame('fishHeads', $this->arc2->camelCase('fish_heads', true, true));
-
-        $this->assertSame('ALLCAPITALS', $this->arc2->camelCase('ALL_CAPITALS'));
-    }
-
-    public function testDeCamelCase()
-    {
-        $this->assertSame('fish', $this->arc2->deCamelCase('fish'));
-        $this->assertSame('Fish', $this->arc2->deCamelCase('fish', true));
-
-        $this->assertSame('fish heads', $this->arc2->deCamelCase('fish_heads'));
-        $this->assertSame('Fish heads', $this->arc2->deCamelCase('fish_heads', true));
-
-        $this->assertSame('ALL CAPITALS', $this->arc2->deCamelCase('ALL_CAPITALS'));
-    }
-
     public function testV()
     {
         $this->assertFalse($this->arc2->v(null));

@@ -29,7 +29,6 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
     public function runQuery($infos)
     {
         $this->infos = $infos;
-        $t1 = ARC2::mtime();
         /* delete */
         $this->refs_deleted = false;
         /* graph(s) only */
@@ -44,7 +43,6 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
         else {
             $tc = $this->deleteConstructedGraph();
         }
-        $t2 = ARC2::mtime();
         /* clean up */
         if ($tc && ($this->refs_deleted || (1 == rand(1, 100)))) {
             $this->cleanTableReferences();
@@ -54,14 +52,11 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
         if ($tc && (1 == rand(1, 500))) {
             $this->cleanValueTables();
         }
-        $t3 = ARC2::mtime();
-        $index_dur = round($t3 - $t2, 4);
-        $dur = round($t3 - $t1, 4);
 
         return [
             't_count' => $tc,
-            'delete_time' => $dur,
-            'index_update_time' => $index_dur,
+            'delete_time' => 0,
+            'index_update_time' => 0,
         ];
     }
 

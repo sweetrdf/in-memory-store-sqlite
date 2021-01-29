@@ -6,21 +6,11 @@
  * @homepage <https://github.com/semsol/arc2>
  */
 
-/* E_STRICT hack */
-if (function_exists('date_default_timezone_get')) {
-    date_default_timezone_set(date_default_timezone_get());
-}
-
 /**
  * @deprecated dont rely on this class, because it gets removed in the future
  */
 class ARC2
 {
-    public static function mtime()
-    {
-        return microtime(true);
-    }
-
     public static function x($re, $v, $options = 'si')
     {
         return preg_match("/^\s*".$re.'(.*)$/'.$options, $v, $m) ? $m : false;
