@@ -12,8 +12,6 @@
 
 namespace Tests\SPARQL11;
 
-use quickrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
-
 /**
  * Runs W3C tests from https://www.w3.org/2009/sparql/docs/tests/.
  *
