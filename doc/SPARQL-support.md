@@ -4,7 +4,7 @@
 
 This store supports all [SPARQL Query Language](http://www.w3.org/TR/rdf-sparql-query/) features ([to a certain extent](http://www.w3.org/2001/sw/DataAccess/tests/implementations)) and also a number of pragmatic extensions such as aggregates (AVG / COUNT / MAX / MIN / SUM) and write mechanisms. The changes to the SPARQL specification were kept at a minimum, so that the existing grammar parser and store functionality can be re-used.
 
-This page documents the core differences between SPARQL and what is called "SPARQL+" (originally from in [ARC2](https://git.com/semsol/ARC2)).
+This page documents the core differences between SPARQL and what is called "SPARQL+" (originally from in [ARC2](https://github.com/semsol/ARC2)).
 
 ## SELECT
 
@@ -32,7 +32,6 @@ ARC2 currently has a bug in the `SUM` ([link](https://github.com/sweetrdf/in-mem
 
 |           | AVG                                                                           | COUNT   | MIN   | MAX   | SUM   |
 |-----------|-------------------------------------------------------------------------------|---------|-------|-------|-------|
-| :-------- | :----------------------------------------------------------:                  | :-----: | :---: | :---: | :---: |
 | Support   | x (but [bugged](https://github.com/sweetrdf/in-memory-store-sqlite/issues/4)) | x       | x     | x     | x     |
 
 
@@ -40,14 +39,12 @@ ARC2 currently has a bug in the `SUM` ([link](https://github.com/sweetrdf/in-mem
 
 |           | =   | !=   | <   | >   |
 |-----------|-----|------|-----|-----|
-| :-------- | :-: | :--: | :-: | :-: |
 | Support   | x   | x    | x   | x   |
 
 ### Supported FILTER functions
 
 |           | bound   | datatype   | isBlank   | isIri   | isLiteral   | isUri   | lang   | langMatches   | regex   | str   |
 |-----------|---------|------------|-----------|---------|-------------|---------|--------|---------------|---------|-------|
-| :-------- | :-----: | :--------: | :-------: | :-----: | :---------: | :-----: | :----: | :-----------: | :-----: | :---: |
 | Support   | x       | x          | x         | x       | x           | x       | x      | x             | x       | x     |
 
 ## INSERT INTO
