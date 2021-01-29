@@ -16,19 +16,6 @@ use Tests\ARC2_TestCase;
 
 class ARC2_Test extends ARC2_TestCase
 {
-    public function testGetVersion()
-    {
-        $actual = \ARC2::getVersion();
-        $this->assertRegExp('/^[0-9]{4}-[0-9]{2}-[0-9]{2}/', $actual, 'should start with date');
-    }
-
-    public function testGetIncPath()
-    {
-        $actual = \ARC2::getIncPath('RDFParser');
-        $this->assertStringEndsWith('parsers/', $actual, 'should create correct path');
-        $this->assertTrue(is_dir($actual), 'should create correct pointer');
-    }
-
     public function testGetScriptURI()
     {
         $tmp = $_SERVER;

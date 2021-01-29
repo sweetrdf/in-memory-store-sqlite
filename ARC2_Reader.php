@@ -10,8 +10,6 @@
  *  file that was distributed with this source code.
  */
 
-ARC2::inc('Class');
-
 class ARC2_Reader extends ARC2_Class
 {
     public function __construct($a, &$caller)

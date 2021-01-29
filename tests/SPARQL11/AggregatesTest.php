@@ -54,23 +54,8 @@ class AggregatesTest extends ComplianceTest
         $actualResult = $this->store->query($testQuery);
         $actualResultAsXml = $this->getXmlVersionOfResult($actualResult);
 
-        if ($this->store->getDBObject() instanceof PDOSQLiteAdapter) {
-            // SQLite related
-            $this->assertEquals(2.22, (string) $actualResultAsXml->results->result->binding->literal[0]);
-        } else {
-            /*
-             * not SQLite
-             */
-            $this->assertEquals(
-                '2',
-                (string) $actualResultAsXml->results->result->binding->literal[0]
-            );
-
-            // remember current behavior, but skip test anyway to show developer here is still a problem.
-            $this->markTestSkipped(
-                'Rounding bug in AVG function (MySQL). See https://github.com/semsol/arc2/issues/99'
-            );
-        }
+        // SQLite related
+        $this->assertEquals(2.22, (string) $actualResultAsXml->results->result->binding->literal[0]);
     }
 
     public function testAggEmptyGroup()

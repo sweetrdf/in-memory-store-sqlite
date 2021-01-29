@@ -16,32 +16,6 @@ if (function_exists('date_default_timezone_get')) {
  */
 class ARC2
 {
-    public static function getVersion()
-    {
-        return '2011-12-01';
-    }
-
-    public static function getIncPath($f = '')
-    {
-        $r = realpath(__DIR__).'/';
-        $dirs = [
-            'plugin' => 'plugins',
-            'trigger' => 'triggers',
-            'store' => 'store',
-            'serializer' => 'serializers',
-            'extractor' => 'extractors',
-            'sparqlscript' => 'sparqlscript',
-            'parser' => 'parsers',
-        ];
-        foreach ($dirs as $k => $dir) {
-            if (preg_match('/'.$k.'/i', $f)) {
-                return $r.$dir.'/';
-            }
-        }
-
-        return $r;
-    }
-
     public static function getScriptURI()
     {
         if (isset($_SERVER) && (isset($_SERVER['SERVER_NAME']) || isset($_SERVER['HTTP_HOST']))) {
@@ -75,28 +49,8 @@ class ARC2
         return self::getScriptURI();
     }
 
-    public static function inc($f, $path = '')
+    public static function inc()
     {
-        $prefix = 'ARC2';
-        if (preg_match('/^([^\_]+)\_(.*)$/', $f, $m)) {
-            $prefix = $m[1];
-            $f = $m[2];
-        }
-        $inc_path = $path ?: self::getIncPath($f);
-        $path = $inc_path.$prefix.'_'.urlencode($f).'.php';
-        if (file_exists($path)) {
-            return include_once $path;
-        } elseif ('ARC2' != $prefix) {
-            /* try other path */
-            $path = $inc_path.strtolower($prefix).'/'.$prefix.'_'.urlencode($f).'.php';
-            if (file_exists($path)) {
-                return include_once $path;
-            } else {
-                return 0;
-            }
-        }
-
-        return 0;
     }
 
     public static function mtime()

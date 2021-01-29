@@ -31,11 +31,7 @@ class ARC2_Class
     }
 
     public function __init()
-    {/* base, time_limit */
-        if (!$_POST && isset($GLOBALS['HTTP_RAW_POST_DATA'])) {
-            parse_str($GLOBALS['HTTP_RAW_POST_DATA'], $_POST);
-        } /* php5 bug */
-        $this->inc_path = ARC2::getIncPath();
+    {
         $this->ns_count = 0;
         $rdf = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
         $this->nsp = [$rdf => 'rdf'];
@@ -403,7 +399,6 @@ class ARC2_Class
 
     public function toTurtle($v, $ns = '', $raw = 0)
     {
-        ARC2::inc('TurtleSerializer');
         if (!$ns) {
             $ns = isset($this->a['ns']) ? $this->a['ns'] : [];
         }

@@ -385,4 +385,25 @@ class InsertIntoQueryTest extends ARC2_TestCase
             .\PHP_EOL.'https://github.com/semsol/arc2/wiki/SPARQL-#insert-example'
         );
     }
+
+    /**
+     * Test handling if it has to add 5 million triples.
+     */
+    public function testInsertInto5MioEntries()
+    {
+        $amount = 2;
+
+        // add test data
+        for ($i = 0; $i < $amount; ++$i) {
+            // generate unique string
+            $str = 'text '.$i;
+
+            $this->fixture->query('INSERT INTO <http://example.com/> {
+                <http://test/entry> <http://has> "'.$str.'" .
+            }');
+        }
+
+        $res = $this->fixture->query('SELECT ?s ?p ?o FROM <http://example.com/> {?s ?p ?o.}');
+        $this->assertEquals($amount, \count($res['result']['rows']));
+    }
 }
