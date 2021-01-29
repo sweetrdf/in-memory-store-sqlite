@@ -260,47 +260,6 @@ class ARC2_Class
         return $this->nsp[$ns];
     }
 
-    public function expandPName($v, $connector = ':')
-    {
-        $re = '/^([a-z0-9\_\-]+)\:([a-z0-9\_\-\.\%]+)$/i';
-        if (':' != $connector) {
-            $connectors = [':', '-', '_', '.'];
-            $chars = '\\'.implode('\\', array_diff($connectors, [$connector]));
-            $re = '/^([a-z0-9'.$chars.']+)\\'.$connector.'([a-z0-9\_\-\.\%]+)$/Ui';
-        }
-        if (preg_match($re, $v, $m) && isset($this->ns[$m[1]])) {
-            return $this->ns[$m[1]].$m[2];
-        }
-
-        return $v;
-    }
-
-    public function expandPNames($index)
-    {
-        $r = [];
-        foreach ($index as $s => $ps) {
-            $s = $this->expandPName($s);
-            $r[$s] = [];
-            foreach ($ps as $p => $os) {
-                $p = $this->expandPName($p);
-                if (!is_array($os)) {
-                    $os = [$os];
-                }
-                foreach ($os as $i => $o) {
-                    if (!is_array($o)) {
-                        $o_val = $this->expandPName($o);
-                        $o_type = preg_match('/^[a-z]+\:[^\s\<\>]+$/si', $o_val) ? 'uri' : 'literal';
-                        $o = ['value' => $o_val, 'type' => $o_type];
-                    }
-                    $os[$i] = $o;
-                }
-                $r[$s][$p] = $os;
-            }
-        }
-
-        return $r;
-    }
-
     public function calcURI($path, $base = '')
     {
         /* quick check */
@@ -339,6 +298,7 @@ class ARC2_Class
         }
         /* rel path: remove stuff after last slash */
         $base = substr($base, 0, strrpos($base, '/') + 1);
+
         /* resolve ../ */
         while (preg_match('/^(\.\.\/)(.*)$/', $path, $m)) {
             $path = $m[2];
@@ -364,38 +324,6 @@ class ARC2_Class
         return 'file://'.realpath($r); /* real path */
     }
 
-    public function getResource($uri, $store_or_props = '')
-    {
-        $res = ARC2::getResource($this->a);
-        $res->setURI($uri);
-        if (is_array($store_or_props)) {
-            $res->setProps($store_or_props);
-        } else {
-            $res->setStore($store_or_props);
-        }
-
-        return $res;
-    }
-
-    public function toIndex($v)
-    {
-        if (is_array($v)) {
-            if (isset($v[0]) && isset($v[0]['s'])) {
-                return ARC2::getSimpleIndex($v, 0);
-            }
-
-            return $v;
-        }
-        $parser = ARC2::getRDFParser($this->a);
-        if ($v && !preg_match('/\s/', $v)) {/* assume graph URI */
-            $parser->parse($v);
-        } else {
-            $parser->parse('', $v);
-        }
-
-        return $parser->getSimpleIndex(0);
-    }
-
     public function toTurtle($v, $ns = '', $raw = 0)
     {
         if (!$ns) {
@@ -403,38 +331,9 @@ class ARC2_Class
         }
         $ser = new ARC2_TurtleSerializer(array_merge($this->a, ['ns' => $ns]), $this);
 
-        return (isset($v[0]) && isset($v[0]['s'])) ? $ser->getSerializedTriples($v, $raw) : $ser->getSerializedIndex($v, $raw);
-    }
-
-    public function toDataURI($str)
-    {
-        return 'data:text/plain;charset=utf-8,'.rawurlencode($str);
-    }
-
-    public function fromDataURI($str)
-    {
-        return str_replace('data:text/plain;charset=utf-8,', '', rawurldecode($str));
-    }
-
-    /* prevent SQL injections via SPARQL REGEX */
-
-    public function checkRegex($str)
-    {
-        return addslashes($str); // @@todo extend
-    }
-
-    /* Microdata methods */
-
-    public function getMicrodataAttrs($id, $type = '')
-    {
-        $type = $type ? $this->expandPName($type) : $this->expandPName('owl:Thing');
-
-        return 'itemscope="" itemtype="'.htmlspecialchars($type).'" itemid="'.htmlspecialchars($id).'"';
-    }
-
-    public function mdAttrs($id, $type = '')
-    {
-        return $this->getMicrodataAttrs($id, $type);
+        return (isset($v[0]) && isset($v[0]['s']))
+            ? $ser->getSerializedTriples($v, $raw)
+            : $ser->getSerializedIndex($v, $raw);
     }
 
     /* central DB query hook */
@@ -464,8 +363,6 @@ class ARC2_Class
      */
     public function queryDB($sql, $con, $log_errors = 0)
     {
-        $t1 = ARC2::mtime();
-
         // create connection using an adapter, if not available yet
         $this->getDBObjectFromARC2Class($con);
 
@@ -476,40 +373,5 @@ class ARC2_Class
         }
 
         return $r;
-    }
-
-    /**
-     * Shortcut method to create an RDF/XML backup dump from an RDF Store object.
-     */
-    public function backupStoreData($store, $target_path, $offset = 0)
-    {
-        $limit = 10;
-        $q = '
-      SELECT DISTINCT ?s WHERE {
-        ?s ?p ?o .
-      }
-      ORDER BY ?s
-      LIMIT '.$limit.'
-      '.($offset ? 'OFFSET '.$offset : '').'
-    ';
-        $rows = $store->query($q, 'rows');
-        $tc = count($rows);
-        $full_tc = $tc + $offset;
-        $mode = $offset ? 'ab' : 'wb';
-        $fp = fopen($target_path, $mode);
-        foreach ($rows as $row) {
-            $index = $store->query('DESCRIBE <'.$row['s'].'>', 'raw');
-            if ($index) {
-                $doc = $this->toRDFXML($index);
-                fwrite($fp, $doc."\n\n");
-            }
-        }
-        fclose($fp);
-        if (10 == $tc) {
-            set_time_limit(300);
-            $this->backupStoreData($store, $target_path, $offset + $limit);
-        }
-
-        return $full_tc;
     }
 }
