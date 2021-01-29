@@ -39,31 +39,8 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $this->target_graph = $graph ? $this->calcURI($graph) : $this->calcURI($url);
         $this->fixed_target_graph = $graph ? $this->target_graph : '';
         $this->keep_bnode_ids = $keep_bnode_ids;
-        /* reader */
-        $reader = new ARC2_Reader($this->a, $this);
-        $reader->activate($url, $data);
-        /* format detection */
-        $mappings = [
-            'rdfxml' => 'RDFXML',
-            'sparqlxml' => 'SPOG',
-            'turtle' => 'Turtle',
-            'ntriples' => 'Turtle',
-            'rss' => 'RSS',
-            'atom' => 'Atom',
-            'n3' => 'Turtle',
-            'html' => 'SemHTML',
-            'sgajson' => 'SGAJSON',
-            'cbjson' => 'CBJSON',
-        ];
-        $format = $reader->getFormat();
-        if (!$format || !isset($mappings[$format])) {
-            return $this->addError('No loader available for "'.$url.'": '.$format);
-        }
-        /* format loader */
-        $suffix = 'Store'.$mappings[$format].'Loader';
-        $cls = 'ARC2_'.$suffix;
+        $cls = 'ARC2_StoreTurtleLoader';
         $loader = new $cls($this->a, $this);
-        $loader->setReader($reader);
         /* lock */
         if (!$this->store->getLock()) {
             $l_name = $this->a['db_name'].'.'.$this->store->getTablePrefix().'.write_lock';
@@ -433,9 +410,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $reset_id_buffers = 0,
         $refresh_lock = 0
     ) {
-        if (!$this->keep_time_limit) {
-            set_time_limit($this->v('time_limit', 60, $this->a));
-        }
         foreach (['triple', 'g2t', 'id2val', 's2val', 'o2val'] as $tbl) {
             $buffer_size = isset($this->sql_buffers[$tbl]) ? 1 : 0;
             if ($buffer_size && $force_write) {

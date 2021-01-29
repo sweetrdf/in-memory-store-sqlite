@@ -15,9 +15,19 @@ use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 class ARC2_RDFParser extends ARC2_Class
 {
     /**
+     * @var array
+     */
+    protected $added_triples;
+
+    /**
      * @var string
      */
     protected $base;
+
+    /**
+     * @var string
+     */
+    protected $bnode_id;
 
     /**
      * @var array
@@ -29,26 +39,20 @@ class ARC2_RDFParser extends ARC2_Class
      */
     protected $prefixes;
 
+    protected $triples = [];
+    protected $t_count = 0;
+
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
 
         $this->reader = new ARC2_Reader($this->a, $this);
         $this->prefixes = NamespaceHelper::getPrefixes();
-    }
 
-    public function __init()
-    {
-        parent::__init();
-        $this->a['format'] = $this->v('format', false, $this->a);
-        $this->keep_time_limit = $this->v('keep_time_limit', 0, $this->a);
-        $this->triples = [];
-        $this->t_count = 0;
-        $this->added_triples = [];
-        $this->skip_dupes = $this->v('skip_dupes', false, $this->a);
-        $this->bnode_prefix = $this->v('bnode_prefix', 'arc'.substr(md5(uniqid(rand())), 0, 4).'b', $this->a);
+        // generates random prefix for blank nodes
+        $this->bnode_prefix = bin2hex(random_bytes(4)).'b';
+
         $this->bnode_id = 0;
-        $this->format = '';
     }
 
     public function setReader(&$reader)
@@ -58,27 +62,8 @@ class ARC2_RDFParser extends ARC2_Class
 
     public function parse($path, $data = '')
     {
-        $this->reader->activate($path, $data);
-        /* format detection */
-        $mappings = [
-            'rdfxml' => 'RDFXML',
-            'turtle' => 'Turtle',
-            'sparqlxml' => 'SPOG',
-            'ntriples' => 'Turtle',
-            'html' => 'SemHTML',
-            'rss' => 'RSS',
-            'atom' => 'Atom',
-            'sgajson' => 'SGAJSON',
-            'cbjson' => 'CBJSON',
-        ];
-        $format = $this->reader->getFormat();
-        if (!$format || !isset($mappings[$format])) {
-            return $this->addError('No parser available for "'.$format.'".');
-        }
-        $this->format = $format;
         /* format parser */
-        $suffix = $mappings[$format].'Parser';
-        $cls = 'ARC2_'.$suffix;
+        $cls = 'ARC2_TurtleParser';
         $this->parser = new $cls($this->a, $this);
         $this->parser->setReader($this->reader);
 

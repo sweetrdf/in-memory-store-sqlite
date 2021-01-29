@@ -69,7 +69,6 @@ class ARC2_Reader extends ARC2_Class
 
     public function activate($path, $data = '', $ping_only = 0, $timeout = 0)
     {
-        $this->setCredentials($path);
         $this->ping_only = $ping_only;
         if ($timeout) {
             $this->timeout = $timeout;
@@ -84,59 +83,10 @@ class ARC2_Reader extends ARC2_Class
             }
             $this->base = $this->calcBase($path);
             $this->uri = $this->calcURI($path, $this->base);
-            $this->stream = ($data) ? $this->getDataStream($data) : $this->getSocketStream($this->base, $ping_only);
-            if ($this->stream && !$this->ping_only) {
-                $this->getFormat();
-            }
+            $this->stream = $data
+                ? $this->getDataStream($data)
+                : $this->getSocketStream($this->base, $ping_only);
         }
-    }
-
-    /*
-     * HTTP Basic/Digest + Proxy authorization can be defined in the
-     * arc_reader_credentials config setting:
-
-          'arc_reader_credentials' => array(
-            'http://basic.example.com/' => 'user:pass', // shortcut for type=basic
-            'http://digest.example.com/' => 'user::pass', // shortcut for type=digest
-            'http://proxy.example.com/' => array('type' => 'basic', 'proxy', 'user' => 'user', 'pass' => 'pass'),
-          ),
-
-     */
-
-    public function setCredentials($url)
-    {
-        if (!$creds = $this->v('arc_reader_credentials', [], $this->a)) {
-            return 0;
-        }
-        foreach ($creds as $pattern => $creds) {
-            /* digest shortcut (user::pass) */
-            if (!is_array($creds) && preg_match('/^(.+)\:\:(.+)$/', $creds, $m)) {
-                $creds = ['type' => 'digest', 'user' => $m[1], 'pass' => $m[2]];
-            }
-            /* basic shortcut (user:pass) */
-            if (!is_array($creds) && preg_match('/^(.+)\:(.+)$/', $creds, $m)) {
-                $creds = ['type' => 'basic', 'user' => $m[1], 'pass' => $m[2]];
-            }
-            if (!is_array($creds)) {
-                return 0;
-            }
-            $regex = '/'.preg_replace('/([\:\/\.\?])/', '\\\\\1', $pattern).'/';
-            if (!preg_match($regex, $url)) {
-                continue;
-            }
-            $mthd = 'set'.$this->camelCase($creds['type']).'AuthCredentials';
-            if (method_exists($this, $mthd)) {
-                $this->$mthd($creds, $url);
-            }
-        }
-    }
-
-    public function setBasicAuthCredentials($creds)
-    {
-        $auth = 'Basic '.base64_encode($creds['user'].':'.$creds['pass']);
-        $h = in_array('proxy', $creds) ? 'Proxy-Authorization' : 'Authorization';
-        $this->addCustomHeaders($h.': '.$auth);
-        //echo $h . ': ' . $auth . print_r($creds, 1);
     }
 
     public function setDigestAuthCredentials($creds, $url)
@@ -432,22 +382,6 @@ class ARC2_Reader extends ARC2_Class
             }
             unset($this->stream);
         }
-    }
-
-    public function getFormat()
-    {
-        if (!$this->format) {
-            if (!$this->v('stream')) {
-                return $this->addError('missing stream in "getFormat"');
-            }
-            $v = $this->readStream(false);
-            $mtype = $this->v('format', '', $this->stream['headers']);
-            $this->stream['buffer'] = $v.$this->stream['buffer'];
-            $ext = preg_match('/\.([^\.]+)$/', $this->uri, $m) ? $m[1] : '';
-            $this->format = ARC2::getFormat($v, $mtype, $ext);
-        }
-
-        return $this->format;
     }
 
     public function getResponseHeaders()

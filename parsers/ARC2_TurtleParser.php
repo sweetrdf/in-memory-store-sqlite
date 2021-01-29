@@ -22,7 +22,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
         $this->nsp = [
             NamespaceHelper::NAMESPACE_XML => 'xml',
             NamespaceHelper::NAMESPACE_RDF => 'rdf',
-            NamespaceHelper::NAMESPACE_XSD => 'xsd'
+            NamespaceHelper::NAMESPACE_XSD => 'xsd',
         ];
         $this->unparsed_code = '';
         $this->max_parsing_loops = 500;
@@ -432,7 +432,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
                         'o' => $sub_r['value'],
                         'o_type' => $sub_r['type'],
                         'o_lang' => $this->v('lang', '', $sub_r),
-                        'o_datatype' => $this->v('datatype', '', $sub_r)
+                        'o_datatype' => $this->v('datatype', '', $sub_r),
                     ];
                     $proceed = 1;
                 } elseif ((list($sub_r, $sub_v) = $this->xCollection($sub_v)) && $sub_r) {
@@ -445,7 +445,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
                         'o' => $sub_r['id'],
                         'o_type' => $sub_r['type'],
                         'o_lang' => '',
-                        'o_datatype' => ''
+                        'o_datatype' => '',
                     ];
                     $r['triples'] = array_merge($r['triples'], $sub_r['triples']);
                     $proceed = 1;
@@ -459,7 +459,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
                         'p_type' => 'uri',
                         'o_type' => $sub_r['type'],
                         'o_lang' => '',
-                        'o_datatype' => ''
+                        'o_datatype' => '',
                     ];
                     $r['triples'] = array_merge($r['triples'], $sub_r['triples']);
                     $proceed = 1;
@@ -476,7 +476,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
                             'o' => NamespaceHelper::NAMESPACE_RDF.'nil',
                             'o_type' => 'uri',
                             'o_lang' => '',
-                            'o_datatype' => ''
+                            'o_datatype' => '',
                         ];
                         $closed = 1;
                         $proceed = 0;
@@ -491,7 +491,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
                             'p_type' => 'uri',
                             'o_type' => 'bnode',
                             'o_lang' => '',
-                            'o_datatype' => ''
+                            'o_datatype' => '',
                         ];
                         $s = $next_s;
                     }
@@ -594,7 +594,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
                 $r = [
                     'value' => $prefix.$sub_r,
                     'type' => 'literal',
-                    'datatype' => NamespaceHelper::NAMESPACE_XSD.$xsd
+                    'datatype' => NamespaceHelper::NAMESPACE_XSD.$xsd,
                 ];
 
                 return [$r, $sub_v];
