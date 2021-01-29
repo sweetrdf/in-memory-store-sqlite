@@ -17,5 +17,22 @@ namespace sweetrdf\InMemoryStoreSqlite;
  */
 final class NamespaceHelper
 {
-    const BASE_NAMESPACE = 'http://sweetrdf/in-mem-store-sqlite/';
+    const BASE_NAMESPACE = 'sweetrdf://in-memory-store-sqlite/';
+
+    const NAMESPACE_RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+    const NAMESPACE_XML = 'http://www.w3.org/XML/1998/namespace';
+    const NAMESPACE_XSD = 'http://www.w3.org/2001/XMLSchema#';
+
+    /**
+     * @todo make it un-static and move it to class constructor
+     */
+    public static function getPrefixes(): array
+    {
+        return [
+            'owl:' => 'http://www.w3.org/2002/07/owl#',
+            'rdf:' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+            'rdfs:' => 'http://www.w3.org/2000/01/rdf-schema#',
+            'xsd:' => 'http://www.w3.org/2001/XMLSchema#',
+        ];
+    }
 }

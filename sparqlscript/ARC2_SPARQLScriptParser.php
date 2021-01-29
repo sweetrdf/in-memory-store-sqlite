@@ -10,18 +10,10 @@
  *  file that was distributed with this source code.
  */
 
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+
 class ARC2_SPARQLScriptParser extends ARC2_SPARQLPlusParser
 {
-    /**
-     * @var string
-     */
-    private $base;
-
-    /**
-     * @var array
-     */
-    private $blocks;
-
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
@@ -34,8 +26,7 @@ class ARC2_SPARQLScriptParser extends ARC2_SPARQLPlusParser
 
     public function parse($v, $src = '', $iso_fallback = 'ignore')
     {
-        $this->setDefaultPrefixes();
-        $this->base = $src ? $this->calcBase($src) : ARC2::getScriptURI();
+        $this->base = $src ? $this->calcBase($src) : NamespaceHelper::BASE_NAMESPACE;
         $this->blocks = [];
         $this->r = ['base' => '', 'vars' => [], 'prefixes' => $this->prefixes];
         do {

@@ -10,23 +10,22 @@
  *  file that was distributed with this source code.
  */
 
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+
 class ARC2_TurtleParser extends ARC2_RDFParser
 {
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
-    }
 
-    public function __init()
-    {/* reader */
-        parent::__init();
         $this->state = 0;
-        $this->xml = 'http://www.w3.org/XML/1998/namespace';
-        $this->rdf = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
-        $this->xsd = 'http://www.w3.org/2001/XMLSchema#';
-        $this->nsp = [$this->xml => 'xml', $this->rdf => 'rdf', $this->xsd => 'xsd'];
+        $this->nsp = [
+            NamespaceHelper::NAMESPACE_XML => 'xml',
+            NamespaceHelper::NAMESPACE_RDF => 'rdf',
+            NamespaceHelper::NAMESPACE_XSD => 'xsd'
+        ];
         $this->unparsed_code = '';
-        $this->max_parsing_loops = $this->v('turtle_max_parsing_loops', 500, $this->a);
+        $this->max_parsing_loops = 500;
     }
 
     public function x($re, $v, $options = 'si')
@@ -54,7 +53,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
 
     public function getTriples()
     {
-        return $this->v('triples', []);
+        return $this->triples;
     }
 
     public function countTriples()
@@ -64,31 +63,12 @@ class ARC2_TurtleParser extends ARC2_RDFParser
 
     public function getUnparsedCode()
     {
-        return $this->v('unparsed_code', '');
-    }
-
-    public function setDefaultPrefixes()
-    {
-        $this->prefixes = [
-            'rdf:' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
-            'rdfs:' => 'http://www.w3.org/2000/01/rdf-schema#',
-            'owl:' => 'http://www.w3.org/2002/07/owl#',
-            'xsd:' => 'http://www.w3.org/2001/XMLSchema#',
-        ];
-        if ($ns = $this->v('ns', [], $this->a)) {
-            foreach ($ns as $p => $u) {
-                $this->prefixes[$p.':'] = $u;
-            }
-        }
+        return $this->unparsed_code;
     }
 
     public function parse($path, $data = '', $iso_fallback = false)
     {
-        $this->setDefaultPrefixes();
-        /* reader */
-        if (!$this->v('reader')) {
-            $this->reader = new ARC2_Reader($this->a, $this);
-        }
+        $this->reader = new ARC2_Reader($this->a, $this);
         $this->reader->setAcceptHeader('Accept: application/x-turtle; q=0.9, */*; q=0.1');
         $this->reader->activate($path, $data);
         $this->base = $this->v1('base', $this->reader->base, $this->a);
@@ -136,7 +116,8 @@ class ARC2_TurtleParser extends ARC2_RDFParser
             } while ($proceed);
             ++$loops;
             $buffer = $sub_v;
-            if ($loops > $this->max_parsing_loops) {/* most probably a parser or code bug, might also be a huge object value, though */
+            if ($loops > $this->max_parsing_loops) {
+                /* most probably a parser or code bug, might also be a huge object value, though */
                 $this->addError('too many loops: '.$loops.'. Could not parse "'.substr($buffer, 0, 200).'..."');
                 break;
             }
@@ -149,10 +130,12 @@ class ARC2_TurtleParser extends ARC2_RDFParser
         $this->unparsed_code = $buffer;
         $this->reader->closeStream();
         unset($this->reader);
+
         /* remove trailing comments */
         while (preg_match('/^\s*(\#[^\xd\xa]*)(.*)$/si', $this->unparsed_code, $m)) {
             $this->unparsed_code = $m[2];
         }
+
         if ($this->unparsed_code && !$this->getErrors()) {
             $rest = preg_replace('/[\x0a|\x0d]/i', ' ', substr($this->unparsed_code, 0, 30));
             if (trim($rest)) {
@@ -265,7 +248,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
             if (2 == $state) {/* expecting predicate */
                 if ($sub_r = $this->x('a\s+', $sub_v)) {
                     $sub_v = $sub_r[1];
-                    $t['p'] = $this->rdf.'type';
+                    $t['p'] = NamespaceHelper::NAMESPACE_RDF.'type';
                     $t['p_type'] = 'uri';
                     $state = 3;
                     $proceed = 1;
@@ -359,7 +342,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
                 if (2 == $state) {/* expecting predicate */
                     if ($sub_r = $this->x('a\s+', $sub_v)) {
                         $sub_v = $sub_r[1];
-                        $t['p'] = $this->rdf.'type';
+                        $t['p'] = NamespaceHelper::NAMESPACE_RDF.'type';
                         $t['p_type'] = 'uri';
                         $state = 3;
                         $proceed = 1;
@@ -440,26 +423,76 @@ class ARC2_TurtleParser extends ARC2_RDFParser
             do {
                 $proceed = 0;
                 if ((list($sub_r, $sub_v) = $this->xVarOrTerm($sub_v)) && $sub_r) {
-                    $r['triples'][] = ['type' => 'triple', 's' => $s, 'p' => $this->rdf.'first', 'o' => $sub_r['value'], 's_type' => 'bnode', 'p_type' => 'uri', 'o_type' => $sub_r['type'], 'o_lang' => $this->v('lang', '', $sub_r), 'o_datatype' => $this->v('datatype', '', $sub_r)];
+                    $r['triples'][] = [
+                        'type' => 'triple',
+                        's' => $s,
+                        's_type' => 'bnode',
+                        'p' => NamespaceHelper::NAMESPACE_RDF.'first',
+                        'p_type' => 'uri',
+                        'o' => $sub_r['value'],
+                        'o_type' => $sub_r['type'],
+                        'o_lang' => $this->v('lang', '', $sub_r),
+                        'o_datatype' => $this->v('datatype', '', $sub_r)
+                    ];
                     $proceed = 1;
                 } elseif ((list($sub_r, $sub_v) = $this->xCollection($sub_v)) && $sub_r) {
-                    $r['triples'][] = ['type' => 'triple', 's' => $s, 'p' => $this->rdf.'first', 'o' => $sub_r['id'], 's_type' => 'bnode', 'p_type' => 'uri', 'o_type' => $sub_r['type'], 'o_lang' => '', 'o_datatype' => ''];
+                    $r['triples'][] = [
+                        'type' => 'triple',
+                        's' => $s,
+                        's_type' => 'bnode',
+                        'p' => NamespaceHelper::NAMESPACE_RDF.'first',
+                        'p_type' => 'uri',
+                        'o' => $sub_r['id'],
+                        'o_type' => $sub_r['type'],
+                        'o_lang' => '',
+                        'o_datatype' => ''
+                    ];
                     $r['triples'] = array_merge($r['triples'], $sub_r['triples']);
                     $proceed = 1;
                 } elseif ((list($sub_r, $sub_v) = $this->xBlankNodePropertyList($sub_v)) && $sub_r) {
-                    $r['triples'][] = ['type' => 'triple', 's' => $s, 'p' => $this->rdf.'first', 'o' => $sub_r['id'], 's_type' => 'bnode', 'p_type' => 'uri', 'o_type' => $sub_r['type'], 'o_lang' => '', 'o_datatype' => ''];
+                    $r['triples'][] = [
+                        'type' => 'triple',
+                        's' => $s,
+                        'p' => NamespaceHelper::NAMESPACE_RDF.'first',
+                        'o' => $sub_r['id'],
+                        's_type' => 'bnode',
+                        'p_type' => 'uri',
+                        'o_type' => $sub_r['type'],
+                        'o_lang' => '',
+                        'o_datatype' => ''
+                    ];
                     $r['triples'] = array_merge($r['triples'], $sub_r['triples']);
                     $proceed = 1;
                 }
                 if ($proceed) {
                     if ($sub_r = $this->x('\)', $sub_v)) {
                         $sub_v = $sub_r[1];
-                        $r['triples'][] = ['type' => 'triple', 's' => $s, 'p' => $this->rdf.'rest', 'o' => $this->rdf.'nil', 's_type' => 'bnode', 'p_type' => 'uri', 'o_type' => 'uri', 'o_lang' => '', 'o_datatype' => ''];
+                        $r['triples'][] = [
+                            'type' => 'triple',
+                            's' => $s,
+                            's_type' => 'bnode',
+                            'p' => NamespaceHelper::NAMESPACE_RDF.'rest',
+                            'p_type' => 'uri',
+                            'o' => NamespaceHelper::NAMESPACE_RDF.'nil',
+                            'o_type' => 'uri',
+                            'o_lang' => '',
+                            'o_datatype' => ''
+                        ];
                         $closed = 1;
                         $proceed = 0;
                     } else {
                         $next_s = $this->createBnodeID();
-                        $r['triples'][] = ['type' => 'triple', 's' => $s, 'p' => $this->rdf.'rest', 'o' => $next_s, 's_type' => 'bnode', 'p_type' => 'uri', 'o_type' => 'bnode', 'o_lang' => '', 'o_datatype' => ''];
+                        $r['triples'][] = [
+                            'type' => 'triple',
+                            's' => $s,
+                            'p' => NamespaceHelper::NAMESPACE_RDF.'rest',
+                            'o' => $next_s,
+                            's_type' => 'bnode',
+                            'p_type' => 'uri',
+                            'o_type' => 'bnode',
+                            'o_lang' => '',
+                            'o_datatype' => ''
+                        ];
                         $s = $next_s;
                     }
                 }
@@ -558,7 +591,11 @@ class ARC2_TurtleParser extends ARC2_RDFParser
         foreach (['DOUBLE' => 'double', 'DECIMAL' => 'decimal', 'INTEGER' => 'integer'] as $type => $xsd) {
             $m = 'x'.$type;
             if ((list($sub_r, $sub_v) = $this->$m($sub_v)) && (false !== $sub_r)) {
-                $r = ['value' => $prefix.$sub_r, 'type' => 'literal', 'datatype' => $this->xsd.$xsd];
+                $r = [
+                    'value' => $prefix.$sub_r,
+                    'type' => 'literal',
+                    'datatype' => NamespaceHelper::NAMESPACE_XSD.$xsd
+                ];
 
                 return [$r, $sub_v];
             }
@@ -756,7 +793,7 @@ class ARC2_TurtleParser extends ARC2_RDFParser
     public function xNIL($v)
     {
         if ($r = $this->x('\([\x20\x9\xd\xa]*\)', $v)) {
-            return [['type' => 'uri', 'value' => $this->rdf.'nil'], $r[1]];
+            return [['type' => 'uri', 'value' => NamespaceHelper::NAMESPACE_RDF.'nil'], $r[1]];
         }
 
         return [0, $v];

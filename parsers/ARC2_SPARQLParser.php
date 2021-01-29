@@ -29,7 +29,6 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     public function parse($q, $src = '', $iso_fallback = 'ignore')
     {
-        $this->setDefaultPrefixes();
         $this->base = $src ? $this->calcBase($src) : NamespaceHelper::BASE_NAMESPACE;
         $this->r = [
             'base' => '',

@@ -14,11 +14,27 @@ use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
 class ARC2_RDFParser extends ARC2_Class
 {
+    /**
+     * @var string
+     */
+    protected $base;
+
+    /**
+     * @var array
+     */
+    protected $blocks;
+
+    /**
+     * @var array<string, string>
+     */
+    protected $prefixes;
+
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
 
         $this->reader = new ARC2_Reader($this->a, $this);
+        $this->prefixes = NamespaceHelper::getPrefixes();
     }
 
     public function __init()
