@@ -12,6 +12,7 @@
 
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
 
 /**
  * ARC2 base class.
@@ -253,7 +254,7 @@ class ARC2_Class
 
     public function toTurtle($v)
     {
-        $ser = new ARC2_TurtleSerializer([], $this);
+        $ser = new TurtleSerializer([], $this);
 
         return (isset($v[0]) && isset($v[0]['s']))
             ? $ser->getSerializedTriples($v)

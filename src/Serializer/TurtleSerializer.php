@@ -10,7 +10,12 @@
  *  file that was distributed with this source code.
  */
 
-class ARC2_TurtleSerializer extends ARC2_RDFSerializer
+namespace sweetrdf\InMemoryStoreSqlite\Serializer;
+
+use ARC2;
+use ARC2_Class;
+
+class TurtleSerializer extends ARC2_Class
 {
     public function __construct($a, &$caller)
     {
@@ -19,10 +24,11 @@ class ARC2_TurtleSerializer extends ARC2_RDFSerializer
         $this->qualifier = ['rdf:type', 'rdfs:domain', 'rdfs:range', 'rdfs:subClassOf'];
     }
 
-    public function __init()
+    public function getSerializedTriples($triples, $raw = 0)
     {
-        parent::__init();
-        $this->content_header = 'application/x-turtle';
+        $index = ARC2::getSimpleIndex($triples, 0);
+
+        return $this->getSerializedIndex($index, $raw);
     }
 
     public function getTerm($v, $term = '', $qualifier = '')
