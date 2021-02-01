@@ -32,15 +32,13 @@ return PhpCsFixer\Config::create()
         PhpCsFixer\Finder::create()
         ->in(__DIR__.'/src')
         ->in(__DIR__.'/parsers')
-        ->in(__DIR__.'/serializers')
         ->in(__DIR__.'/sparqlscript')
         ->in(__DIR__.'/tests')
         ->name('*.php')
         ->append([
             __FILE__,
+            'ARC2.php',
             'ARC2_Class.php',
-            'ARC2_Graph.php',
             'ARC2_Reader.php',
-            'ARC2_Resource.php',
         ])
     );

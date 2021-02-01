@@ -33,7 +33,7 @@ class TurtleSerializer extends ARC2_Class
 
     public function getTerm($v, $term = '', $qualifier = '')
     {
-        if (!is_array($v)) {
+        if (!\is_array($v)) {
             if (preg_match('/^\_\:/', $v)) {
                 return $v;
             }
@@ -42,7 +42,7 @@ class TurtleSerializer extends ARC2_Class
             }
             if (
                 ('o' === $term)
-                && in_array($qualifier, $this->qualifier)
+                && \in_array($qualifier, $this->qualifier)
                 && ($pn = $this->getPName($v))
             ) {
                 return $pn;
@@ -74,7 +74,7 @@ class TurtleSerializer extends ARC2_Class
                 }
             }
         }
-        if ((1 == strlen($quot)) && false !== preg_match('/[\x0d\x0a]/', $v['value'])) {
+        if ((1 == \strlen($quot)) && false !== preg_match('/[\x0d\x0a]/', $v['value'])) {
             $quot = $quot.$quot.$quot;
         }
         $suffix = isset($v['lang']) && $v['lang'] ? '@'.$v['lang'] : '';
@@ -115,14 +115,14 @@ class TurtleSerializer extends ARC2_Class
                     continue;
                 }
                 $p = $this->getTerm($p, 'p');
-                $r .= $first_p ? ' ' : ' ;'.$nl.str_pad('', strlen($s) + 1);
+                $r .= $first_p ? ' ' : ' ;'.$nl.str_pad('', \strlen($s) + 1);
                 $r .= $p;
                 $first_o = 1;
-                if (!is_array($os)) {/* single literal o */
+                if (!\is_array($os)) {/* single literal o */
                     $os = [['value' => $os, 'type' => 'literal']];
                 }
                 foreach ($os as $o) {
-                    $r .= $first_o ? ' ' : ' ,'.$nl.str_pad('', strlen($s) + strlen($p) + 2);
+                    $r .= $first_o ? ' ' : ' ,'.$nl.str_pad('', \strlen($s) + \strlen($p) + 2);
                     $o = $this->getTerm($o, 'o', $p);
                     $r .= $o;
                     $first_o = 0;
