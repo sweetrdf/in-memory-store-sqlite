@@ -21,7 +21,7 @@
         "phpunit/phpunit": "^9.0"
     },
     "autoload": {
-        "classmap": ["parsers/", "serializers/", "store/"],
+        "classmap": ["parsers/", "store/"],
         "files": [
             "./ARC2.php",
             "./ARC2_Class.php",
