@@ -17,17 +17,13 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
-    }
 
-    public function __init()
-    {
-        parent::__init();
         $this->bnode_prefix = $this->v('bnode_prefix', 'arc'.substr(md5(uniqid(rand())), 0, 4).'b', $this->a);
         $this->bnode_id = 0;
         $this->bnode_pattern_index = ['patterns' => [], 'bnodes' => []];
     }
 
-    public function parse($q, $src = '', $iso_fallback = 'ignore')
+    public function parse($q, $src = ''): void
     {
         $this->base = $src ? $this->calcBase($src) : NamespaceHelper::BASE_NAMESPACE;
         $this->r = [
@@ -56,14 +52,9 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
         }
     }
 
-    public function getQueryInfos()
-    {
-        return $this->v('r', []);
-    }
-
     /* 1 */
 
-    public function xQuery($v)
+    protected function xQuery($v)
     {
         list($r, $v) = $this->xPrologue($v);
         foreach (['Select', 'Construct', 'Describe', 'Ask'] as $type) {
@@ -78,7 +69,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 2 */
 
-    public function xPrologue($v)
+    protected function xPrologue($v)
     {
         $r = 0;
         if ((list($sub_r, $v) = $this->xBaseDecl($v)) && $sub_r) {
@@ -95,7 +86,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 5.. */
 
-    public function xSelectQuery($v)
+    protected function xSelectQuery($v)
     {
         if ($sub_r = $this->x('SELECT\s+', $v)) {
             $r = [
@@ -152,14 +143,14 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
         return [0, $v];
     }
 
-    public function xResultVar($v)
+    protected function xResultVar($v)
     {
         return $this->xVar($v);
     }
 
     /* 6.. */
 
-    public function xConstructQuery($v)
+    protected function xConstructQuery($v)
     {
         if ($sub_r = $this->x('CONSTRUCT\s*', $v)) {
             $r = [
@@ -198,7 +189,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 7.. */
 
-    public function xDescribeQuery($v)
+    protected function xDescribeQuery($v)
     {
         if ($sub_r = $this->x('DESCRIBE\s+', $v)) {
             $r = [
@@ -256,7 +247,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 8.. */
 
-    public function xAskQuery($v)
+    protected function xAskQuery($v)
     {
         if ($sub_r = $this->x('ASK\s+', $v)) {
             $r = [
@@ -283,7 +274,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 9, 10, 11, 12 */
 
-    public function xDatasetClause($v)
+    protected function xDatasetClause($v)
     {
         if ($r = $this->x('FROM(\s+NAMED)?\s+', $v)) {
             $named = $r[1] ? 1 : 0;
@@ -297,7 +288,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 13 */
 
-    public function xWhereClause($v)
+    protected function xWhereClause($v)
     {
         if ($r = $this->x('(WHERE)?', $v)) {
             $v = $r[2];
@@ -311,7 +302,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 14, 15 */
 
-    public function xSolutionModifier($v)
+    protected function xSolutionModifier($v)
     {
         $r = [];
         if ((list($sub_r, $sub_v) = $this->xOrderClause($v)) && $sub_r) {
@@ -326,7 +317,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 18, 19 */
 
-    public function xLimitOrOffsetClause($v)
+    protected function xLimitOrOffsetClause($v)
     {
         if ($sub_r = $this->x('(LIMIT|OFFSET)', $v)) {
             $key = strtolower($sub_r[1]);
@@ -344,7 +335,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 16 */
 
-    public function xOrderClause($v)
+    protected function xOrderClause($v)
     {
         if ($sub_r = $this->x('ORDER BY\s+', $v)) {
             $sub_v = $sub_r[1];
@@ -364,7 +355,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 17, 27 */
 
-    public function xOrderCondition($v)
+    protected function xOrderCondition($v)
     {
         if ($sub_r = $this->x('(ASC|DESC)', $v)) {
             $dir = strtolower($sub_r[1]);
@@ -395,7 +386,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 20 */
 
-    public function xGroupGraphPattern($v)
+    protected function xGroupGraphPattern($v)
     {
         $pattern_id = substr(md5(uniqid(rand())), 0, 4);
         if ($sub_r = $this->x('\{', $v)) {
@@ -440,7 +431,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
         return [0, $v];
     }
 
-    public function indexBnodes($triples, $pattern_id)
+    protected function indexBnodes($triples, $pattern_id)
     {
         $index_id = count($this->bnode_pattern_index['patterns']);
         $index_id = $pattern_id;
@@ -461,7 +452,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 22.., 25.. */
 
-    public function xGraphPatternNotTriples($v)
+    protected function xGraphPatternNotTriples($v)
     {
         if ((list($sub_r, $sub_v) = $this->xOptionalGraphPattern($v)) && $sub_r) {
             return [$sub_r, $sub_v];
@@ -493,7 +484,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 23 */
 
-    public function xOptionalGraphPattern($v)
+    protected function xOptionalGraphPattern($v)
     {
         if ($sub_r = $this->x('OPTIONAL', $v)) {
             $sub_v = $sub_r[1];
@@ -508,7 +499,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 24.. */
 
-    public function xGraphGraphPattern($v)
+    protected function xGraphGraphPattern($v)
     {
         if ($sub_r = $this->x('GRAPH', $v)) {
             $sub_v = $sub_r[1];
@@ -533,7 +524,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 26.., 27.. */
 
-    public function xFilter($v)
+    protected function xFilter($v)
     {
         if ($r = $this->x('FILTER', $v)) {
             $sub_v = $r[1];
@@ -554,7 +545,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 28.. */
 
-    public function xFunctionCall($v)
+    protected function xFunctionCall($v)
     {
         if ((list($r, $sub_v) = $this->xIRIref($v)) && $r) {
             if ((list($sub_r, $sub_v) = $this->xArgList($sub_v)) && $sub_r) {
@@ -567,7 +558,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 29 */
 
-    public function xArgList($v)
+    protected function xArgList($v)
     {
         $r = [];
         $sub_v = $v;
@@ -596,7 +587,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 30, 31 */
 
-    public function xConstructTemplate($v)
+    protected function xConstructTemplate($v)
     {
         if ($sub_r = $this->x('\{', $v)) {
             $r = [];
@@ -613,7 +604,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 46, 47 */
 
-    public function xExpression($v)
+    protected function xExpression($v)
     {
         if ((list($sub_r, $sub_v) = $this->xConditionalAndExpression($v)) && $sub_r) {
             $r = ['type' => 'expression', 'sub_type' => 'or', 'patterns' => [$sub_r]];
@@ -636,7 +627,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 48.., 49.. */
 
-    public function xConditionalAndExpression($v)
+    protected function xConditionalAndExpression($v)
     {
         if ((list($sub_r, $sub_v) = $this->xRelationalExpression($v)) && $sub_r) {
             $r = ['type' => 'expression', 'sub_type' => 'and', 'patterns' => [$sub_r]];
@@ -659,7 +650,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 50, 51 */
 
-    public function xRelationalExpression($v)
+    protected function xRelationalExpression($v)
     {
         if ((list($sub_r, $sub_v) = $this->xAdditiveExpression($v)) && $sub_r) {
             $r = ['type' => 'expression', 'sub_type' => 'relational', 'patterns' => [$sub_r]];
@@ -689,7 +680,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 52 */
 
-    public function xAdditiveExpression($v)
+    protected function xAdditiveExpression($v)
     {
         if ((list($sub_r, $sub_v) = $this->xMultiplicativeExpression($v)) && $sub_r) {
             $r = ['type' => 'expression', 'sub_type' => 'additive', 'patterns' => [$sub_r]];
@@ -717,7 +708,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 53 */
 
-    public function xMultiplicativeExpression($v)
+    protected function xMultiplicativeExpression($v)
     {
         if ((list($sub_r, $sub_v) = $this->xUnaryExpression($v)) && $sub_r) {
             $r = ['type' => 'expression', 'sub_type' => 'multiplicative', 'patterns' => [$sub_r]];
@@ -742,7 +733,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 54 */
 
-    public function xUnaryExpression($v)
+    protected function xUnaryExpression($v)
     {
         $sub_v = $v;
         $op = '';
@@ -767,7 +758,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 55 */
 
-    public function xPrimaryExpression($v)
+    protected function xPrimaryExpression($v)
     {
         foreach (['BrackettedExpression', 'BuiltInCall', 'IRIrefOrFunction', 'RDFLiteral', 'NumericLiteral', 'BooleanLiteral', 'Var', 'Placeholder'] as $type) {
             $m = 'x'.$type;
@@ -781,7 +772,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 56 */
 
-    public function xBrackettedExpression($v)
+    protected function xBrackettedExpression($v)
     {
         if ($r = $this->x('\(', $v)) {
             if ((list($r, $sub_v) = $this->xExpression($r[1])) && $r) {
@@ -796,7 +787,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 57.., 58.. */
 
-    public function xBuiltInCall($v)
+    protected function xBuiltInCall($v)
     {
         if ($sub_r = $this->x('(str|lang|langmatches|datatype|bound|sameterm|isiri|isuri|isblank|isliteral|regex)\s*\(', $v)) {
             $r = ['type' => 'built_in_call', 'call' => strtolower($sub_r[1])];
@@ -812,7 +803,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 59.. */
 
-    public function xIRIrefOrFunction($v)
+    protected function xIRIrefOrFunction($v)
     {
         if ((list($r, $v) = $this->xIRIref($v)) && $r) {
             if ((list($sub_r, $sub_v) = $this->xArgList($v)) && is_array($sub_r)) {
@@ -825,7 +816,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     /* 70.. @@sync with TurtleParser */
 
-    public function xIRI_REF($v)
+    protected function xIRI_REF($v)
     {
         if (($r = $this->x('\<(\$\{[^\>]*\})\>', $v)) && ($sub_r = $this->xPlaceholder($r[1]))) {
             return [$r[1], $r[2]];

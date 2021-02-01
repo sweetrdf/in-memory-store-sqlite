@@ -1328,6 +1328,46 @@ class SelectQueryTest extends ARC2_TestCase
     }
 
     /*
+     * PREFIX
+     */
+
+    public function testSelectPrefix()
+    {
+        // test data
+        $this->fixture->query('INSERT INTO <http://example.com/> {
+            <http://person1> <http://example.com/kennt> <http://person2> .
+        }');
+
+        $res = $this->fixture->query('
+            PREFIX ex: <http://example.com/>
+            SELECT * WHERE {
+                ?s ex:kennt ?o
+            }
+        ');
+
+        $this->assertEquals(
+            [
+                'query_type' => 'select',
+                'result' => [
+                    'variables' => [
+                        's', 'o',
+                    ],
+                    'rows' => [
+                        [
+                            's' => 'http://person1',
+                            's type' => 'uri',
+                            'o' => 'http://person2',
+                            'o type' => 'uri',
+                        ],
+                    ],
+                ],
+                'query_time' => $res['query_time'],
+            ],
+            $res
+        );
+    }
+
+    /*
      * UNION
      */
 

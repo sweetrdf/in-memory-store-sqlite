@@ -41,7 +41,8 @@ class InsertIntoQueryTest extends ARC2_TestCase
     public function testInsertIntoAllKindsOfTriples()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->fixture->query('PREFIX ex: <http://example.com/> .
+        INSERT INTO <http://example.com/> {
             <http://s> <http://p1> <http://o> .
             <#make> <#me> <#happy> .
             <http://s2> rdf:type <http://Person> .
@@ -49,7 +50,7 @@ class InsertIntoQueryTest extends ARC2_TestCase
             <http://s2> <http://foo> 2.0 .
             <http://s2> <http://foo> "3" .
             <http://s2> <http://foo> "4"^^xsd:integer .
-            <http://s2> <http://foo> "5"@en .
+            <http://s2> ex:foo "5"@en .
             _:foo <http://foo> "6" .
         }');
 
@@ -119,7 +120,7 @@ class InsertIntoQueryTest extends ARC2_TestCase
                 [
                     's' => 'http://s2',
                     's type' => 'uri',
-                    'p' => 'http://foo',
+                    'p' => 'http://example.com/foo',
                     'p type' => 'uri',
                     'o' => '5',
                     'o type' => 'literal',

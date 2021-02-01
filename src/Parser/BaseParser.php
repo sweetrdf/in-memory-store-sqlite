@@ -10,9 +10,14 @@
  *  file that was distributed with this source code.
  */
 
+namespace sweetrdf\InMemoryStoreSqlite\Parser;
+
+use ARC2_Class;
+use ARC2_Reader;
+use ARC2_TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
-class ARC2_RDFParser extends ARC2_Class
+class BaseParser extends ARC2_Class
 {
     /**
      * @var array
@@ -39,7 +44,21 @@ class ARC2_RDFParser extends ARC2_Class
      */
     protected $prefixes;
 
+    /**
+     * Query infos container.
+     *
+     * @var array
+     */
+    protected $r = [];
+
+    /**
+     * @var array
+     */
     protected $triples = [];
+
+    /**
+     * @var integer
+     */
     protected $t_count = 0;
 
     public function __construct($a, &$caller)
@@ -59,40 +78,14 @@ class ARC2_RDFParser extends ARC2_Class
         $this->bnode_id = 0;
     }
 
+    public function getQueryInfos()
+    {
+        return $this->r;
+    }
+
     public function getTriples()
     {
         return $this->triples;
-    }
-
-    public function setReader(&$reader)
-    {
-        $this->reader = $reader;
-    }
-
-    public function parse($path, $data = '')
-    {
-        /* format parser */
-        $cls = 'ARC2_TurtleParser';
-        $this->parser = new $cls($this->a, $this);
-        $this->parser->setReader($this->reader);
-
-        return $this->parser->parse($path, $data);
-    }
-
-    public function parseData($data)
-    {
-        return $this->parse(NamespaceHelper::BASE_NAMESPACE, $data);
-    }
-
-    public function done()
-    {
-    }
-
-    private function createBnodeID()
-    {
-        ++$this->bnode_id;
-
-        return '_:'.$this->bnode_prefix.$this->bnode_id;
     }
 
     public function getSimpleIndex($flatten_objects = 1, $vals = ''): array
@@ -167,26 +160,5 @@ class ARC2_RDFParser extends ARC2_Class
             $this->parser->__init();
             unset($this->parser);
         }
-    }
-
-    public function extractRDF($formats = '')
-    {
-        if (method_exists($this->parser, 'extractRDF')) {
-            return $this->parser->extractRDF($formats);
-        }
-    }
-
-    /**
-     * returns the array of namespace prefixes encountered during parsing.
-     *
-     * @return array (keys = namespace URI / values = prefix used)
-     */
-    public function getParsedNamespacePrefixes()
-    {
-        if (isset($this->parser)) {
-            return $this->v('nsp', [], $this->parser);
-        }
-
-        return $this->v('nsp', []);
     }
 }
