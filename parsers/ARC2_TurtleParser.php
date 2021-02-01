@@ -10,8 +10,8 @@
  *  file that was distributed with this source code.
  */
 
-use sweetrdf\InMemoryStoreSqlite\Parser\BaseParser;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+use sweetrdf\InMemoryStoreSqlite\Parser\BaseParser;
 
 class ARC2_TurtleParser extends BaseParser
 {

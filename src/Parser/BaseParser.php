@@ -14,7 +14,6 @@ namespace sweetrdf\InMemoryStoreSqlite\Parser;
 
 use ARC2_Class;
 use ARC2_Reader;
-use ARC2_TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
 class BaseParser extends ARC2_Class
@@ -57,7 +56,7 @@ class BaseParser extends ARC2_Class
     protected $triples = [];
 
     /**
-     * @var integer
+     * @var int
      */
     protected $t_count = 0;
 
@@ -129,7 +128,7 @@ class BaseParser extends ARC2_Class
                 $r[$s][$p] = [];
             }
             if ($flatten_objects) {
-                if (!in_array($o, $r[$s][$p])) {
+                if (!\in_array($o, $r[$s][$p])) {
                     $r[$s][$p][] = $o;
                 }
             } else {
@@ -141,7 +140,7 @@ class BaseParser extends ARC2_Class
                         $o[$suffix] = $t['o '.$suffix];
                     }
                 }
-                if (!in_array($o, $r[$s][$p])) {
+                if (!\in_array($o, $r[$s][$p])) {
                     $r[$s][$p][] = $o;
                 }
             }

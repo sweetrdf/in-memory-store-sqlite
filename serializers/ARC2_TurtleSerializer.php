@@ -15,6 +15,8 @@ class ARC2_TurtleSerializer extends ARC2_RDFSerializer
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
+
+        $this->qualifier = ['rdf:type', 'rdfs:domain', 'rdfs:range', 'rdfs:subClassOf'];
     }
 
     public function __init()
@@ -33,10 +35,10 @@ class ARC2_TurtleSerializer extends ARC2_RDFSerializer
                 return $pn;
             }
             if (
-        ('o' === $term) &&
-        in_array($qualifier, ['rdf:type', 'rdfs:domain', 'rdfs:range', 'rdfs:subClassOf']) &&
-        ($pn = $this->getPName($v))
-      ) {
+                ('o' === $term)
+                && in_array($qualifier, $this->qualifier)
+                && ($pn = $this->getPName($v))
+            ) {
                 return $pn;
             }
             if (preg_match('/^[a-z0-9]+\:[^\s]*$/isu', $v)) {
@@ -50,11 +52,15 @@ class ARC2_TurtleSerializer extends ARC2_RDFSerializer
         }
         /* literal */
         $quot = '"';
-        if (preg_match('/\"/', $v['value'])) {
+        if (false !== preg_match('/\"/', $v['value'])) {
             $quot = "'";
-            if (preg_match('/\'/', $v['value']) || preg_match('/[\x0d\x0a]/', $v['value'])) {
+            if (false !== preg_match('/\'/', $v['value']) || false !== preg_match('/[\x0d\x0a]/', $v['value'])) {
                 $quot = '"""';
-                if (preg_match('/\"\"\"/', $v['value']) || preg_match('/\"$/', $v['value']) || preg_match('/^\"/', $v['value'])) {
+                if (
+                    false !== preg_match('/\"\"\"/', $v['value'])
+                    || false !== preg_match('/\"$/', $v['value'])
+                    || false !== preg_match('/^\"/', $v['value'])
+                ) {
                     $quot = "'''";
                     $v['value'] = preg_replace("/'$/", "' ", $v['value']);
                     $v['value'] = preg_replace("/^'/", " '", $v['value']);
@@ -62,7 +68,7 @@ class ARC2_TurtleSerializer extends ARC2_RDFSerializer
                 }
             }
         }
-        if ((1 == strlen($quot)) && preg_match('/[\x0d\x0a]/', $v['value'])) {
+        if ((1 == strlen($quot)) && false !== preg_match('/[\x0d\x0a]/', $v['value'])) {
             $quot = $quot.$quot.$quot;
         }
         $suffix = isset($v['lang']) && $v['lang'] ? '@'.$v['lang'] : '';

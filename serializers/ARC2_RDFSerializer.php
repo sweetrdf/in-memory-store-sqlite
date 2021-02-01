@@ -35,7 +35,8 @@ class ARC2_RDFSerializer extends ARC2_Class
     }
 
     public function xgetPName($v)
-    {/* moved to merged getPName in ARC2_CLass */
+    {
+        /* moved to merged getPName in ARC2_CLass */
         if (preg_match('/^([a-z0-9\_\-]+)\:([a-z\_][a-z0-9\_\-]*)$/i', $v, $m) && isset($this->ns[$m[1]])) {
             $this->used_ns = !in_array($this->ns[$m[1]], $this->used_ns) ? array_merge($this->used_ns, [$this->ns[$m[1]]]) : $this->used_ns;
 
@@ -53,10 +54,5 @@ class ARC2_RDFSerializer extends ARC2_Class
         $index = ARC2::getSimpleIndex($triples, 0);
 
         return $this->getSerializedIndex($index, $raw);
-    }
-
-    public function getSerializedIndex($index, $raw = 0)
-    {
-        return '';
     }
 }

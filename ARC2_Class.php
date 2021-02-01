@@ -235,7 +235,7 @@ class ARC2_Class
         return $base.$path;
     }
 
-    public function calcBase($path)
+    public function calcBase(string $path): string
     {
         $r = $path;
         $r = preg_replace('/\#.*$/', '', $r); /* remove hash */
@@ -251,16 +251,13 @@ class ARC2_Class
         return 'file://'.realpath($r); /* real path */
     }
 
-    public function toTurtle($v, $ns = '', $raw = 0)
+    public function toTurtle($v)
     {
-        if (!$ns) {
-            $ns = isset($this->a['ns']) ? $this->a['ns'] : [];
-        }
-        $ser = new ARC2_TurtleSerializer(array_merge($this->a, ['ns' => $ns]), $this);
+        $ser = new ARC2_TurtleSerializer([], $this);
 
         return (isset($v[0]) && isset($v[0]['s']))
-            ? $ser->getSerializedTriples($v, $raw)
-            : $ser->getSerializedIndex($v, $raw);
+            ? $ser->getSerializedTriples($v)
+            : $ser->getSerializedIndex($v);
     }
 
     /* central DB query hook */
