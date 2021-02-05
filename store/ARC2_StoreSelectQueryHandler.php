@@ -166,31 +166,6 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         ];
     }
 
-    public function getTempTableDefForMySQL($q_sql)
-    {
-        $col_part = preg_replace('/^SELECT\s*(DISTINCT)?(.*)FROM.*$/s', '\\2', $q_sql);
-        $parts = explode(',', $col_part);
-        $has_order_infos = $this->v('order_infos', 0, $this->infos['query']);
-        $r = '';
-        $added = [];
-        foreach ($parts as $part) {
-            if (preg_match('/\.?(.+)\s+AS\s+`(.+)`/U', trim($part), $m) && !isset($added[$m[2]])) {
-                $alias = $m[2];
-                if ('TMPPOS' == $alias) {
-                    continue;
-                }
-                $r .= $r ? ',' : '';
-                $r .= "\n `".$alias.'` int UNSIGNED';
-                $added[$alias] = 1;
-            }
-        }
-        if ($has_order_infos) {
-            $r = "\n".'`TMPPOS` mediumint NOT NULL AUTO_INCREMENT PRIMARY KEY, '.$r;
-        }
-
-        return $r ? $r."\n" : '';
-    }
-
     public function getTempTableDefForSQLite($q_sql)
     {
         $col_part = preg_replace('/^SELECT\s*(DISTINCT)?(.*)FROM.*$/s', '\\2', $q_sql);
@@ -325,11 +300,17 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             foreach (['s', 'p', 'o'] as $term) {
                 if ('var' == $pattern[$term.'_type']) {
                     $val = $pattern[$term];
-                    $this->index['vars'][$val] = array_merge($this->v($val, [], $this->index['vars']), [['table' => $pattern['id'], 'col' => $term]]);
+                    $this->index['vars'][$val] = array_merge(
+                        $this->v($val, [], $this->index['vars']),
+                        [['table' => $pattern['id'], 'col' => $term]]
+                    );
                 }
                 if ('bnode' == $pattern[$term.'_type']) {
                     $val = $pattern[$term];
-                    $this->index['bnodes'][$val] = array_merge($this->v($val, [], $this->index['bnodes']), [['table' => $pattern['id'], 'col' => $term]]);
+                    $this->index['bnodes'][$val] = array_merge(
+                        $this->v($val, [], $this->index['bnodes']),
+                        [['table' => $pattern['id'], 'col' => $term]]
+                    );
                 }
             }
             $this->index['triple_patterns'][] = $pattern['id'];
@@ -349,10 +330,16 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                 if ('graph' == $info['type']) {
                     if ($info['var']) {
                         $val = $info['var']['value'];
-                        $this->index['graph_vars'][$val] = array_merge($this->v($val, [], $this->index['graph_vars']), [['table' => $id]]);
+                        $this->index['graph_vars'][$val] = array_merge(
+                            $this->v($val, [], $this->index['graph_vars']),
+                            [['table' => $id]]
+                        );
                     } elseif ($info['uri']) {
                         $val = $info['uri'];
-                        $this->index['graph_uris'][$val] = array_merge($this->v($val, [], $this->index['graph_uris']), [['table' => $id]]);
+                        $this->index['graph_uris'][$val] = array_merge(
+                            $this->v($val, [], $this->index['graph_uris']),
+                            [['table' => $id]]
+                        );
                     }
                 }
             }
@@ -379,9 +366,8 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             }
 
             return array_merge($this->getGraphInfos($pattern['parent_id']), $r);
-        }
-        /* FROM / FROM NAMED */
-        else {
+        } else {
+            /* FROM / FROM NAMED */
             if (isset($this->infos['query']['dataset'])) {
                 foreach ($this->infos['query']['dataset'] as $set) {
                     $r[] = array_merge(['type' => 'dataset'], $set);
