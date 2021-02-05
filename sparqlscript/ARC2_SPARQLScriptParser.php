@@ -24,7 +24,7 @@ class ARC2_SPARQLScriptParser extends ARC2_SPARQLPlusParser
         parent::__init();
     }
 
-    public function parse($v, $src = '', $iso_fallback = 'ignore')
+    public function parse($v, $src = ''): void
     {
         $this->base = $src ? $this->calcBase($src) : NamespaceHelper::BASE_NAMESPACE;
         $this->blocks = [];

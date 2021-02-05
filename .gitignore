@@ -1,4 +1,5 @@
 composer.lock
+html
 .phpunit.result.cache
+.php_cs.cache
 vendor
-/.php_cs.cache

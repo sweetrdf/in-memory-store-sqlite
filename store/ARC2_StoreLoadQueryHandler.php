@@ -48,9 +48,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $this->t_start = 0;
         $this->log_inserts = $this->v('store_log_inserts', 0, $this->a);
         if ($this->log_inserts) {
-            if (file_exists('arc_insert_log.txt')) {
-                unlink('arc_insert_log.txt');
-            }
             $this->inserts = [];
             $this->insert_times = [];
             $this->t_prev = $this->t_start;
@@ -69,12 +66,10 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         /* done */
         $this->checkSQLBuffers(1);
 
-        $r = [
+        return [
             't_count' => $this->t_count,
             'load_time' => 0,
         ];
-
-        return $r;
     }
 
     public function addT($s, $p, $o, $s_type, $o_type, $o_dt = '', $o_lang = '')
