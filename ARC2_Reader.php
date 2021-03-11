@@ -19,6 +19,34 @@ class ARC2_Reader
     private array $errors = [];
 
     /**
+     * @todo refactor that
+     */
+    public function v($name, $default = false, $o = false)
+    {/* value if set */
+        if (false === $o) {
+            $o = $this;
+        }
+        if (is_array($o)) {
+            return isset($o[$name]) ? $o[$name] : $default;
+        }
+
+        return isset($o->$name) ? $o->$name : $default;
+    }
+
+    /**
+     * @todo refactor that
+     */
+    public function m($name, $a = false, $default = false, $o = false)
+    {
+        /* call method */
+        if (false === $o) {
+            $o = $this;
+        }
+
+        return method_exists($o, $name) ? $o->$name($a) : $default;
+    }
+
+    /**
      * @todo replace by Logger
      */
     private function addError(string $error): void
@@ -26,7 +54,7 @@ class ARC2_Reader
         $this->errors[] = $error;
     }
 
-    public function activate($path, $data = '')
+    public function activate($path, $data = '', $ping_only = 0)
     {
         /* data uri? */
         if (!$data && preg_match('/^data\:([^\,]+)\,(.*)$/', $path, $m)) {
@@ -37,7 +65,7 @@ class ARC2_Reader
         $this->uri = calcURI($path, $this->base);
         $this->stream = $data
             ? $this->getDataStream($data)
-            : $this->getSocketStream($this->base);
+            : $this->getSocketStream($this->base, $ping_only);
     }
 
     public function getDataStream($data)
@@ -57,8 +85,11 @@ class ARC2_Reader
         if ('file://' == $url) {
             return $this->addError('Error: file does not exists or is not accessible');
         }
-
-        return $this->getFileSocket($url);
+        $parts = parse_url($url);
+        $mappings = ['file' => 'File', 'http' => 'HTTP', 'https' => 'HTTP'];
+        if ($scheme = $this->v(strtolower($parts['scheme']), '', $mappings)) {
+            return $this->m('get'.$scheme.'Socket', $url, $this->getDataStream(''));
+        }
     }
 
     public function getFileSocket($url)
@@ -69,14 +100,7 @@ class ARC2_Reader
             return $this->addError('Socket error: Could not open "'.$parts['path'].'"');
         }
 
-        return [
-            'type' => 'socket',
-            'socket' => &$s,
-            'headers' => [],
-            'pos' => 0,
-            'size' => filesize($parts['path']),
-            'buffer' => '',
-        ];
+        return ['type' => 'socket', 'socket' => &$s, 'headers' => [], 'pos' => 0, 'size' => filesize($parts['path']), 'buffer' => ''];
     }
 
     /**
@@ -84,14 +108,11 @@ class ARC2_Reader
      */
     public function readStream($buffer_xml = true, $d_size = 1024)
     {
-        if (!isset($this->stream)) {
-            $this->addError('missing stream');
-
-            return;
+        //if (!$s = $this->v('stream')) return '';
+        if (!$s = $this->v('stream')) {
+            return $this->addError('missing stream in "readStream" '.$this->uri);
         }
-
-        $s = $this->stream;
-        $s_type = $s['type'] ?? '';
+        $s_type = $this->v('type', '', $s);
         $r = $s['buffer'];
         $s['buffer'] = '';
         if ($s['size']) {
@@ -103,16 +124,11 @@ class ARC2_Reader
         }
         /* socket */
         elseif ('socket' == $s_type) {
-            echo PHP_EOL.'readStream: '.$s['socket'];
             $d = ($d_size > 0) && !feof($s['socket']) ? fread($s['socket'], $d_size) : '';
         }
         $eof = $d ? false : true;
         /* chunked despite HTTP 1.0 request */
-        if (
-            isset($s['headers'])
-            && isset($s['headers']['transfer-encoding'])
-            && ('chunked' == $s['headers']['transfer-encoding'])
-        ) {
+        if (isset($s['headers']) && isset($s['headers']['transfer-encoding']) && ('chunked' == $s['headers']['transfer-encoding'])) {
             $d = preg_replace('/(^|[\r\n]+)[0-9a-f]{1,4}[\r\n]+/', '', $d);
         }
         $s['pos'] += strlen($d);
@@ -135,7 +151,7 @@ class ARC2_Reader
     public function closeStream()
     {
         if (isset($this->stream)) {
-            if ('socket' == $this->stream['type'] && !empty($this->stream['socket'])) {
+            if ('socket' == $this->v('type', 0, $this->stream) && !empty($this->stream['socket'])) {
                 fclose($this->stream['socket']);
             }
             unset($this->stream);
