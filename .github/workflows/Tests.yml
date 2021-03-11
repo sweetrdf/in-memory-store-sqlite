@@ -34,12 +34,4 @@ jobs:
                 run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
 
             -   name: Tests
-                run: vendor/bin/phpunit -v --coverage-clover coverage/clover.xml
-
-            -   name: "CodeCov Integration"
-                uses: codecov/codecov-action@v1
-                with:
-                    files: ./coverage/clover.xml
-                    flags: Tests
-                    fail_ci_if_error: true
-                    verbose: true
+                run: vendor/bin/phpunit -v
