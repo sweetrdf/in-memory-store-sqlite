@@ -11,7 +11,6 @@ return PhpCsFixer\Config::create()
         PhpCsFixer\Finder::create()
         ->in(__DIR__.'/src')
         ->in(__DIR__.'/parsers')
-        ->in(__DIR__.'/sparqlscript')
         ->in(__DIR__.'/tests')
         ->name('*.php')
         ->append([
