@@ -4,10 +4,10 @@
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
  * the terms of the GPL-3 license.
  *
-
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
- ** For the full copyright and license information, please view the LICENSE
+ *
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -48,7 +48,7 @@ class BaseParser extends ARC2_Class
     {
         parent::__construct($a, $caller);
 
-        $this->reader = new ARC2_Reader($this->a, $this);
+        $this->reader = new ARC2_Reader();
 
         /*
          * @todo make it a constructor param

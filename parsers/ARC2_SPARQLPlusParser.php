@@ -66,6 +66,7 @@ class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
             $sub_v = $sub_r[1];
             if ((list($sub_r, $sub_v) = $this->xIRIref($sub_v)) && $sub_r) {
                 $r = ['type' => 'load', 'url' => $sub_r, 'target_graph' => ''];
+
                 return [$r, $sub_v];
             }
         }

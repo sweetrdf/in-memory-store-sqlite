@@ -11,20 +11,33 @@
  * file that was distributed with this source code.
  */
 
-class ARC2_Reader extends ARC2_Class
+use function sweetrdf\InMemoryStoreSqlite\calcBase;
+use function sweetrdf\InMemoryStoreSqlite\calcURI;
+
+class ARC2_Reader
 {
-    public function activate($path, $data = '', $ping_only = 0, $timeout = 0)
+    private array $errors = [];
+
+    /**
+     * @todo replace by Logger
+     */
+    private function addError(string $error): void
+    {
+        $this->errors[] = $error;
+    }
+
+    public function activate($path, $data = '')
     {
         /* data uri? */
         if (!$data && preg_match('/^data\:([^\,]+)\,(.*)$/', $path, $m)) {
             $path = '';
             $data = preg_match('/base64/', $m[1]) ? base64_decode($m[2]) : rawurldecode($m[2]);
         }
-        $this->base = $this->calcBase($path);
-        $this->uri = $this->calcURI($path, $this->base);
+        $this->base = calcBase($path);
+        $this->uri = calcURI($path, $this->base);
         $this->stream = $data
             ? $this->getDataStream($data)
-            : $this->getSocketStream($this->base, $ping_only);
+            : $this->getSocketStream($this->base);
     }
 
     public function getDataStream($data)
@@ -44,11 +57,8 @@ class ARC2_Reader extends ARC2_Class
         if ('file://' == $url) {
             return $this->addError('Error: file does not exists or is not accessible');
         }
-        $parts = parse_url($url);
-        $mappings = ['file' => 'File', 'http' => 'HTTP', 'https' => 'HTTP'];
-        if ($scheme = $this->v(strtolower($parts['scheme']), '', $mappings)) {
-            return $this->m('get'.$scheme.'Socket', $url, $this->getDataStream(''));
-        }
+
+        return $this->getFileSocket($url);
     }
 
     public function getFileSocket($url)
@@ -59,7 +69,14 @@ class ARC2_Reader extends ARC2_Class
             return $this->addError('Socket error: Could not open "'.$parts['path'].'"');
         }
 
-        return ['type' => 'socket', 'socket' => &$s, 'headers' => [], 'pos' => 0, 'size' => filesize($parts['path']), 'buffer' => ''];
+        return [
+            'type' => 'socket',
+            'socket' => &$s,
+            'headers' => [],
+            'pos' => 0,
+            'size' => filesize($parts['path']),
+            'buffer' => '',
+        ];
     }
 
     /**
@@ -67,11 +84,14 @@ class ARC2_Reader extends ARC2_Class
      */
     public function readStream($buffer_xml = true, $d_size = 1024)
     {
-        //if (!$s = $this->v('stream')) return '';
-        if (!$s = $this->v('stream')) {
-            return $this->addError('missing stream in "readStream" '.$this->uri);
+        if (!isset($this->stream)) {
+            $this->addError('missing stream');
+
+            return;
         }
-        $s_type = $this->v('type', '', $s);
+
+        $s = $this->stream;
+        $s_type = $s['type'] ?? '';
         $r = $s['buffer'];
         $s['buffer'] = '';
         if ($s['size']) {
@@ -87,7 +107,11 @@ class ARC2_Reader extends ARC2_Class
         }
         $eof = $d ? false : true;
         /* chunked despite HTTP 1.0 request */
-        if (isset($s['headers']) && isset($s['headers']['transfer-encoding']) && ('chunked' == $s['headers']['transfer-encoding'])) {
+        if (
+            isset($s['headers'])
+            && isset($s['headers']['transfer-encoding'])
+            && ('chunked' == $s['headers']['transfer-encoding'])
+        ) {
             $d = preg_replace('/(^|[\r\n]+)[0-9a-f]{1,4}[\r\n]+/', '', $d);
         }
         $s['pos'] += strlen($d);
@@ -110,7 +134,7 @@ class ARC2_Reader extends ARC2_Class
     public function closeStream()
     {
         if (isset($this->stream)) {
-            if ('socket' == $this->v('type', 0, $this->stream) && !empty($this->stream['socket'])) {
+            if ('socket' == $this->stream['type'] && !empty($this->stream['socket'])) {
                 fclose($this->stream['socket']);
             }
             unset($this->stream);
