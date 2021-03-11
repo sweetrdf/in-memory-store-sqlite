@@ -22,12 +22,12 @@
             <directory suffix="Test.php">./tests</directory>
         </testsuite>
     </testsuites>
-    <filter>
-        <whitelist>
+    <coverage>
+        <include>
             <directory>parsers</directory>
             <directory>sparqlscript</directory>
             <directory>src</directory>
             <directory>store</directory>
-        </whitelist>
-    </filter>
+        </include>
+    </coverage>
 </phpunit>
