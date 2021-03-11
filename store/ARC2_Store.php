@@ -37,13 +37,6 @@ class ARC2_Store extends ARC2_Class
         $this->split_predicates = $this->v('store_split_predicates', [], $this->a);
     }
 
-    public function cacheEnabled()
-    {
-        return isset($this->a['cache_enabled'])
-            && true === $this->a['cache_enabled']
-            && 'pdo' == $this->a['db_adapter'];
-    }
-
     public function getName()
     {
         return $this->v('store_name', 'arc', $this->a);
@@ -260,7 +253,7 @@ class ARC2_Store extends ARC2_Class
     {
         $doc = is_array($doc) ? $this->toTurtle($doc) : $doc;
         $infos = ['query' => ['url' => $g, 'target_graph' => $g]];
-        $h = new ARC2_StoreLoadQueryHandler($this->a, $this);
+        $h = new ARC2_StoreLoadQueryHandler($this);
         $r = $h->runQuery($infos, $doc, $keep_bnode_ids);
         $this->processTriggers('insert', $infos);
 
@@ -299,24 +292,10 @@ class ARC2_Store extends ARC2_Class
         if (preg_match('/^dump/i', $q)) {
             $infos = ['query' => ['type' => 'dump']];
         } else {
-            // check cache
-            $key = hash('sha1', $q);
-            if ($this->cacheEnabled() && $this->cache->has($key.'_infos')) {
-                $infos = $this->cache->get($key.'_infos');
-                $errors = $this->cache->get($key.'_errors');
-            // no entry found
-            } else {
-                $p = new ARC2_SPARQLPlusParser($this->a, $this);
-                $p->parse($q, $src);
-                $infos = $p->getQueryInfos();
-                $errors = $p->getErrors();
-
-                // store result in cache
-                if ($this->cacheEnabled()) {
-                    $this->cache->set($key.'_infos', $infos);
-                    $this->cache->set($key.'_errors', $errors);
-                }
-            }
+            $p = new ARC2_SPARQLPlusParser($this->a, $this);
+            $p->parse($q, $src);
+            $infos = $p->getQueryInfos();
+            $errors = $p->getErrors();
         }
 
         if ('infos' == $result_format) {
@@ -330,18 +309,8 @@ class ARC2_Store extends ARC2_Class
             if (!in_array($qt, ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'])) {
                 return $this->addError('Unsupported query type "'.$qt.'"');
             }
-            // if cache is enabled, get/store result
-            $key = hash('sha1', $q);
-            if ($this->cacheEnabled() && $this->cache->has($key)) {
-                $result = $this->cache->get($key);
-            } else {
-                $result = $this->runQuery($infos, $qt, $keep_bnode_ids, $q);
 
-                // store in cache, if enabled
-                if ($this->cacheEnabled()) {
-                    $this->cache->set($key, $result);
-                }
-            }
+            $result = $this->runQuery($infos, $qt, $keep_bnode_ids, $q);
 
             $r = ['query_type' => $qt, 'result' => $result];
             $r['query_time'] = 0;
@@ -369,7 +338,14 @@ class ARC2_Store extends ARC2_Class
     private function runQuery($infos, $type, $keep_bnode_ids = 0, $q = '')
     {
         $cls = 'ARC2_Store'.ucfirst($type).'QueryHandler';
-        $h = new $cls($this->a, $this);
+
+        // TODO make that if-else obsolete
+        if ('ARC2_StoreLoadQueryHandler' == $cls) {
+            $h = new ARC2_StoreLoadQueryHandler($this);
+        } else {
+            $h = new $cls($this->a, $this);
+        }
+
         $ticket = 1;
         $r = [];
         if ($q && ('select' == $type)) {

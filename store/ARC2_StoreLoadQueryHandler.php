@@ -1,4 +1,5 @@
 <?php
+
 /**
  * ARC2 RDF Store LOAD Query Handler.
  *
@@ -7,29 +8,31 @@
  * @homepage <https://github.com/semsol/arc2>
  */
 
-use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
-
 class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 {
-    public function __construct($a, &$caller)
+    private string $fixed_target_graph;
+    private string $target_graph;
+
+    /**
+     * @todo required?
+     */
+    private int $t_count;
+
+    /**
+     * @todo required?
+     */
+    private int $t_start;
+
+    private int $write_buffer_size = 2500;
+
+    public function __construct(ARC2_Store $store)
     {
-        /* caller has to be a store */
-        parent::__construct($a, $caller);
+        $this->store = $store;
     }
 
     public function setStore(ARC2_Store $store): void
     {
         $this->store = $store;
-    }
-
-    public function __init()
-    {
-        /* db_con, store_log_inserts */
-        parent::__init();
-        $this->store = $this->caller;
-        $this->write_buffer_size = $this->v('store_write_buffer', 2500, $this->a);
-        $this->split_threshold = $this->v('store_split_threshold', 0, $this->a);
-        $this->strip_mb_comp_str = $this->v('store_strip_mb_comp_str', 0, $this->a);
     }
 
     public function runQuery($infos, $data = '', $keep_bnode_ids = 0)
@@ -39,20 +42,13 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $this->target_graph = $graph ? $this->calcURI($graph) : $this->calcURI($url);
         $this->fixed_target_graph = $graph ? $this->target_graph : '';
         $this->keep_bnode_ids = $keep_bnode_ids;
-        $cls = 'ARC2_StoreTurtleLoader';
-        $loader = new $cls($this->a, $this);
 
-        $this->has_lock = 1;
+        // remove parameters
+        $loader = new ARC2_StoreTurtleLoader([], $this);
+
         /* logging */
         $this->t_count = 0;
         $this->t_start = 0;
-        $this->log_inserts = $this->v('store_log_inserts', 0, $this->a);
-        if ($this->log_inserts) {
-            $this->inserts = [];
-            $this->insert_times = [];
-            $this->t_prev = $this->t_start;
-            $this->t_count_prev = 0;
-        }
         /* load and parse */
         $this->max_term_id = $this->getMaxTermID();
         $this->max_triple_id = $this->getMaxTripleID();
@@ -74,9 +70,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 
     public function addT($s, $p, $o, $s_type, $o_type, $o_dt = '', $o_lang = '')
     {
-        if (!$this->has_lock) {
-            return 0;
-        }
         $type_ids = ['uri' => '0', 'bnode' => '1', 'literal' => '2'];
         $g = $this->getStoredTermID($this->target_graph, '0', 'id');
         $s = (('bnode' == $s_type) && !$this->keep_bnode_ids) ? '_:b'.abs(crc32($g.$s)).'_'.(strlen($s) > 12 ? substr(substr($s, 2), -10) : substr($s, 2)) : $s;
@@ -111,7 +104,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         }
     }
 
-    public function getMaxTermID()
+    public function getMaxTermID(): int
     {
         $sql = '';
         foreach (['id2val', 's2val', 'o2val'] as $tbl) {
@@ -284,9 +277,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             $fnc = function_exists('mb_substr') ? 'mb_substr' : 'substr';
             $val = $fnc($val, 0, 17).'-'.$fnc($val, -17);
         }
-        if ($this->strip_mb_comp_str) {
-            $val = urldecode(preg_replace('/\%[0-9A-F]{2}/', '', urlencode($val)));
-        }
 
         return $val;
     }
@@ -365,17 +355,8 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                 $this->store->a['db_object']->simpleQuery($this->sql_buffers[$tbl]);
                 /* table error */
                 $error = $this->store->a['db_object']->getErrorMessage();
-                if (!empty($error)) {
-                    $this->autoRepairTable($error, $this->sql_buffers[$tbl]);
-                }
                 unset($this->sql_buffers[$tbl]);
-                if ($this->log_inserts) {
-                    $this->inserts[$tbl] = $this->v(
-                        $tbl,
-                        0,
-                        $this->inserts
-                    ) + max(0, $this->store->a['db_object']->getAffectedRows());
-                }
+
                 /* reset term id buffers */
                 if ($reset_id_buffers) {
                     $this->term_ids = [];
@@ -385,25 +366,5 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         }
 
         return 1;
-    }
-
-    public function autoRepairTable($er, $sql = '')
-    {
-        $this->addError('MySQL error: '.$er.' ('.$sql.')');
-        if (preg_match('/Table \'[^\']+\/([a-z0-9\_\-]+)\' .*(crashed|repair)/i', $er, $m)) {
-            $row = $this->store->a['db_object']->fetchRow('REPAIR TABLE '.rawurlencode($m[1]));
-            $msg = is_array($row) ? $row : [];
-
-            if ('error' == $this->v('Msg_type', 'error', $msg)) {
-                /* auto-reset */
-                if ($this->v('store_reset_on_table_crash', 0, $this->a)) {
-                    $this->store->drop();
-                    $this->store->setUp();
-                } else {
-                    $er = $this->v('Msg_text', 'unknown error', $msg);
-                    $this->addError('Auto-repair failed on '.rawurlencode($m[1]).': '.$er);
-                }
-            }
-        }
     }
 }

@@ -25,7 +25,7 @@ class ARC2_StoreLoadQueryHandlerTest extends ARC2_TestCase
 
         $this->store = \ARC2::getStore($this->dbConfig);
 
-        $this->fixture = new ARC2_StoreLoadQueryHandler($this->store, $this);
+        $this->fixture = new ARC2_StoreLoadQueryHandler($this->store);
     }
 
     /**

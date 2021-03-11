@@ -109,7 +109,7 @@ final class PDOSQLiteAdapter
     {
         // triple
         $sql = 'CREATE TABLE IF NOT EXISTS triple (
-            t INTEGER UNSIGNED NOT NULL UNIQUE,
+            t INTEGER PRIMARY KEY AUTOINCREMENT,
             s INTEGER UNSIGNED NOT NULL,
             p INTEGER UNSIGNED NOT NULL,
             o INTEGER UNSIGNED NOT NULL,

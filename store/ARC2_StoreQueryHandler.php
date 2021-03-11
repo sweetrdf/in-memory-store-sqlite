@@ -12,6 +12,8 @@
 
 class ARC2_StoreQueryHandler extends ARC2_Class
 {
+    protected ARC2_Store $store;
+
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
