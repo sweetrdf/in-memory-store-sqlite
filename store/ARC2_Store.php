@@ -11,44 +11,30 @@
  * file that was distributed with this source code.
  */
 
+use Psr\Log\LoggerInterface;
+use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
 
-class ARC2_Store extends ARC2_Class
+class ARC2_Store
 {
-    protected $cache;
-    protected $db;
+    protected PDOSQLiteAdapter $db;
 
-    public function __construct($a, &$caller)
+    protected LoggerInterface $logger;
+
+    public function __construct()
     {
-        parent::__construct($a, $caller);
-
+        // TODO make it a constructor argument
         $this->db = new PDOSQLiteAdapter();
-
         $this->a['db_object'] = $this->db;
+
+        // TODO make it a constructor argument
+        $this->logger = new Logger();
     }
 
-    public function __init()
+    public function getLogger(): LoggerInterface
     {
-        parent::__init();
-        $this->table_lock = 0;
-        $this->triggers = $this->v('store_triggers', [], $this->a);
-        $this->queue_queries = $this->v('store_queue_queries', 0, $this->a);
-        $this->is_win = ('win' == strtolower(substr(PHP_OS, 0, 3))) ? true : false;
-        $this->max_split_tables = $this->v('store_max_split_tables', 10, $this->a);
-        $this->split_predicates = $this->v('store_split_predicates', [], $this->a);
-    }
-
-    public function getName()
-    {
-        return $this->v('store_name', 'arc', $this->a);
-    }
-
-    /**
-     * @todo remove
-     */
-    public function createDBCon()
-    {
-        return true;
+        return $this->logger;
     }
 
     public function getDBObject(): ?PDOSQLiteAdapter
@@ -64,22 +50,6 @@ class ARC2_Store extends ARC2_Class
     public function getDBSName(): string
     {
         return $this->db->getDBSName();
-    }
-
-    public function getCollation()
-    {
-        $row = $this->db->fetchRow('SHOW TABLE STATUS LIKE "setting"');
-
-        return isset($row['Collation']) ? $row['Collation'] : '';
-    }
-
-    public function getColumnType()
-    {
-        if (!$this->v('column_type')) {
-            $this->column_type = 'INTEGER';
-        }
-
-        return $this->column_type;
     }
 
     public function hasHashColumn($tbl)
@@ -99,10 +69,6 @@ class ARC2_Store extends ARC2_Class
 
     public function hasSetting($k)
     {
-        if (null == $this->db) {
-            $this->createDBCon();
-        }
-
         $tbl = 'setting';
 
         return $this->db->fetchRow('SELECT val FROM '.$tbl." WHERE k = '".md5($k)."'")
@@ -112,10 +78,6 @@ class ARC2_Store extends ARC2_Class
 
     public function getSetting($k, $default = 0)
     {
-        if (null == $this->db) {
-            $this->createDBCon();
-        }
-
         $tbl = 'setting';
         $row = $this->db->fetchRow('SELECT val FROM '.$tbl." WHERE k = '".md5($k)."'");
         if (isset($row['val'])) {
@@ -144,45 +106,6 @@ class ARC2_Store extends ARC2_Class
         return $this->db->simpleQuery('DELETE FROM '.$tbl." WHERE k = '".md5($k)."'");
     }
 
-    public function getQueueTicket()
-    {
-        if (!$this->queue_queries) {
-            return 1;
-        }
-        $t = 'ticket_'.substr(md5(uniqid(rand())), 0, 10);
-        /* lock */
-        $this->db->simpleQuery('LOCK TABLES setting WRITE');
-        /* queue */
-        $queue = $this->getSetting('query_queue', []);
-        $queue[] = $t;
-        $this->setSetting('query_queue', $queue);
-        $this->db->simpleQuery('UNLOCK TABLES');
-        /* loop */
-        $lc = 0;
-        $queue = $this->getSetting('query_queue', []);
-        while ($queue && ($queue[0] != $t) && ($lc < 30)) {
-            usleep(100000);
-            $lc += 0.1;
-            $queue = $this->getSetting('query_queue', []);
-        }
-
-        return ($lc < 30) ? $t : 0;
-    }
-
-    public function removeQueueTicket($t)
-    {
-        if (!$this->queue_queries) {
-            return 1;
-        }
-        /* lock */
-        $this->db->simpleQuery('LOCK TABLES setting WRITE');
-        /* queue */
-        $vals = $this->getSetting('query_queue', []);
-        $pos = array_search($t, $vals);
-        $queue = ($pos < (count($vals) - 1)) ? array_slice($vals, $pos + 1) : [];
-        $this->setSetting('query_queue', $queue);
-        $this->db->simpleQuery('UNLOCK TABLES');
-    }
 
     public function reset($keep_settings = 0)
     {
@@ -203,13 +126,21 @@ class ARC2_Store extends ARC2_Class
         }
     }
 
+    private function toTurtle($v): string
+    {
+        $ser = new TurtleSerializer([], $this);
+
+        return (isset($v[0]) && isset($v[0]['s']))
+            ? $ser->getSerializedTriples($v)
+            : $ser->getSerializedIndex($v);
+    }
+
     public function insert($doc, $g, $keep_bnode_ids = 0)
     {
         $doc = is_array($doc) ? $this->toTurtle($doc) : $doc;
         $infos = ['query' => ['url' => $g, 'target_graph' => $g]];
         $h = new ARC2_StoreLoadQueryHandler($this);
         $r = $h->runQuery($infos, $doc, $keep_bnode_ids);
-        $this->processTriggers('insert', $infos);
 
         return $r;
     }
@@ -220,7 +151,6 @@ class ARC2_Store extends ARC2_Class
             $infos = ['query' => ['target_graphs' => [$g]]];
             $h = new ARC2_StoreDeleteQueryHandler($this);
             $r = $h->runQuery($infos);
-            $this->processTriggers('delete', $infos);
 
             return $r;
         }
@@ -261,7 +191,7 @@ class ARC2_Store extends ARC2_Class
         if (!isset($p) || 0 == count($errors)) {
             $qt = $infos['query']['type'];
             if (!in_array($qt, ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'])) {
-                return $this->addError('Unsupported query type "'.$qt.'"');
+                return $this->logger->error('Unsupported query type "'.$qt.'"');
             }
 
             $result = $this->runQuery($infos, $qt, $keep_bnode_ids, $q);
@@ -301,46 +231,12 @@ class ARC2_Store extends ARC2_Class
             $h = new $cls($this->a, $this);
         }
 
-        $ticket = 1;
         $r = [];
-        if ($q && ('select' == $type)) {
-            $ticket = $this->getQueueTicket($q);
+        if ('Load' == $type) {/* the LoadQH supports raw data as 2nd parameter */
+            $r = $h->runQuery($infos, '', $keep_bnode_ids);
+        } else {
+            $r = $h->runQuery($infos, $keep_bnode_ids);
         }
-        if ($ticket) {
-            if ('Load' == $type) {/* the LoadQH supports raw data as 2nd parameter */
-                $r = $h->runQuery($infos, '', $keep_bnode_ids);
-            } else {
-                $r = $h->runQuery($infos, $keep_bnode_ids);
-            }
-        }
-        if ($q && ('select' == $type)) {
-            $this->removeQueueTicket($ticket);
-        }
-        $this->processTriggers($type, $infos);
-
-        return $r;
-    }
-
-    public function processTriggers($type, $infos)
-    {
-        $r = [];
-        $trigger_defs = $this->triggers;
-        $this->triggers = [];
-        $triggers = $this->v($type, [], $trigger_defs);
-        if ($triggers) {
-            $r['trigger_results'] = [];
-            $triggers = is_array($triggers) ? $triggers : [$triggers];
-            foreach ($triggers as $trigger) {
-                $trigger .= !preg_match('/Trigger$/', $trigger) ? 'Trigger' : '';
-                $cls = 'ARC2_'.ucfirst($trigger);
-                $config = array_merge($this->a, ['query_infos' => $infos]);
-                $trigger_obj = new $cls($config, $this);
-                if (method_exists($trigger_obj, 'go')) {
-                    $r['trigger_results'][] = $trigger_obj->go();
-                }
-            }
-        }
-        $this->triggers = $trigger_defs;
 
         return $r;
     }
@@ -461,17 +357,14 @@ class ARC2_Store extends ARC2_Class
 
     public function getLabelProps()
     {
-        return array_merge(
-            $this->v('rdf_label_properties', [], $this->a),
-            [
-                'http://www.w3.org/2000/01/rdf-schema#label',
-                'http://xmlns.com/foaf/0.1/name',
-                'http://purl.org/dc/elements/1.1/title',
-                'http://purl.org/rss/1.0/title',
-                'http://www.w3.org/2004/02/skos/core#prefLabel',
-                'http://xmlns.com/foaf/0.1/nick',
-            ]
-        );
+        return [
+            'http://www.w3.org/2000/01/rdf-schema#label',
+            'http://xmlns.com/foaf/0.1/name',
+            'http://purl.org/dc/elements/1.1/title',
+            'http://purl.org/rss/1.0/title',
+            'http://www.w3.org/2004/02/skos/core#prefLabel',
+            'http://xmlns.com/foaf/0.1/nick',
+        ];
     }
 
     public function inferLabelProps($ps)
@@ -482,6 +375,8 @@ class ARC2_Store extends ARC2_Class
             $sub_q .= ' <'.$p.'> a <http://semsol.org/ns/arc#LabelProperty> . ';
         }
         $this->query('INSERT INTO <label-properties> { '.$sub_q.' }');
+
+        // TODO is that required? move to standalone property if so
         $this->setSetting('store_label_properties', md5(serialize($ps)));
     }
 

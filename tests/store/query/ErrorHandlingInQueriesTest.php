@@ -13,6 +13,7 @@
 
 namespace Tests\store\query;
 
+use ARC2_Store;
 use Tests\ARC2_TestCase;
 
 /**
@@ -24,7 +25,7 @@ class ErrorHandlingInQueriesTest extends ARC2_TestCase
     {
         parent::setUp();
 
-        $this->fixture = \ARC2::getStore($this->dbConfig);
+        $this->fixture = new ARC2_Store();
     }
 
     /**
@@ -53,6 +54,7 @@ class ErrorHandlingInQueriesTest extends ARC2_TestCase
             $res
         );
 
-        $this->assertTrue(2 <= \count($this->fixture->errors));
+        // TODO not bad if count is higher than 2
+        $this->assertEquals(2, \count($this->fixture->getLogger()->getEntries()));
     }
 }

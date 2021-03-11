@@ -24,7 +24,6 @@ class ARC2_StoreQueryHandler extends ARC2_Class
         parent::__construct($a, $caller);
 
         $this->allow_extension_functions = $this->v('store_allow_extension_functions', 1, $this->a);
-        $this->handler_type = '';
     }
 
     public function getTermID($val, $term = '')

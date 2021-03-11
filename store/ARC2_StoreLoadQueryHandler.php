@@ -45,7 +45,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         /* load and parse */
         $this->max_term_id = $this->getMaxTermID();
         $this->max_triple_id = $this->getMaxTripleID();
-        $this->column_type = $this->store->getColumnType();
 
         $this->term_ids = [];
         $this->triple_ids = [];

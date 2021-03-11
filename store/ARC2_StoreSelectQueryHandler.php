@@ -134,10 +134,12 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             !$this->store->getDBObject()->simpleQuery($tmp_sql)
             && !$this->store->getDBObject()->simpleQuery($tmpSql2)
         ) {
-            return $this->addError($this->store->getDBObject()->getErrorMessage());
+            return $this->store->getLogger()->error(
+                $this->store->getDBObject()->getErrorMessage()
+            );
         }
         if (false == $this->store->getDBObject()->exec('INSERT INTO '.$tbl.' '."\n".$q_sql)) {
-            $this->addError($this->store->getDBObject()->getErrorMessage());
+            $this->store->getLogger()->error($this->store->getDBObject()->getErrorMessage());
         }
 
         return $tbl;
@@ -207,7 +209,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
             $entries = $this->store->getDBObject()->fetchList($v_sql);
         } catch (\Exception $e) {
-            $this->addError($e->getMessage());
+            $this->store->getLogger()->error($e->getMessage());
         }
 
         $rows = [];
@@ -532,7 +534,9 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             } elseif (1 == $var_name) {/* ASK query */
                 $r .= '1 AS `success`';
             } else {
-                $this->addError('Result variable "'.$var_name.'" not used in query.');
+                $this->store->getLogger()->warning(
+                    'Result variable "'.$var_name.'" not used in query.'
+                );
             }
             if ($tbl_alias) {
                 /* aggregate */
@@ -707,7 +711,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             }
         } while ($next_id);
         if ($deps) {
-            $this->addError('Not all patterns could be rewritten to SQL JOINs');
+            $this->store->getLogger()->notice('Not all patterns could be rewritten to SQL JOINs');
         }
 
         return $r;
@@ -1597,7 +1601,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         if (method_exists($this, $m)) {
             return $this->$m($pattern, $context);
         } else {
-            $this->addError('Unknown built-in call "'.$call.'"');
+            throw new Exception('Unknown built-in call "'.$call.'"');
         }
 
         return '';
