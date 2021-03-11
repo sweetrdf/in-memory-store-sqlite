@@ -105,7 +105,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         }
         $r = 0;
 
-        $rows = $this->store->a['db_object']->fetchList($sql);
+        $rows = $this->store->getDBObject()->fetchList($sql);
 
         if (is_array($rows)) {
             foreach ($rows as $row) {
@@ -125,7 +125,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
     {
         $sql = 'SELECT MAX(t) AS `id` FROM triple';
 
-        $row = $this->store->a['db_object']->fetchRow($sql);
+        $row = $this->store->getDBObject()->fetchRow($sql);
         if (isset($row['id'])) {
             return $row['id'] + 1;
         }
@@ -163,7 +163,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             if (preg_match('/^(s2val|o2val)$/', $sub_tbl) && $this->hasHashColumn($sub_tbl)) {
                 $sql = 'SELECT id, val FROM '.$sub_tbl.' WHERE val_hash = "'.$this->getValueHash($val).'"';
 
-                $rows = $this->store->a['db_object']->fetchList($sql);
+                $rows = $this->store->getDBObject()->fetchList($sql);
                 if (is_array($rows)) {
                     foreach ($rows as $row) {
                         if ($row['val'] == $val) {
@@ -173,11 +173,11 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                     }
                 }
             } else {
-                $binaryValue = $this->store->a['db_object']->escape($val);
+                $binaryValue = $this->store->getDBObject()->escape($val);
                 if (false !== empty($binaryValue)) {
                     $sql = 'SELECT id FROM '.$sub_tbl." WHERE val = '".$binaryValue."'";
 
-                    $row = $this->store->a['db_object']->fetchRow($sql);
+                    $row = $this->store->getDBObject()->fetchRow($sql);
                     if (is_array($row) && isset($row['id'])) {
                         $id = $row['id'];
                     }
@@ -219,7 +219,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                     AND s_type = '.$t['s_type'].'
                     AND o_type = '.$t['o_type'].'
                  LIMIT 1';
-        $row = $this->store->a['db_object']->fetchRow($sql);
+        $row = $this->store->getDBObject()->fetchRow($sql);
         if (isset($row['t'])) {
             /* hack for "don't insert this triple" */
             $this->triple_ids[$val] = $row['t'];
@@ -290,7 +290,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             $sql = ' ';
         }
 
-        $oCompEscaped = $this->store->a['db_object']->escape($t['o_comp']);
+        $oCompEscaped = $this->store->getDBObject()->escape($t['o_comp']);
 
         $this->sql_buffers[$tbl] .= $sql.'('.$t['t'].', '.$t['s'].', '.$t['p'].', ';
         $this->sql_buffers[$tbl] .= $t['o'].', '.$t['o_lang_dt'].", '";
@@ -319,13 +319,17 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $tbl = $tbl.'2val';
         if ('id2val' == $tbl) {
             $cols = 'id, val, val_type';
-            $vals = '('.$id.", '".$this->store->a['db_object']->escape($val)."', ".$val_type.')';
+            $vals = '('.$id.", '".$this->store->getDBObject()->escape($val)."', ".$val_type.')';
         } elseif (preg_match('/^(s2val|o2val)$/', $tbl) && $this->hasHashColumn($tbl)) {
             $cols = 'id, val_hash, val';
-            $vals = '('.$id.", '".$this->getValueHash($val)."', '".$this->store->a['db_object']->escape($val)."')";
+            $vals = '('.$id.", '"
+                .$this->getValueHash($val)
+                ."', '"
+                .$this->store->getDBObject()->escape($val)
+                ."')";
         } else {
             $cols = 'id, val';
-            $vals = '('.$id.", '".$this->store->a['db_object']->escape($val)."')";
+            $vals = '('.$id.", '".$this->store->getDBObject()->escape($val)."')";
         }
         if (!isset($this->sql_buffers[$tbl])) {
             $this->sql_buffers[$tbl] = '';
@@ -344,9 +348,9 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         foreach (['triple', 'g2t', 'id2val', 's2val', 'o2val'] as $tbl) {
             $buffer_size = isset($this->sql_buffers[$tbl]) ? 1 : 0;
             if ($buffer_size && $force_write) {
-                $this->store->a['db_object']->simpleQuery($this->sql_buffers[$tbl]);
+                $this->store->getDBObject()->simpleQuery($this->sql_buffers[$tbl]);
                 /* table error */
-                $error = $this->store->a['db_object']->getErrorMessage();
+                $error = $this->store->getDBObject()->getErrorMessage();
                 unset($this->sql_buffers[$tbl]);
 
                 /* reset term id buffers */

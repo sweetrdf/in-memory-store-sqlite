@@ -26,7 +26,8 @@
         "files": [
             "./ARC2.php",
             "./ARC2_Class.php",
-            "./ARC2_Reader.php"
+            "./ARC2_Reader.php",
+            "./src/functions.php"
         ],
         "psr-4": {
             "sweetrdf\\InMemoryStoreSqlite\\": [

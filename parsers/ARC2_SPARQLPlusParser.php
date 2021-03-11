@@ -18,11 +18,6 @@ class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
         parent::__construct($a, $caller);
     }
 
-    public function __init()
-    {
-        parent::__init();
-    }
-
     /* +1 */
 
     protected function xQuery($v)
@@ -71,13 +66,6 @@ class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
             $sub_v = $sub_r[1];
             if ((list($sub_r, $sub_v) = $this->xIRIref($sub_v)) && $sub_r) {
                 $r = ['type' => 'load', 'url' => $sub_r, 'target_graph' => ''];
-                if ($sub_r = $this->x('INTO\s+', $sub_v)) {
-                    $sub_v = $sub_r[1];
-                    if ((list($sub_r, $sub_v) = $this->xIRIref($sub_v)) && $sub_r) {
-                        $r['target_graph'] = $sub_r;
-                    }
-                }
-
                 return [$r, $sub_v];
             }
         }

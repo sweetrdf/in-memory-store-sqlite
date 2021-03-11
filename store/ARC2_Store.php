@@ -189,7 +189,8 @@ class ARC2_Store
 
         if (!isset($p) || 0 == count($errors)) {
             $qt = $infos['query']['type'];
-            if (!in_array($qt, ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'])) {
+            $validTypes = ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'];
+            if (!in_array($qt, $validTypes)) {
                 return $this->logger->error('Unsupported query type "'.$qt.'"');
             }
 
@@ -223,12 +224,7 @@ class ARC2_Store
         $type = ucfirst($type);
         $cls = 'ARC2_Store'.$type.'QueryHandler';
 
-        // TODO make that if-else obsolete
-        if (in_array($type, ['Ask', 'Construct', 'Delete', 'Describe', 'Insert', 'Load'])) {
-            $h = new $cls($this);
-        } else {
-            $h = new $cls($this->a, $this);
-        }
+        $h = new $cls($this);
 
         $r = [];
         if ('Load' == $type) {/* the LoadQH supports raw data as 2nd parameter */

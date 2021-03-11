@@ -18,11 +18,6 @@ class ARC2_StoreTurtleLoader extends ARC2_TurtleParser
         parent::__construct($a, $caller);
     }
 
-    public function __init()
-    {
-        parent::__init();
-    }
-
     public function addT($t)
     {
         $this->caller->addT(

@@ -15,38 +15,22 @@ use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
 class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 {
-    public function __construct($a, &$caller)
-    {/* caller has to be a store */
-        parent::__construct($a, $caller);
-    }
-
-    public function __init()
+    /**
+     * @todo move to parent
+     */
+    public function __construct(ARC2_Store $store)
     {
-        parent::__init();
-        $this->store = $this->caller;
-        $this->handler_type = 'select';
-        $this->engine_type = $this->v('store_engine_type', 'MyISAM', $this->a);
+        $this->store = $store;
     }
 
     public function runQuery($infos)
     {
-        $rf = $this->v('result_format', '', $infos);
         $this->infos = $infos;
         $this->infos['null_vars'] = [];
         $this->indexes = [];
         $this->pattern_order_offset = 0;
         $q_sql = $this->getSQL();
 
-        /* debug result formats */
-        if ('sql' == $rf) {
-            return $q_sql;
-        }
-        if ('structure' == $rf) {
-            return $this->infos;
-        }
-        if ('index' == $rf) {
-            return $this->indexes;
-        }
         /* create intermediate results (ID-based) */
         $tmp_tbl = $this->createTempTable($q_sql);
         /* join values */

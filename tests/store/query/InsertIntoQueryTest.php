@@ -363,6 +363,18 @@ class InsertIntoQueryTest extends ARC2_TestCase
         );
     }
 
+    public function testInsertIntoConstruct()
+    {
+        // test data
+        $this->fixture->query('INSERT INTO <http://example.com/> CONSTRUCT {
+            <http://baz> <http://location> "Leipzig" .
+            <http://baz2> <http://location> "Grimma" .
+        }');
+
+        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
+        $this->assertEquals(2, \count($res['result']['rows']));
+    }
+
     public function testInsertIntoWhere()
     {
         // test data
