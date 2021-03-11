@@ -103,6 +103,7 @@ class ARC2_Reader
         }
         /* socket */
         elseif ('socket' == $s_type) {
+            echo PHP_EOL.'readStream: '.$s['socket'];
             $d = ($d_size > 0) && !feof($s['socket']) ? fread($s['socket'], $d_size) : '';
         }
         $eof = $d ? false : true;
