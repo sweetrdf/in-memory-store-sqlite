@@ -23,11 +23,11 @@
         </testsuite>
     </testsuites>
     <filter>
-        <whitelist processUncoveredFilesFromWhitelist="true">
-            <directory suffix=".php">./parsers</directory>
-            <directory suffix=".php">./sparqlscript</directory>
-            <directory suffix=".php">./src</directory>
-            <directory suffix=".php">./store</directory>
+        <whitelist>
+            <directory>parsers</directory>
+            <directory>sparqlscript</directory>
+            <directory>src</directory>
+            <directory>store</directory>
         </whitelist>
     </filter>
 </phpunit>
