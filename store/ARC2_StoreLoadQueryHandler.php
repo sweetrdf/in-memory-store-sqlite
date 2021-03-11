@@ -50,7 +50,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $this->term_ids = [];
         $this->triple_ids = [];
         $this->sql_buffers = [];
-        $r = $loader->parse($url, $data);
+        $loader->parse($url, $data);
 
         /* done */
         $this->checkSQLBuffers(1);

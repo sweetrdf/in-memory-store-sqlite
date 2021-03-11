@@ -13,16 +13,14 @@
 
 class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
 {
-    public function __construct($a, &$caller)
-    {/* caller has to be a store */
-        parent::__construct($a, $caller);
-    }
+    private bool $refs_deleted;
 
-    public function __init()
+    /**
+     * @todo move to parent
+     */
+    public function __construct(ARC2_Store $store)
     {
-        parent::__init();
-        $this->store = $this->caller;
-        $this->handler_type = 'delete';
+        $this->store = $store;
     }
 
     public function runQuery($infos)
@@ -46,11 +44,6 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
         if ($tc && ($this->refs_deleted || (1 == rand(1, 100)))) {
             $this->cleanTableReferences();
         }
-        // TODO What does this rand() call here? remove it and think about a cleaner way
-        //      when to trigger cleanValueTables
-        if ($tc && (1 == rand(1, 500))) {
-            $this->cleanValueTables();
-        }
 
         return [
             't_count' => $tc,
@@ -59,12 +52,12 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
         ];
     }
 
-    public function deleteTargetGraphs()
+    private function deleteTargetGraphs()
     {
         $r = 0;
         foreach ($this->infos['query']['target_graphs'] as $g) {
             if ($g_id = $this->getTermID($g, 'g')) {
-                $r += $this->store->a['db_object']->exec('DELETE FROM g2t WHERE g = '.$g_id);
+                $r += $this->store->getDBObject()->exec('DELETE FROM g2t WHERE g = '.$g_id);
             }
         }
         $this->refs_deleted = $r ? 1 : 0;
@@ -72,7 +65,7 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
         return $r;
     }
 
-    public function deleteTriples()
+    private function deleteTriples()
     {
         $r = 0;
         /* graph restriction */
@@ -117,17 +110,17 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
                 $q = str_replace('T.', '', $q);
                 $sql = 'DELETE FROM triple WHERE '.$q;
             }
-            $r += $this->store->a['db_object']->exec($sql);
-            if (!empty($this->store->a['db_object']->getErrorMessage())) {
+            $r += $this->store->getDBObject()->exec($sql);
+            if (!empty($this->store->getDBObject()->getErrorMessage())) {
                 // TODO deletable because never reachable?
-                throw new Exception($this->store->a['db_object']->getErrorMessage().' in '.$sql);
+                throw new Exception($this->store->getDBObject()->getErrorMessage().' in '.$sql);
             }
         }
 
         return $r;
     }
 
-    public function deleteConstructedGraph()
+    private function deleteConstructedGraph()
     {
         $h = new ARC2_StoreConstructQueryHandler($this->store);
         $sub_r = $h->runQuery($this->infos);
@@ -160,16 +153,15 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
         return $r;
     }
 
-    public function cleanTableReferences()
+    private function cleanTableReferences()
     {
-        $dbv = $this->store->getDBVersion();
         /* check for unconnected triples */
         $sql = 'SELECT T.t
             FROM triple T LEFT JOIN g2t G ON ( G.t = T.t )
             WHERE G.t IS NULL
             LIMIT 1';
 
-        $numRows = $this->store->a['db_object']->getNumberOfRows($sql);
+        $numRows = $this->store->getDBObject()->getNumberOfRows($sql);
 
         if (0 < $numRows) {
             /* delete unconnected triples */
@@ -179,7 +171,7 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
                                 LEFT JOIN g2t G ON G.t = T.t
                             WHERE G.t IS NULL';
             $sql .= ')';
-            $this->store->a['db_object']->simpleQuery($sql);
+            $this->store->getDBObject()->simpleQuery($sql);
         }
         /* check for unconnected graph refs */
         if ((1 == rand(1, 10))) {
@@ -187,50 +179,15 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
                 SELECT G.g FROM g2t G LEFT JOIN triple T ON ( T.t = G.t )
                 WHERE T.t IS NULL LIMIT 1
             ';
-            if (0 < $this->store->a['db_object']->getNumberOfRows($sql)) {
+            if (0 < $this->store->getDBObject()->getNumberOfRows($sql)) {
                 /* delete unconnected graph refs */
                 $sql = 'DELETE G
                     FROM g2t G
                     LEFT JOIN triple T ON (T.t = G.t)
                     WHERE T.t IS NULL
                 ';
-                $this->store->a['db_object']->simpleQuery($sql);
+                $this->store->getDBObject()->simpleQuery($sql);
             }
         }
-    }
-
-    public function cleanValueTables()
-    {
-        $dbv = $this->store->getDBVersion();
-
-        /* o2val */
-        $sql = ($dbv < '04-01') ? 'DELETE o2val' : 'DELETE V';
-        $sql .= '
-      FROM o2val V
-      LEFT JOIN triple T ON (T.o = V.id)
-      WHERE T.t IS NULL
-    ';
-        $this->store->a['db_object']->simpleQuery($sql);
-
-        /* s2val */
-        $sql = ($dbv < '04-01') ? 'DELETE s2val' : 'DELETE V';
-        $sql .= '
-      FROM s2val V
-      LEFT JOIN triple T ON (T.s = V.id)
-      WHERE T.t IS NULL
-    ';
-        $this->store->a['db_object']->simpleQuery($sql);
-
-        /* id2val */
-        $sql = ($dbv < '04-01') ? 'DELETE id2val' : 'DELETE V';
-        $sql .= '
-      FROM id2val V
-      LEFT JOIN g2t G ON (G.g = V.id)
-      LEFT JOIN triple T1 ON (T1.p = V.id)
-      LEFT JOIN triple T2 ON (T2.o_lang_dt = V.id)
-      WHERE G.g IS NULL AND T1.t IS NULL AND T2.t IS NULL
-    ';
-        // TODO was commented out before. could this be a problem?
-        $this->store->a['db_object']->simpleQuery($sql);
     }
 }

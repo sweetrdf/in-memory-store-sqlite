@@ -13,15 +13,12 @@
 
 class ARC2_StoreInsertQueryHandler extends ARC2_StoreQueryHandler
 {
-    public function __construct($a, &$caller)
-    {/* caller has to be a store */
-        parent::__construct($a, $caller);
-    }
-
-    public function __init()
+    /**
+     * @todo move to parent
+     */
+    public function __construct(ARC2_Store $store)
     {
-        parent::__init();
-        $this->store = $this->caller;
+        $this->store = $store;
     }
 
     public function runQuery($infos, $keep_bnode_ids = 0)
@@ -32,7 +29,11 @@ class ARC2_StoreInsertQueryHandler extends ARC2_StoreQueryHandler
             $triples = $this->infos['query']['construct_triples'];
             /* don't execute empty INSERTs as they trigger a LOAD on the graph URI */
             if ($triples) {
-                return $this->store->insert($triples, $this->infos['query']['target_graph'], $keep_bnode_ids);
+                return $this->store->insert(
+                    $triples,
+                    $this->infos['query']['target_graph'],
+                    $keep_bnode_ids
+                );
             } else {
                 return ['t_count' => 0, 'load_time' => 0];
             }
@@ -41,7 +42,11 @@ class ARC2_StoreInsertQueryHandler extends ARC2_StoreQueryHandler
             $h = new ARC2_StoreConstructQueryHandler($this->store);
             $sub_r = $h->runQuery($this->infos);
             if ($sub_r) {
-                return $this->store->insert($sub_r, $this->infos['query']['target_graph'], $keep_bnode_ids);
+                return $this->store->insert(
+                    $sub_r,
+                    $this->infos['query']['target_graph'],
+                    $keep_bnode_ids
+                );
             }
 
             return ['t_count' => 0, 'load_time' => 0];

@@ -218,7 +218,7 @@ class ARC2_Store extends ARC2_Class
     {
         if (!$doc) {
             $infos = ['query' => ['target_graphs' => [$g]]];
-            $h = new ARC2_StoreDeleteQueryHandler($this->a, $this);
+            $h = new ARC2_StoreDeleteQueryHandler($this);
             $r = $h->runQuery($infos);
             $this->processTriggers('delete', $infos);
 
@@ -295,7 +295,7 @@ class ARC2_Store extends ARC2_Class
         $cls = 'ARC2_Store'.$type.'QueryHandler';
 
         // TODO make that if-else obsolete
-        if (in_array($type, ['Ask', 'Construct', 'Describe', 'Load'])) {
+        if (in_array($type, ['Ask', 'Construct', 'Delete', 'Describe', 'Insert', 'Load'])) {
             $h = new $cls($this);
         } else {
             $h = new $cls($this->a, $this);

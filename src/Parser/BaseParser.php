@@ -24,42 +24,25 @@ class BaseParser extends ARC2_Class
      */
     protected $added_triples;
 
-    /**
-     * @var string
-     */
-    protected $base;
+    protected string $base;
 
-    /**
-     * @var string
-     */
-    protected $bnode_id;
+    protected string $bnode_id;
 
-    /**
-     * @var array
-     */
-    protected $blocks;
+    protected array $blocks;
 
     /**
      * @var array<string, string>
      */
-    protected $prefixes;
+    protected array $prefixes;
 
     /**
      * Query infos container.
-     *
-     * @var array
      */
-    protected $r = [];
+    protected array $r = [];
 
-    /**
-     * @var array
-     */
-    protected $triples = [];
+    protected array $triples = [];
 
-    /**
-     * @var int
-     */
-    protected $t_count = 0;
+    protected int $t_count = 0;
 
     public function __construct($a, &$caller)
     {
