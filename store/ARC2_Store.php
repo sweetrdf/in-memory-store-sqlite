@@ -12,7 +12,6 @@
  */
 
 use Psr\Log\LoggerInterface;
-use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
 
@@ -22,14 +21,14 @@ class ARC2_Store
 
     protected LoggerInterface $logger;
 
-    public function __construct()
+    public function __construct(PDOSQLiteAdapter $db, LoggerInterface $logger)
     {
         // TODO make it a constructor argument
-        $this->db = new PDOSQLiteAdapter();
+        $this->db = $db;
         $this->a['db_object'] = $this->db;
 
         // TODO make it a constructor argument
-        $this->logger = new Logger();
+        $this->logger = $logger;
     }
 
     public function getLogger(): LoggerInterface

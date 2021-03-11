@@ -137,11 +137,4 @@ class ARC2
     {
         return self::getParser('Turtle', $a);
     }
-
-    /* store */
-
-    public static function getStore($a = '', $caller = '')
-    {
-        return self::getComponent('Store', [], $caller);
-    }
 }

@@ -14,6 +14,8 @@
 namespace Tests\store\query;
 
 use ARC2_Store;
+use sweetrdf\InMemoryStoreSqlite\Logger;
+use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
 
 /**
@@ -25,7 +27,7 @@ class ErrorHandlingInQueriesTest extends ARC2_TestCase
     {
         parent::setUp();
 
-        $this->fixture = new ARC2_Store();
+        $this->fixture = new ARC2_Store(new PDOSQLiteAdapter(), new Logger());
     }
 
     /**

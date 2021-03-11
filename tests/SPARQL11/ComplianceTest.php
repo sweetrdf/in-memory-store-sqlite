@@ -13,6 +13,9 @@
 
 namespace Tests\SPARQL11;
 
+use ARC2_Store;
+use sweetrdf\InMemoryStoreSqlite\Logger;
+use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
 
 /**
@@ -60,7 +63,7 @@ abstract class ComplianceTest extends ARC2_TestCase
         /*
          * Setup a store instance to load test information and data.
          */
-        $this->store = \ARC2::getStore($this->dbConfig);
+        $this->store = new ARC2_Store(new PDOSQLiteAdapter(), new Logger());
     }
 
     /**
