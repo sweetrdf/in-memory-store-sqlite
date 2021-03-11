@@ -295,7 +295,7 @@ class ARC2_Store extends ARC2_Class
         $cls = 'ARC2_Store'.$type.'QueryHandler';
 
         // TODO make that if-else obsolete
-        if (in_array($type, ['Ask', 'Load'])) {
+        if (in_array($type, ['Ask', 'Construct', 'Describe', 'Load'])) {
             $h = new $cls($this);
         } else {
             $h = new $cls($this->a, $this);

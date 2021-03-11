@@ -13,6 +13,9 @@
 
 class ARC2_StoreAskQueryHandler extends ARC2_StoreSelectQueryHandler
 {
+    /**
+     * @todo move to parent
+     */
     public function __construct(ARC2_Store $store)
     {
         $this->store = $store;

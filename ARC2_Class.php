@@ -88,7 +88,7 @@ class ARC2_Class
         if (!in_array($v, $this->errors)) {
             $this->errors[] = $v;
         }
-        if ($this->caller && method_exists($this->caller, 'addError')) {
+        if (isset($this->caller) && method_exists($this->caller, 'addError')) {
             $glue = strpos($v, ' in ') ? ' via ' : ' in ';
             $this->caller->addError($v.$glue.static::class);
         }
@@ -96,16 +96,25 @@ class ARC2_Class
         return false;
     }
 
+    /**
+     * @todo remove
+     */
     public function getErrors()
     {
         return $this->errors;
     }
 
+    /**
+     * @todo remove
+     */
     public function getWarnings()
     {
         return $this->warnings;
     }
 
+    /**
+     * @todo remove
+     */
     public function resetErrors()
     {
         $this->errors = [];

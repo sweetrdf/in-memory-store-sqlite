@@ -11,19 +11,18 @@
  * file that was distributed with this source code.
  */
 
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+
 class ARC2_StoreQueryHandler extends ARC2_Class
 {
+    protected array $errors = [];
     protected ARC2_Store $store;
+    protected string $xsd = NamespaceHelper::NAMESPACE_XSD;
 
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
-    }
 
-    public function __init()
-    {
-        parent::__init();
-        $this->xsd = 'http://www.w3.org/2001/XMLSchema#';
         $this->allow_extension_functions = $this->v('store_allow_extension_functions', 1, $this->a);
         $this->handler_type = '';
     }

@@ -11,8 +11,6 @@
  * file that was distributed with this source code.
  */
 
-use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
-
 class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
 {
     public function __construct($a, &$caller)
@@ -131,7 +129,7 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
 
     public function deleteConstructedGraph()
     {
-        $h = new ARC2_StoreConstructQueryHandler($this->a, $this->store);
+        $h = new ARC2_StoreConstructQueryHandler($this->store);
         $sub_r = $h->runQuery($this->infos);
         $triples = $this->getTriplesFromIndex($sub_r);
         $tgs = $this->infos['query']['target_graphs'];

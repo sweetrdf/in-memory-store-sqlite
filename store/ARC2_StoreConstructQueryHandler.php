@@ -13,15 +13,12 @@
 
 class ARC2_StoreConstructQueryHandler extends ARC2_StoreSelectQueryHandler
 {
-    public function __construct($a, &$caller)
-    {/* caller has to be a store */
-        parent::__construct($a, $caller);
-    }
-
-    public function __init()
+    /**
+     * @todo move to parent
+     */
+    public function __construct(ARC2_Store $store)
     {
-        parent::__init();
-        $this->store = $this->caller;
+        $this->store = $store;
     }
 
     public function runQuery($infos)

@@ -13,16 +13,12 @@
 
 class ARC2_StoreDescribeQueryHandler extends ARC2_StoreSelectQueryHandler
 {
-    public function __construct($a, &$caller)
-    {/* caller has to be a store */
-        parent::__construct($a, $caller);
-    }
-
-    public function __init()
+    /**
+     * @todo move to parent
+     */
+    public function __construct(ARC2_Store $store)
     {
-        parent::__init();
-        $this->store = $this->caller;
-        $this->detect_labels = $this->v('detect_describe_query_labels', 0, $this->a);
+        $this->store = $store;
     }
 
     public function runQuery($infos)
@@ -52,29 +48,7 @@ class ARC2_StoreDescribeQueryHandler extends ARC2_StoreSelectQueryHandler
         while ($this->ids) {
             $id = $this->ids[0];
             $this->described_ids[] = $id;
-            if ($this->detect_labels) {
-                $q = '
-          CONSTRUCT {
-            <'.$id.'> ?p ?o .
-            ?o ?label_p ?o_label .
-            ?o <http://arc.semsol.org/ns/arc#label> ?o_label .
-          } WHERE {
-            <'.$id.'> ?p ?o .
-            OPTIONAL {
-              ?o ?label_p ?o_label .
-              FILTER REGEX(str(?label_p), "(name|label|title|summary|nick|fn)$", "i")
-            }
-          }
-        ';
-            } else {
-                $q = '
-          CONSTRUCT {
-            <'.$id.'> ?p ?o .
-          } WHERE {
-            <'.$id.'> ?p ?o .
-          }
-        ';
-            }
+            $q = 'CONSTRUCT { <'.$id.'> ?p ?o . } WHERE {<'.$id.'> ?p ?o .}';
             $sub_r = $this->store->query($q);
             $sub_index = is_array($sub_r['result']) ? $sub_r['result'] : [];
             $this->mergeSubResults($sub_index, $is_sub_describe);

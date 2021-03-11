@@ -131,13 +131,13 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $tmpSql2 = str_replace('CREATE TEMPORARY', 'CREATE', $tmp_sql);
 
         if (
-            !$this->store->a['db_object']->simpleQuery($tmp_sql)
-            && !$this->store->a['db_object']->simpleQuery($tmpSql2)
+            !$this->store->getDBObject()->simpleQuery($tmp_sql)
+            && !$this->store->getDBObject()->simpleQuery($tmpSql2)
         ) {
-            return $this->addError($this->store->a['db_object']->getErrorMessage());
+            return $this->addError($this->store->getDBObject()->getErrorMessage());
         }
-        if (false == $this->store->a['db_object']->exec('INSERT INTO '.$tbl.' '."\n".$q_sql)) {
-            $this->addError($this->store->a['db_object']->getErrorMessage());
+        if (false == $this->store->getDBObject()->exec('INSERT INTO '.$tbl.' '."\n".$q_sql)) {
+            $this->addError($this->store->getDBObject()->getErrorMessage());
         }
 
         return $tbl;
@@ -205,7 +205,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         try {
             $entries = []; // in case an exception gets thrown
 
-            $entries = $this->store->a['db_object']->fetchList($v_sql);
+            $entries = $this->store->getDBObject()->fetchList($v_sql);
         } catch (\Exception $e) {
             $this->addError($e->getMessage());
         }
@@ -1489,7 +1489,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
     {
         $val = $pattern['uri'];
         $r = $pattern['operator'];
-        $r .= is_numeric($val) ? ' '.$val : ' "'.$this->store->a['db_object']->escape($val).'"';
+        $r .= is_numeric($val) ? ' '.$val : ' "'.$this->store->getDBObject()->escape($val).'"';
 
         return $r;
     }
@@ -1503,10 +1503,10 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         } elseif (preg_match('/^(true|false)$/i', $val) && ('http://www.w3.org/2001/XMLSchema#boolean' == $this->v1('datatype', '', $pattern))) {
             $r .= ' '.strtoupper($val);
         } elseif ('regex' == $parent_type) {
-            $sub_r = $this->store->a['db_object']->escape($val);
+            $sub_r = $this->store->getDBObject()->escape($val);
             $r .= ' "'.preg_replace('/\x5c\x5c/', '\\', $sub_r).'"';
         } else {
-            $r .= ' "'.$this->store->a['db_object']->escape($val).'"';
+            $r .= ' "'.$this->store->getDBObject()->escape($val).'"';
         }
         if (($lang_dt = $this->v1('lang', '', $pattern)) || ($lang_dt = $this->v1('datatype', '', $pattern))) {
             /* try table/alias via var in siblings */
@@ -1859,11 +1859,11 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $limit = $this->v('limit', -1, $this->infos['query']);
         $offset = $this->v('offset', -1, $this->infos['query']);
         if (-1 != $limit) {
-            $offset = (-1 == $offset) ? 0 : $this->store->a['db_object']->escape($offset);
+            $offset = (-1 == $offset) ? 0 : $this->store->getDBObject()->escape($offset);
             $r = 'LIMIT '.$offset.','.$limit;
         } elseif (-1 != $offset) {
             // mysql doesn't support stand-alone offsets
-            $r = 'LIMIT '.$this->store->a['db_object']->escape($offset).',999999999999';
+            $r = 'LIMIT '.$this->store->getDBObject()->escape($offset).',999999999999';
         }
 
         return $r ? $nl.$r : '';
