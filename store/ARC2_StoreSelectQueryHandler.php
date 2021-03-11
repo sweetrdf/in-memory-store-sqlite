@@ -25,7 +25,6 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $this->store = $this->caller;
         $this->handler_type = 'select';
         $this->engine_type = $this->v('store_engine_type', 'MyISAM', $this->a);
-        $this->cache_results = $this->v('store_cache_results', 0, $this->a);
     }
 
     public function runQuery($infos)
@@ -52,9 +51,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         /* join values */
         $r = $this->getFinalQueryResult($q_sql, $tmp_tbl);
         /* remove intermediate results */
-        if (!$this->cache_results) {
-            $this->getDBObjectFromARC2Class()->simpleQuery('DROP TABLE IF EXISTS '.$tmp_tbl);
-        }
+        $this->getDBObjectFromARC2Class()->simpleQuery('DROP TABLE IF EXISTS '.$tmp_tbl);
 
         return $r;
     }
@@ -124,11 +121,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
     public function createTempTable($q_sql)
     {
-        if ($this->cache_results) {
-            $tbl = 'Q'.md5($q_sql);
-        } else {
-            $tbl = 'Q'.md5($q_sql.time().uniqid(rand()));
-        }
+        $tbl = 'Q'.md5($q_sql.time().uniqid(rand()));
         if (strlen($tbl) > 64) {
             $tbl = 'Q'.md5($tbl);
         }

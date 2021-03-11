@@ -77,25 +77,9 @@ class ARC2_StoreTest extends ARC2_TestCase
     // just check pattern
     public function testGetDBVersion()
     {
-        // SQLite
-        if ($this->fixture->getDBObject() instanceof PDOSQLiteAdapter) {
-            $pattern = '/[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}/';
-        } else {
-            // MySQL
-            $pattern = '/[0-9]{2}-[0-9]{2}-[0-9]{2}/';
-        }
+        $pattern = '/[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}/';
         $result = preg_match($pattern, $this->fixture->getDBVersion(), $match);
         $this->assertEquals(1, $result);
-    }
-
-    /*
-     * Tests for getDBCon
-     */
-
-    public function testGetDBCon()
-    {
-        // TODO use a different check, if mariadb or mysql is used
-        $this->assertTrue(false !== $this->fixture->getDBCon());
     }
 
     /*

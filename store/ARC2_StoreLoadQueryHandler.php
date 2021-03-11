@@ -10,18 +10,12 @@
 
 class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 {
-    private string $fixed_target_graph;
     private string $target_graph;
 
     /**
      * @todo required?
      */
     private int $t_count;
-
-    /**
-     * @todo required?
-     */
-    private int $t_start;
 
     private int $write_buffer_size = 2500;
 
@@ -40,7 +34,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $url = $infos['query']['url'];
         $graph = $infos['query']['target_graph'];
         $this->target_graph = $graph ? $this->calcURI($graph) : $this->calcURI($url);
-        $this->fixed_target_graph = $graph ? $this->target_graph : '';
         $this->keep_bnode_ids = $keep_bnode_ids;
 
         // remove parameters

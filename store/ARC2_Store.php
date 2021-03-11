@@ -55,23 +55,12 @@ class ARC2_Store extends ARC2_Class
         return $this->db;
     }
 
-    /**
-     * @todo remove
-     */
-    public function getDBCon($force = 0)
-    {
-        return true;
-    }
-
     public function getDBVersion()
     {
         return $this->db->getServerVersion();
     }
 
-    /**
-     * @return string Returns DBS name. Possible values: mysql, mariadb
-     */
-    public function getDBSName()
+    public function getDBSName(): string
     {
         return $this->db->getDBSName();
     }
@@ -102,45 +91,9 @@ class ARC2_Store extends ARC2_Class
         return $this->$var_name;
     }
 
-    /**
-     * @todo remove
-     */
-    public function hasFulltextIndex()
-    {
-        return true;
-    }
-
-    /**
-     * @todo remove
-     */
-    public function enableFulltextSearch()
-    {
-    }
-
-    /**
-     * @todo remove
-     */
-    public function disableFulltextSearch()
-    {
-    }
-
     public function getTables()
     {
         return ['triple', 'g2t', 'id2val', 's2val', 'o2val', 'setting'];
-    }
-
-    /**
-     * @todo remove
-     */
-    public function extendColumns()
-    {
-    }
-
-    /**
-     * @todo remove
-     */
-    public function splitTables()
-    {
     }
 
     public function hasSetting($k)
@@ -337,11 +290,12 @@ class ARC2_Store extends ARC2_Class
      */
     private function runQuery($infos, $type, $keep_bnode_ids = 0, $q = '')
     {
-        $cls = 'ARC2_Store'.ucfirst($type).'QueryHandler';
+        $type = ucfirst($type);
+        $cls = 'ARC2_Store'.$type.'QueryHandler';
 
         // TODO make that if-else obsolete
-        if ('ARC2_StoreLoadQueryHandler' == $cls) {
-            $h = new ARC2_StoreLoadQueryHandler($this);
+        if (in_array($type, ['Ask', 'Load'])) {
+            $h = new $cls($this);
         } else {
             $h = new $cls($this->a, $this);
         }
@@ -352,7 +306,7 @@ class ARC2_Store extends ARC2_Class
             $ticket = $this->getQueueTicket($q);
         }
         if ($ticket) {
-            if ('load' == $type) {/* the LoadQH supports raw data as 2nd parameter */
+            if ('Load' == $type) {/* the LoadQH supports raw data as 2nd parameter */
                 $r = $h->runQuery($infos, '', $keep_bnode_ids);
             } else {
                 $r = $h->runQuery($infos, $keep_bnode_ids);
