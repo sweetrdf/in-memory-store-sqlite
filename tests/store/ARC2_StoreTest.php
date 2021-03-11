@@ -1,18 +1,18 @@
 <?php
 
 /*
- *  This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- *  the terms of the GPL-3 license.
+ * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
+ * the terms of the GPL-3 license.
  *
- *  (c) Konrad Abicht <hi@inspirito.de>
+ * (c) Konrad Abicht <hi@inspirito.de>
+ * (c) Benjamin Nowack
  *
- *  For the full copyright and license information, please view the LICENSE
- *  file that was distributed with this source code.
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Tests\store;
 
-use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
 
 class ARC2_StoreTest extends ARC2_TestCase
