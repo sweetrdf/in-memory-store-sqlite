@@ -66,7 +66,7 @@ class BaseParser
         if (false === $o) {
             $o = $this;
         }
-        if (is_array($o)) {
+        if (\is_array($o)) {
             return isset($o[$name]) ? $o[$name] : $default;
         }
 
@@ -78,7 +78,7 @@ class BaseParser
         if (false === $o) {
             $o = $this;
         }
-        if (is_array($o)) {
+        if (\is_array($o)) {
             return (isset($o[$name]) && $o[$name]) ? $o[$name] : $default;
         }
 

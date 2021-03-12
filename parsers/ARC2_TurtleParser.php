@@ -11,10 +11,9 @@
  * file that was distributed with this source code.
  */
 
+use function sweetrdf\InMemoryStoreSqlite\calcURI;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\Parser\BaseParser;
-
-use function sweetrdf\InMemoryStoreSqlite\calcURI;
 
 class ARC2_TurtleParser extends BaseParser
 {

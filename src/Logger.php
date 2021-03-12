@@ -51,6 +51,6 @@ class Logger
 
     public function hasEntries(?string $level = null): bool
     {
-        return 0 < count($this->getEntries($level));
+        return 0 < \count($this->getEntries($level));
     }
 }

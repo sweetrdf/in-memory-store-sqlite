@@ -11,9 +11,8 @@
  * file that was distributed with this source code.
  */
 
-use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
-
 use function sweetrdf\InMemoryStoreSqlite\calcBase;
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
 class ARC2_SPARQLParser extends ARC2_TurtleParser
 {

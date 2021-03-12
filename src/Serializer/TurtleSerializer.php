@@ -14,7 +14,6 @@
 namespace sweetrdf\InMemoryStoreSqlite\Serializer;
 
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
-
 use function sweetrdf\InMemoryStoreSqlite\splitURI;
 
 class TurtleSerializer
@@ -73,7 +72,7 @@ class TurtleSerializer
                 $r[$s][$p] = [];
             }
             if ($flatten_objects) {
-                if (!in_array($o, $r[$s][$p])) {
+                if (!\in_array($o, $r[$s][$p])) {
                     $r[$s][$p][] = $o;
                 }
             } else {
@@ -85,7 +84,7 @@ class TurtleSerializer
                         $o[$suffix] = $t['o '.$suffix];
                     }
                 }
-                if (!in_array($o, $r[$s][$p])) {
+                if (!\in_array($o, $r[$s][$p])) {
                     $r[$s][$p][] = $o;
                 }
             }
@@ -123,7 +122,7 @@ class TurtleSerializer
         /* is already a pname */
         $ns = $this->getPNameNamespace($v, $connector);
         if ($ns) {
-            if (!in_array($ns, $this->used_ns)) {
+            if (!\in_array($ns, $this->used_ns)) {
                 $this->used_ns[] = $ns;
             }
 
@@ -135,7 +134,7 @@ class TurtleSerializer
             /* known prefix */
             foreach ($this->ns as $prefix => $ns) {
                 if ($parts[0] == $ns) {
-                    if (!in_array($ns, $this->used_ns)) {
+                    if (!\in_array($ns, $this->used_ns)) {
                         $this->used_ns[] = $ns;
                     }
 
@@ -161,7 +160,7 @@ class TurtleSerializer
             $this->nsp[$ns] = 'ns'.$this->ns_count;
             ++$this->ns_count;
         }
-        if (!in_array($ns, $this->used_ns)) {
+        if (!\in_array($ns, $this->used_ns)) {
             $this->used_ns[] = $ns;
         }
 

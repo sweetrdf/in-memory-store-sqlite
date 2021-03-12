@@ -76,17 +76,17 @@ function splitURI($v): array
      * we have to set the split position manually
      */
     if (strpos($v, 'www.w3.org')) {
+        /*
+         * @todo port to NamespaceHelper
+         */
         $specials = [
             'http://www.w3.org/XML/1998/namespace',
             'http://www.w3.org/2005/Atom',
-
-    /**
-     * @todo port to NamespaceHelper
-     */'http://www.w3.org/1999/xhtml',
+            'http://www.w3.org/1999/xhtml',
         ];
         foreach ($specials as $ns) {
             if (str_contains($v, $ns)) {
-                $local_part = substr($v, strlen($ns));
+                $local_part = substr($v, \strlen($ns));
                 if (!preg_match('/^[\/\#]/', $local_part)) {
                     return [$ns, $local_part];
                 }
