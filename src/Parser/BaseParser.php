@@ -172,16 +172,4 @@ class BaseParser
 
         return $r;
     }
-
-    public function reset()
-    {
-        $this->__init();
-        if (isset($this->reader)) {
-            unset($this->reader);
-        }
-        if (isset($this->parser)) {
-            $this->parser->__init();
-            unset($this->parser);
-        }
-    }
 }

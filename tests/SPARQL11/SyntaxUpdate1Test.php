@@ -62,29 +62,13 @@ class SyntaxUpdate1Test extends ComplianceTest
      * tests
      */
 
-    public function testTest1()
-    {
-        $this->loadManifestFileIntoStore($this->w3cTestsFolderPath);
-        $query = $this->getTestQuery($this->testPref.'test_1');
+    /*
+     * Ignore test_1 because we don't support LOAD <...>
+     */
 
-        // fire query
-        $result = $this->store->query($query);
-
-        // check result
-        $this->assertTrue(\is_array($result) && isset($result['query_type']));
-    }
-
-    public function testTest2()
-    {
-        $this->loadManifestFileIntoStore($this->w3cTestsFolderPath);
-        $query = $this->getTestQuery($this->testPref.'test_2');
-
-        // fire query
-        $result = $this->store->query($query);
-
-        // check result
-        $this->assertTrue(\is_array($result) && isset($result['query_type']));
-    }
+    /*
+     * Ignore test_2 because we don't support LOAD <...>
+     */
 
     public function testTest41()
     {

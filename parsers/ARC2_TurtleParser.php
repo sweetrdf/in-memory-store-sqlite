@@ -65,7 +65,7 @@ class ARC2_TurtleParser extends BaseParser
     {
         $this->reader = new ARC2_Reader();
         $this->reader->activate($path, $data);
-        $this->base = $this->reader->base;
+        $this->base = $this->reader->getBase();
         $this->r = ['vars' => []];
         /* parse */
         $buffer = '';
@@ -74,7 +74,7 @@ class ARC2_TurtleParser extends BaseParser
         $sub_v2 = '';
         $loops = 0;
         $prologue_done = 0;
-        while ($d = $this->reader->readStream(0, 8192)) {
+        while ($d = $this->reader->readStream(8192)) {
             $buffer .= $d;
             $sub_v = $buffer;
             do {
@@ -83,7 +83,7 @@ class ARC2_TurtleParser extends BaseParser
                     $proceed = 1;
                     if ((list($sub_r, $sub_v) = $this->xPrologue($sub_v)) && $sub_r) {
                         $loops = 0;
-                        $sub_v .= $this->reader->readStream(0, 128);
+                        $sub_v .= $this->reader->readStream(128);
                         /* in case we missed the final DOT in the previous prologue loop */
                         if ($sub_r = $this->x('\.', $sub_v)) {
                             $sub_v = $sub_r[1];
@@ -111,10 +111,8 @@ class ARC2_TurtleParser extends BaseParser
             ++$loops;
             $buffer = $sub_v;
             if ($loops > $this->max_parsing_loops) {
-                // most probably a parser or code bug, might also be a huge object value, though
-                // TODO: handle this case
-                $this->addError('too many loops: '.$loops.'. Could not parse "'.substr($buffer, 0, 200).'..."');
-                break;
+                $msg = 'too many loops: '.$loops.'. Could not parse "'.substr($buffer, 0, 200).'..."';
+                throw new Exception($msg);
             }
         }
         foreach ($more_triples as $t) {
@@ -123,7 +121,6 @@ class ARC2_TurtleParser extends BaseParser
         $sub_v = count($more_triples) ? $sub_v2 : $sub_v;
         $buffer = $sub_v;
         $this->unparsed_code = $buffer;
-        $this->reader->closeStream();
         unset($this->reader);
 
         /* remove trailing comments */
