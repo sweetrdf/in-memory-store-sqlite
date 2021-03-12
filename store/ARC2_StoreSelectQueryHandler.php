@@ -205,7 +205,10 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                                     ? 'literal'
                                     : 'uri'
                               );
-                        if (isset($pre_row[$var.' lang_dt']) && ($lang_dt = $pre_row[$var.' lang_dt'])) {
+                        if (
+                            isset($pre_row[$var.' lang_dt'])
+                            && ($lang_dt = $pre_row[$var.' lang_dt'])
+                        ) {
                             if (preg_match('/^([a-z]+(\-[a-z0-9]+)*)$/i', $lang_dt)) {
                                 $row[$var.' lang'] = $lang_dt;
                             } else {

@@ -17,9 +17,9 @@ use sweetrdf\InMemoryStoreSqlite\Parser\BaseParser;
 
 class ARC2_TurtleParser extends BaseParser
 {
-    public function __construct($a, &$caller)
+    public function __construct()
     {
-        parent::__construct($a, $caller);
+        parent::__construct();
 
         $this->state = 0;
         $this->unparsed_code = '';
@@ -45,7 +45,7 @@ class ARC2_TurtleParser extends BaseParser
         return '_:'.$this->bnode_prefix.$this->bnode_id;
     }
 
-    protected function addT($t)
+    protected function addT(array $t): void
     {
         $this->triples[$this->t_count] = $t;
         ++$this->t_count;

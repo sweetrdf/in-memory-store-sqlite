@@ -19,24 +19,16 @@ use PDO;
 /**
  * PDO SQLite adapter.
  */
-final class PDOSQLiteAdapter
+class PDOSQLiteAdapter
 {
-    /**
-     * @var \PDO
-     */
-    private $db;
+    private ?\PDO $db;
 
-    /**
-     * @var int
-     */
-    private $lastRowCount = 0;
+    private int $lastRowCount = 0;
 
     /**
      * Sent queries.
-     *
-     * @var array
      */
-    private $queries = [];
+    private array $queries = [];
 
     public function __construct(string $dbName = null)
     {
@@ -193,29 +185,9 @@ final class PDOSQLiteAdapter
         return $result;
     }
 
-    public function getConnectionId()
-    {
-        return null;
-    }
-
-    public function getDBSName()
-    {
-        return 'sqlite';
-    }
-
-    public function getServerInfo()
-    {
-        return null;
-    }
-
     public function getServerVersion()
     {
         return $this->fetchRow('select sqlite_version()')['sqlite_version()'];
-    }
-
-    public function getAdapterName()
-    {
-        return 'pdo';
     }
 
     public function getAffectedRows(): int
@@ -263,10 +235,6 @@ final class PDOSQLiteAdapter
             'by_function' => 'fetchList',
         ];
 
-        if (null == $this->db) {
-            $this->connect();
-        }
-
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $rows = $stmt->fetchAll();
@@ -283,10 +251,6 @@ final class PDOSQLiteAdapter
             'by_function' => 'fetchRow',
         ];
 
-        if (null == $this->db) {
-            $this->connect();
-        }
-
         $row = false;
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
@@ -299,7 +263,7 @@ final class PDOSQLiteAdapter
         return $row;
     }
 
-    public function getConnection()
+    public function getPDO()
     {
         return $this->db;
     }
@@ -348,10 +312,6 @@ final class PDOSQLiteAdapter
             'by_function' => 'simpleQuery',
         ];
 
-        if (false === $this->db instanceof \PDO) {
-            $this->connect();
-        }
-
         $stmt = $this->db->prepare($sql);
         $stmt->execute();
         $this->lastRowCount = $stmt->rowCount();
@@ -361,7 +321,8 @@ final class PDOSQLiteAdapter
     }
 
     /**
-     * Encapsulates internal PDO::exec call. This allows us to extend it, e.g. with caching functionality.
+     * Encapsulates internal PDO::exec call.
+     * This allows us to extend it, e.g. with caching functionality.
      *
      * @param string $sql
      *
@@ -374,10 +335,6 @@ final class PDOSQLiteAdapter
             'query' => $sql,
             'by_function' => 'exec',
         ];
-
-        if (null == $this->db) {
-            $this->connect();
-        }
 
         return $this->db->exec($sql);
     }

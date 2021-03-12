@@ -2,12 +2,15 @@
 
 use function sweetrdf\InMemoryStoreSqlite\calcURI;
 
-/**
- * ARC2 RDF Store LOAD Query Handler.
+/*
+ * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
+ * the terms of the GPL-3 license.
  *
- * @author Benjamin Nowack
- * @license W3C Software License and GPL
- * @homepage <https://github.com/semsol/arc2>
+ * (c) Konrad Abicht <hi@inspirito.de>
+ * (c) Benjamin Nowack
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
@@ -29,7 +32,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $this->keep_bnode_ids = $keep_bnode_ids;
 
         // remove parameters
-        $loader = new ARC2_StoreTurtleLoader([], $this);
+        $loader = new ARC2_StoreTurtleLoader();
         $loader->setCaller($this);
 
         /* logging */
@@ -271,9 +274,6 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $tbl = 'triple';
         $sql = ', ';
 
-        /*
-         * Use appropriate INSERT syntax, depending on the DBS.
-         */
         $sqlHead = 'INSERT OR IGNORE INTO ';
 
         if (!isset($this->sql_buffers[$tbl])) {

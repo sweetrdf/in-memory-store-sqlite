@@ -13,11 +13,6 @@
 
 class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
 {
-    public function __construct($a, &$caller)
-    {
-        parent::__construct($a, $caller);
-    }
-
     /* +1 */
 
     protected function xQuery($v)

@@ -23,11 +23,7 @@ class ARC2_Store
 
     public function __construct(PDOSQLiteAdapter $db, Logger $logger)
     {
-        // TODO make it a constructor argument
         $this->db = $db;
-        $this->a['db_object'] = $this->db;
-
-        // TODO make it a constructor argument
         $this->logger = $logger;
     }
 
@@ -44,11 +40,6 @@ class ARC2_Store
     public function getDBVersion()
     {
         return $this->db->getServerVersion();
-    }
-
-    public function getDBSName(): string
-    {
-        return $this->db->getDBSName();
     }
 
     public function hasHashColumn($tbl)
@@ -127,7 +118,7 @@ class ARC2_Store
 
     private function toTurtle($v): string
     {
-        $ser = new TurtleSerializer([], $this);
+        $ser = new TurtleSerializer();
 
         return (isset($v[0]) && isset($v[0]['s']))
             ? $ser->getSerializedTriples($v)
@@ -137,21 +128,20 @@ class ARC2_Store
     /**
      * @todo rework insert and delete functions (maybe force RDFInterface dataset instance?)
      */
-    public function insert($doc, $g, $keep_bnode_ids = 0)
+    public function insert($data, $g, $keep_bnode_ids = 0)
     {
-        if (is_array($doc)) {
-            $doc = $this->toTurtle($doc);
+        if (is_array($data)) {
+            $data = $this->toTurtle($data);
         }
 
-        if (empty($doc)) {
-            return;
+
+        if (empty($data)) {
+            throw new Exception('$data is empty.');
         }
 
         $infos = ['query' => ['url' => $g, 'target_graph' => $g]];
         $h = new ARC2_StoreLoadQueryHandler($this);
-        $r = $h->runQuery($infos, $doc, $keep_bnode_ids);
-
-        return $r;
+        return $h->runQuery($infos, $data, $keep_bnode_ids);
     }
 
     public function delete($doc, $g)
@@ -185,7 +175,7 @@ class ARC2_Store
         if (preg_match('/^dump/i', $q)) {
             $infos = ['query' => ['type' => 'dump']];
         } else {
-            $p = new ARC2_SPARQLPlusParser($this->a, $this);
+            $p = new ARC2_SPARQLPlusParser();
             $p->parse($q, $src);
             $infos = $p->getQueryInfos();
             $errors = $p->getErrors();
@@ -229,7 +219,7 @@ class ARC2_Store
     /**
      * Uses a relevant QueryHandler class to handle given $query.
      */
-    private function runQuery($infos, $type, $keep_bnode_ids = 0, $q = '')
+    private function runQuery(array $infos, string $type, $keep_bnode_ids = 0, $q = '')
     {
         $type = ucfirst($type);
         $cls = 'ARC2_Store'.$type.'QueryHandler';

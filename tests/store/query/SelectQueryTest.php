@@ -1026,16 +1026,6 @@ class SelectQueryTest extends ARC2_TestCase
             GROUP BY ?who
         ';
 
-        // mark skipped, if we have a certain MySQL version running
-        // TODO make that more flexible, currently its tight to MySQL
-        $serverVersion = $this->fixture->a['db_object']->getServerVersion();
-        if ('05-07' == substr($serverVersion, 0, 5)) {
-            $this->markTestSkipped(
-                '[mysql 5.7] Result set is empty for query: '
-                .$query
-            );
-        }
-
         // test data
         $this->fixture->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://knows> <http://person2>, <http://person3> .

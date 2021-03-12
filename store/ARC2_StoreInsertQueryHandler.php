@@ -13,7 +13,7 @@
 
 class ARC2_StoreInsertQueryHandler extends ARC2_StoreQueryHandler
 {
-    public function runQuery($infos, $keep_bnode_ids = 0)
+    public function runQuery(array $infos, $keep_bnode_ids = 0)
     {
         $this->infos = $infos;
 
@@ -21,11 +21,10 @@ class ARC2_StoreInsertQueryHandler extends ARC2_StoreQueryHandler
         if (!isset($this->infos['query']['pattern'])) {
             $triples = $this->infos['query']['construct_triples'];
             /* don't execute empty INSERTs as they trigger a LOAD on the graph URI */
-            if ($triples) {
+            if (0 < count($triples)) {
                 return $this->store->insert(
                     $triples,
-                    $this->infos['query']['target_graph'],
-                    $keep_bnode_ids
+                    $this->infos['query']['target_graph']
                 );
             } else {
                 return ['t_count' => 0, 'load_time' => 0];

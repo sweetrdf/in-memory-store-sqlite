@@ -103,24 +103,9 @@ class PDOSQLiteAdapterTest extends ARC2_TestCase
         );
     }
 
-    public function testGetAdapterName()
+    public function testGetPDO()
     {
-        $this->assertEquals('pdo', $this->fixture->getAdapterName());
-    }
-
-    public function testGetConnection()
-    {
-        $this->assertTrue($this->fixture->getConnection() instanceof \PDO);
-    }
-
-    /*
-     * Tests for getDBSName
-     */
-
-    public function testGetDBSName()
-    {
-        // connect and check
-        $this->assertEquals('sqlite', $this->fixture->getDBSName(), 'Found: '.$this->fixture->getDBSName());
+        $this->assertTrue($this->fixture->getPDO() instanceof \PDO);
     }
 
     /*

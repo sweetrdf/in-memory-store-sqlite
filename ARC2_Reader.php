@@ -16,11 +16,11 @@ use function sweetrdf\InMemoryStoreSqlite\calcURI;
 
 class ARC2_Reader
 {
-    private string $base;
+    private ?string $base;
 
     private array $stream = [];
 
-    public function getBase(): string
+    public function getBase(): ?string
     {
         return $this->base;
     }
