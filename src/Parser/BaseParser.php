@@ -13,11 +13,10 @@
 
 namespace sweetrdf\InMemoryStoreSqlite\Parser;
 
-use ARC2_Class;
 use ARC2_Reader;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
-class BaseParser extends ARC2_Class
+class BaseParser
 {
     /**
      * @var array
@@ -29,6 +28,8 @@ class BaseParser extends ARC2_Class
     protected string $bnode_id;
 
     protected array $blocks;
+
+    private array $errors = [];
 
     /**
      * @var array<string, string>
@@ -44,10 +45,9 @@ class BaseParser extends ARC2_Class
 
     protected int $t_count = 0;
 
-    public function __construct($a, &$caller)
+    public function __construct()
     {
-        parent::__construct($a, $caller);
-
+        // TODO pass logger as parameter
         $this->reader = new ARC2_Reader();
 
         /*
@@ -59,6 +59,46 @@ class BaseParser extends ARC2_Class
         $this->bnode_prefix = bin2hex(random_bytes(4)).'b';
 
         $this->bnode_id = 0;
+    }
+
+    public function v($name, $default = false, $o = false)
+    {/* value if set */
+        if (false === $o) {
+            $o = $this;
+        }
+        if (is_array($o)) {
+            return isset($o[$name]) ? $o[$name] : $default;
+        }
+
+        return isset($o->$name) ? $o->$name : $default;
+    }
+
+    public function v1($name, $default = false, $o = false)
+    {/* value if 1 (= not empty) */
+        if (false === $o) {
+            $o = $this;
+        }
+        if (is_array($o)) {
+            return (isset($o[$name]) && $o[$name]) ? $o[$name] : $default;
+        }
+
+        return (isset($o->$name) && $o->$name) ? $o->$name : $default;
+    }
+
+    /**
+     * @todo replace by Logger
+     */
+    protected function addError(string $error): void
+    {
+        $this->errors[] = $error;
+    }
+
+    /**
+     * @todo replace by Logger
+     */
+    public function getErrors(): array
+    {
+        return $this->errors;
     }
 
     public function getQueryInfos()

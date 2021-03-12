@@ -13,20 +13,22 @@
 
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
+use function sweetrdf\InMemoryStoreSqlite\calcBase;
+
 class ARC2_SPARQLParser extends ARC2_TurtleParser
 {
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
 
-        $this->bnode_prefix = $this->v('bnode_prefix', 'arc'.substr(md5(uniqid(rand())), 0, 4).'b', $this->a);
+        $this->bnode_prefix = 'arc'.substr(md5(uniqid(rand())), 0, 4).'b';
         $this->bnode_id = 0;
         $this->bnode_pattern_index = ['patterns' => [], 'bnodes' => []];
     }
 
     public function parse($q, $src = ''): void
     {
-        $this->base = $src ? $this->calcBase($src) : NamespaceHelper::BASE_NAMESPACE;
+        $this->base = $src ? calcBase($src) : NamespaceHelper::BASE_NAMESPACE;
         $this->r = [
             'base' => '',
             'vars' => [],

@@ -65,3 +65,43 @@ function calcBase(string $path): string
 
     return 'file://'.realpath($r); /* real path */
 }
+
+/**
+ * @return array<string,string>
+ */
+function splitURI($v): array
+{
+    /*
+     * the following namespaces may lead to conflated URIs,
+     * we have to set the split position manually
+     */
+    if (strpos($v, 'www.w3.org')) {
+        $specials = [
+            'http://www.w3.org/XML/1998/namespace',
+            'http://www.w3.org/2005/Atom',
+
+    /**
+     * @todo port to NamespaceHelper
+     */'http://www.w3.org/1999/xhtml',
+        ];
+        foreach ($specials as $ns) {
+            if (str_contains($v, $ns)) {
+                $local_part = substr($v, strlen($ns));
+                if (!preg_match('/^[\/\#]/', $local_part)) {
+                    return [$ns, $local_part];
+                }
+            }
+        }
+    }
+    /* auto-splitting on / or # */
+    //$re = '^(.*?)([A-Z_a-z][-A-Z_a-z0-9.]*)$';
+    if (preg_match('/^(.*[\/\#])([^\/\#]+)$/', $v, $m)) {
+        return [$m[1], $m[2]];
+    }
+    /* auto-splitting on last special char, e.g. urn:foo:bar */
+    if (preg_match('/^(.*[\:\/])([^\:\/]+)$/', $v, $m)) {
+        return [$m[1], $m[2]];
+    }
+
+    return [$v, ''];
+}

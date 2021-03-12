@@ -13,9 +13,16 @@
 
 class ARC2_StoreTurtleLoader extends ARC2_TurtleParser
 {
+    private ARC2_StoreLoadQueryHandler $caller;
+
     public function __construct($a, &$caller)
     {
         parent::__construct($a, $caller);
+    }
+
+    public function setCaller(ARC2_StoreLoadQueryHandler $caller): void
+    {
+        $this->caller = $caller;
     }
 
     public function addT($t)

@@ -30,6 +30,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 
         // remove parameters
         $loader = new ARC2_StoreTurtleLoader([], $this);
+        $loader->setCaller($this);
 
         /* logging */
         $this->t_count = 0;

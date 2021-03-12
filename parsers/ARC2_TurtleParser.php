@@ -14,6 +14,8 @@
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\Parser\BaseParser;
 
+use function sweetrdf\InMemoryStoreSqlite\calcURI;
+
 class ARC2_TurtleParser extends BaseParser
 {
     public function __construct($a, &$caller)
@@ -64,7 +66,7 @@ class ARC2_TurtleParser extends BaseParser
     {
         $this->reader = new ARC2_Reader();
         $this->reader->activate($path, $data);
-        $this->base = $this->v1('base', $this->reader->base, $this->a);
+        $this->base = $this->reader->base;
         $this->r = ['vars' => []];
         /* parse */
         $buffer = '';
@@ -180,7 +182,7 @@ class ARC2_TurtleParser extends BaseParser
             if ((list($r, $sub_v) = $this->xPNAME_NS($r[1])) && $r) {
                 $prefix = $r;
                 if ((list($r, $sub_v) = $this->xIRI_REF($sub_v)) && $r) {
-                    $uri = $this->calcURI($r, $this->base);
+                    $uri = calcURI($r, $this->base);
                     if ($sub_r = $this->x('\.', $sub_v)) {
                         $sub_v = $sub_r[1];
                     }
@@ -649,7 +651,7 @@ class ARC2_TurtleParser extends BaseParser
     protected function xIRIref($v)
     {
         if ((list($r, $v) = $this->xIRI_REF($v)) && $r) {
-            return [$this->calcURI($r, $this->base), $v];
+            return [calcURI($r, $this->base), $v];
         } elseif ((list($r, $v) = $this->xPrefixedName($v)) && $r) {
             return [$r, $v];
         }
