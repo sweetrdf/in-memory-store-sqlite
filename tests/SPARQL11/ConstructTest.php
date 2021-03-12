@@ -13,6 +13,8 @@
 
 namespace Tests\SPARQL11;
 
+use ARC2_TurtleParser;
+
 /**
  * Runs W3C tests from https://www.w3.org/2009/sparql/docs/tests/.
  *
@@ -49,7 +51,7 @@ class ConstructTest extends ComplianceTest
         // if no result was given, expect test is of type NegativeSyntaxTest11,
         // which has no data (group-data-X.ttl) and result (.srx) file.
         if (0 < \count($res['result']['rows'])) {
-            $parser = \ARC2::getTurtleParser();
+            $parser = new ARC2_TurtleParser([], $this);
             $parser->parse(file_get_contents($res['result']['rows'][0]['resultFile']));
 
             return $parser->getSimpleIndex();

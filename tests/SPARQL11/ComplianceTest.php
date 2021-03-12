@@ -14,6 +14,7 @@
 namespace Tests\SPARQL11;
 
 use ARC2_Store;
+use ARC2_TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
@@ -140,7 +141,7 @@ abstract class ComplianceTest extends ARC2_TestCase
         // if no result was given, expect test is of type NegativeSyntaxTest11,
         // which has no data (group-data-X.ttl) and result (.srx) file.
         if (0 < \count($file['result']['rows'])) {
-            $parser = \ARC2::getTurtleParser();
+            $parser = new ARC2_TurtleParser([], $this);
             $parser->parse($file['result']['rows'][0]['file']);
 
             return $parser->getSimpleIndex();
@@ -322,7 +323,7 @@ abstract class ComplianceTest extends ARC2_TestCase
     protected function loadManifestFileIntoStore($folderPath)
     {
         // parse manifest.ttl and load its content into $this->manifestGraphUri
-        $parser = \ARC2::getTurtleParser();
+        $parser = new ARC2_TurtleParser([], $this);
         $parser->parse($folderPath.'/manifest.ttl');
         $this->store->insert($parser->getSimpleIndex(), $this->manifestGraphUri);
     }

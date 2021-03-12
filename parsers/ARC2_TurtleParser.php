@@ -35,7 +35,7 @@ class ARC2_TurtleParser extends BaseParser
             $v = $m[2];
         }
 
-        return ARC2::x($re, $v, $options);
+        return preg_match("/^\s*".$re.'(.*)$/'.$options, $v, $m) ? $m : false;
     }
 
     private function createBnodeID(): string
