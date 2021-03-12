@@ -142,7 +142,9 @@ abstract class ComplianceTest extends ARC2_TestCase
         // which has no data (group-data-X.ttl) and result (.srx) file.
         if (0 < \count($file['result']['rows'])) {
             $parser = new ARC2_TurtleParser([], $this);
-            $parser->parse($file['result']['rows'][0]['file']);
+            $data = file_get_contents($file['result']['rows'][0]['file']);
+            $uri = $file['result']['rows'][0]['file'];
+            $parser->parse($uri, $data);
 
             return $parser->getSimpleIndex();
         } else {
@@ -324,7 +326,9 @@ abstract class ComplianceTest extends ARC2_TestCase
     {
         // parse manifest.ttl and load its content into $this->manifestGraphUri
         $parser = new ARC2_TurtleParser([], $this);
-        $parser->parse($folderPath.'/manifest.ttl');
+        $data = file_get_contents($folderPath.'/manifest.ttl');
+        $uri = $folderPath.'/manifest.ttl';
+        $parser->parse($uri, $data);
         $this->store->insert($parser->getSimpleIndex(), $this->manifestGraphUri);
     }
 

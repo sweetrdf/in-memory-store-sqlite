@@ -134,9 +134,19 @@ class ARC2_Store
             : $ser->getSerializedIndex($v);
     }
 
+    /**
+     * @todo rework insert and delete functions (maybe force RDFInterface dataset instance?)
+     */
     public function insert($doc, $g, $keep_bnode_ids = 0)
     {
-        $doc = is_array($doc) ? $this->toTurtle($doc) : $doc;
+        if (is_array($doc)) {
+            $doc = $this->toTurtle($doc);
+        }
+
+        if (empty($doc)) {
+            return;
+        }
+
         $infos = ['query' => ['url' => $g, 'target_graph' => $g]];
         $h = new ARC2_StoreLoadQueryHandler($this);
         $r = $h->runQuery($infos, $doc, $keep_bnode_ids);
