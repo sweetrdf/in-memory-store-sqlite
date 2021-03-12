@@ -13,17 +13,47 @@
 
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
-class ARC2_StoreQueryHandler extends ARC2_Class
+class ARC2_StoreQueryHandler
 {
     protected array $errors = [];
+
     protected ARC2_Store $store;
+
     protected string $xsd = NamespaceHelper::NAMESPACE_XSD;
 
-    public function __construct($a, &$caller)
+    public function __construct(ARC2_Store $store)
     {
-        parent::__construct($a, $caller);
+        $this->store = $store;
+    }
 
-        $this->allow_extension_functions = $this->v('store_allow_extension_functions', 1, $this->a);
+    /**
+     * @todo refactor and remove it
+     */
+    public function v($name, $default = false, $o = false)
+    {/* value if set */
+        if (false === $o) {
+            $o = $this;
+        }
+        if (is_array($o)) {
+            return isset($o[$name]) ? $o[$name] : $default;
+        }
+
+        return isset($o->$name) ? $o->$name : $default;
+    }
+
+    /**
+     * @todo refactor and remove it
+     */
+    public function v1($name, $default = false, $o = false)
+    {/* value if 1 (= not empty) */
+        if (false === $o) {
+            $o = $this;
+        }
+        if (is_array($o)) {
+            return (isset($o[$name]) && $o[$name]) ? $o[$name] : $default;
+        }
+
+        return (isset($o->$name) && $o->$name) ? $o->$name : $default;
     }
 
     public function getTermID($val, $term = '')

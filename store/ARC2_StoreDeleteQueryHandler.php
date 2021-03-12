@@ -15,14 +15,6 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
 {
     private bool $refs_deleted;
 
-    /**
-     * @todo move to parent
-     */
-    public function __construct(ARC2_Store $store)
-    {
-        $this->store = $store;
-    }
-
     public function runQuery($infos)
     {
         $this->infos = $infos;

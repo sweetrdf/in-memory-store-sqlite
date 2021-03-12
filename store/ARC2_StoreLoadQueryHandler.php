@@ -1,5 +1,7 @@
 <?php
 
+use function sweetrdf\InMemoryStoreSqlite\calcURI;
+
 /**
  * ARC2 RDF Store LOAD Query Handler.
  *
@@ -19,21 +21,11 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 
     private int $write_buffer_size = 2500;
 
-    public function __construct(ARC2_Store $store)
-    {
-        $this->store = $store;
-    }
-
-    public function setStore(ARC2_Store $store): void
-    {
-        $this->store = $store;
-    }
-
     public function runQuery($infos, $data = '', $keep_bnode_ids = 0)
     {
         $url = $infos['query']['url'];
         $graph = $infos['query']['target_graph'];
-        $this->target_graph = $graph ? $this->calcURI($graph) : $this->calcURI($url);
+        $this->target_graph = $graph ? calcURI($graph) : calcURI($url);
         $this->keep_bnode_ids = $keep_bnode_ids;
 
         // remove parameters

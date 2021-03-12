@@ -13,14 +13,6 @@
 
 class ARC2_StoreDescribeQueryHandler extends ARC2_StoreSelectQueryHandler
 {
-    /**
-     * @todo move to parent
-     */
-    public function __construct(ARC2_Store $store)
-    {
-        $this->store = $store;
-    }
-
     public function runQuery($infos)
     {
         $ids = $infos['query']['result_uris'];

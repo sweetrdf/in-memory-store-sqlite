@@ -13,19 +13,12 @@
 
 class ARC2_StoreInsertQueryHandler extends ARC2_StoreQueryHandler
 {
-    /**
-     * @todo move to parent
-     */
-    public function __construct(ARC2_Store $store)
-    {
-        $this->store = $store;
-    }
-
     public function runQuery($infos, $keep_bnode_ids = 0)
     {
         $this->infos = $infos;
+
         /* insert */
-        if (!$this->v('pattern', [], $this->infos['query'])) {
+        if (!isset($this->infos['query']['pattern'])) {
             $triples = $this->infos['query']['construct_triples'];
             /* don't execute empty INSERTs as they trigger a LOAD on the graph URI */
             if ($triples) {

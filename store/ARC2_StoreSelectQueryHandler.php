@@ -15,14 +15,6 @@ use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
 class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 {
-    /**
-     * @todo move to parent
-     */
-    public function __construct(ARC2_Store $store)
-    {
-        $this->store = $store;
-    }
-
     public function runQuery($infos)
     {
         $this->infos = $infos;
@@ -33,10 +25,12 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
         /* create intermediate results (ID-based) */
         $tmp_tbl = $this->createTempTable($q_sql);
+
         /* join values */
         $r = $this->getFinalQueryResult($q_sql, $tmp_tbl);
+
         /* remove intermediate results */
-        $this->getDBObjectFromARC2Class()->simpleQuery('DROP TABLE IF EXISTS '.$tmp_tbl);
+        $this->store->getDBObject()->simpleQuery('DROP TABLE IF EXISTS '.$tmp_tbl);
 
         return $r;
     }
@@ -1555,20 +1549,6 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $op = $this->v('operator', '', $pattern);
         if ($op) {
             $op .= ' ';
-        }
-        if ($this->allow_extension_functions) {
-            /* mysql functions */
-            if (preg_match('/^http\:\/\/web\-semantics\.org\/ns\/mysql\/(.*)$/', $fnc_uri, $m)) {
-                $fnc_name = strtoupper($m[1]);
-                $sub_r = '';
-                foreach ($pattern['args'] as $arg) {
-                    $sub_r .= $sub_r ? ', ' : '';
-                    $sub_r .= $this->getExpressionSQL($arg, $context, $val_type, $parent_type);
-                }
-
-                return $op.$fnc_name.'('.$sub_r.')';
-            }
-            /* any other: ignore */
         }
         /* simple type conversions */
         if (0 === strpos($fnc_uri, 'http://www.w3.org/2001/XMLSchema#')) {

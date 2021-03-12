@@ -62,7 +62,7 @@ class ARC2_TurtleParser extends BaseParser
 
     public function parse($path, $data = ''): void
     {
-        $this->reader = new ARC2_Reader($this->a, $this);
+        $this->reader = new ARC2_Reader();
         $this->reader->activate($path, $data);
         $this->base = $this->v1('base', $this->reader->base, $this->a);
         $this->r = ['vars' => []];
