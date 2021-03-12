@@ -109,7 +109,7 @@ class ARC2_Reader
             'headers' => [],
             'pos' => 0,
             'size' => filesize($parts['path']),
-            'buffer' => ''
+            'buffer' => '',
         ];
     }
 
