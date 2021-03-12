@@ -116,7 +116,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                 $this->store->getDBObject()->getErrorMessage()
             );
         }
-        if (false == $this->store->getDBObject()->exec('INSERT INTO '.$tbl.' '."\n".$q_sql)) {
+        if (false === $this->store->getDBObject()->exec('INSERT INTO '.$tbl.' '."\n".$q_sql)) {
             $this->store->getLogger()->error($this->store->getDBObject()->getErrorMessage());
         }
 

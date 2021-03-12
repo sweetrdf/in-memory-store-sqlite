@@ -11,7 +11,7 @@
  * file that was distributed with this source code.
  */
 
-use Psr\Log\LoggerInterface;
+use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
 
@@ -19,9 +19,9 @@ class ARC2_Store
 {
     protected PDOSQLiteAdapter $db;
 
-    protected LoggerInterface $logger;
+    protected Logger $logger;
 
-    public function __construct(PDOSQLiteAdapter $db, LoggerInterface $logger)
+    public function __construct(PDOSQLiteAdapter $db, Logger $logger)
     {
         // TODO make it a constructor argument
         $this->db = $db;
@@ -31,7 +31,7 @@ class ARC2_Store
         $this->logger = $logger;
     }
 
-    public function getLogger(): LoggerInterface
+    public function getLogger(): Logger
     {
         return $this->logger;
     }
