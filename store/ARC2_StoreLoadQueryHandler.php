@@ -157,7 +157,9 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             $id = 0;
             /* via hash */
             if (preg_match('/^(s2val|o2val)$/', $sub_tbl) && $this->hasHashColumn($sub_tbl)) {
-                $sql = 'SELECT id, val FROM '.$sub_tbl.' WHERE val_hash = "'.$this->getValueHash($val).'"';
+                $sql = 'SELECT id, val
+                    FROM '.$sub_tbl.'
+                    WHERE val_hash = "'.$this->getValueHash($val).'"';
 
                 $rows = $this->store->getDBObject()->fetchList($sql);
                 if (is_array($rows)) {
@@ -179,7 +181,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                     }
                 }
             }
-            if ($id) {
+            if (0 < $id) {
                 $this->term_ids[$val] = [$tbl => $id];
                 if ($sub_tbl != $tbl.'2val') {
                     $this->bufferIDSQL($tbl, $id, $val, $type_id);

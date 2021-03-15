@@ -2,7 +2,8 @@
 
 ## Introduction
 
-This store supports all [SPARQL Query Language](http://www.w3.org/TR/rdf-sparql-query/) features ([to a certain extent](http://www.w3.org/2001/sw/DataAccess/tests/implementations)) and also a number of pragmatic extensions such as aggregates (AVG / COUNT / MAX / MIN / SUM) and write mechanisms. The changes to the SPARQL specification were kept at a minimum, so that the existing grammar parser and store functionality can be re-used.
+This store supports many [SPARQL Query Language](http://www.w3.org/TR/rdf-sparql-query/) features ([to a certain extent](http://www.w3.org/2001/sw/DataAccess/tests/implementations)) and also a number of pragmatic extensions such as aggregates (AVG / COUNT / MAX / MIN / SUM) and write mechanisms.
+The changes to the SPARQL specification were kept at a minimum, so that the existing grammar parser and store functionality can be re-used.
 
 This page documents the core differences between SPARQL and what is called "SPARQL+" (originally from in [ARC2](https://github.com/semsol/ARC2)).
 
@@ -55,18 +56,15 @@ INSERT INTO <http://example.com/> {
 ```
 In this INSERT form the triples have to be fully specified, variables are not allowed.
 
-
 It is possible to dynamically generate the triples that should be inserted:
 ```sql
-INSERT INTO <http://example.com/inferred> CONSTRUCT {
+INSERT INTO <http://example.com/inferred> {
   ?s foaf:knows ?o .
 }
 WHERE {
   ?s xfn:contact ?o .
 }
 ```
-This is a simple extension to SPARQL's existing CONSTRUCT query type. It adds the triples generated in the construction step to the specified graph. **Note**: The CONSTRUCT keyword was made optional with the Jan 7th, 2008 revision, to increase the compatibility with SPARUL.
-
 
 ## DELETE
 
@@ -84,7 +82,7 @@ FROM can be used to restrict the delete operations to selected graphs. It's also
 DELETE FROM <http://example.com/archive>
 ```
 
-DELETE can (like INSERT) be combined with a CONSTRUCT query (the CONSTRUCT keyword was made optional with the Jan 7th, 2008 revision):
+DELETE can be combined with a WHERE query, like:
 
 ```sql
 DELETE FROM <http://example.com/inferred> {
@@ -108,15 +106,15 @@ WHERE {
 
 ## SPARQL Grammar Changes and Additions
 ```sql
-Query ::= Prologue ( SelectQuery | ConstructQuery | DescribeQuery | AskQuery | LoadQuery | InsertQuery | DeleteQuery )
+Query ::= Prologue ( SelectQuery | DescribeQuery | AskQuery | InsertQuery | DeleteQuery )
 
 SelectQuery ::= 'SELECT' ( 'DISTINCT' | 'REDUCED' )? ( Aggregate+ | Var+ | '*' ) DatasetClause* WhereClause SolutionModifier
 
 Aggregate ::= ( 'AVG' | 'COUNT' | 'MAX' | 'MIN' | 'SUM' ) '(' Var | '*' ')' 'AS' Var
 
-InsertQuery ::= 'INSERT' 'INTO' IRIref 'CONSTRUCT'? ConstructTemplate DatasetClause* WhereClause? SolutionModifier
+InsertQuery ::= 'INSERT' 'INTO' IRIref DatasetClause* WhereClause? SolutionModifier
 
-DeleteQuery ::= 'DELETE' ( 'FROM' IRIref )* 'CONSTRUCT'? ConstructTemplate? DatasetClause* WhereClause? SolutionModifier
+DeleteQuery ::= 'DELETE' ( 'FROM' IRIref )* DatasetClause* WhereClause? SolutionModifier
 
 SolutionModifier ::= GroupClause? OrderClause? LimitOffsetClauses?
 

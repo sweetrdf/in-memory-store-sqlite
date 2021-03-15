@@ -134,7 +134,6 @@ class ARC2_Store
             $data = $this->toTurtle($data);
         }
 
-
         if (empty($data)) {
             throw new Exception('$data is empty.');
         }
