@@ -13,6 +13,7 @@
 
 namespace Tests\integration;
 
+use Exception;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
 
@@ -141,6 +142,32 @@ class PDOSQLiteAdapterTest extends ARC2_TestCase
             preg_match('/[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}/',
             'Found: '.$this->fixture->getServerVersion())
         );
+    }
+
+    /*
+     * Tests for insert
+     */
+
+    public function testInsert()
+    {
+        // create test table
+        $this->fixture->exec('CREATE TABLE pet (name TEXT)');
+
+        $this->fixture->insert('pet', ['name' => 'test1']);
+        $this->fixture->insert('pet', ['name' => 'test2']);
+
+        $this->assertEquals(2, $this->fixture->getNumberOfRows('SELECT * FROM pet;'));
+    }
+
+    public function testInsertTableNameSpecialChars()
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('Invalid table name given.');
+
+        // create test table
+        $this->fixture->exec('CREATE TABLE pet (name TEXT)');
+
+        $this->fixture->insert('pet"', ['name' => 'test1']);
     }
 
     public function testQuery()

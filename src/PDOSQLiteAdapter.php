@@ -109,8 +109,7 @@ class PDOSQLiteAdapter
             o_lang_dt INTEGER UNSIGNED NOT NULL,
             o_comp TEXT NOT NULL,                       -- normalized value for ORDER BY operations
             s_type INTEGER UNSIGNED NOT NULL DEFAULT 0, -- uri/bnode => 0/1
-            o_type INTEGER UNSIGNED NOT NULL DEFAULT 0, -- uri/bnode/literal => 0/1/2
-            misc INTEGER NOT NULL DEFAULT 0             -- temporary flags
+            o_type INTEGER UNSIGNED NOT NULL DEFAULT 0  -- uri/bnode/literal => 0/1/2
         )';
 
         $this->exec($sql);
@@ -127,9 +126,8 @@ class PDOSQLiteAdapter
         // id2val
         $sql = 'CREATE TABLE IF NOT EXISTS id2val (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            misc INTEGER UNSIGNED NOT NULL DEFAULT 0,
             val TEXT NOT NULL,
-            val_type INTEGER NOT NULL DEFAULT 0,     -- uri/bnode/literal => 0/1/2
+            val_type INTEGER NOT NULL DEFAULT 0, -- uri/bnode/literal => 0/1/2
             UNIQUE (id,val_type)
         )';
 
@@ -138,7 +136,6 @@ class PDOSQLiteAdapter
         // s2val
         $sql = 'CREATE TABLE IF NOT EXISTS s2val (
             id INTEGER UNSIGNED NOT NULL,
-            misc INTEGER NOT NULL DEFAULT 0,
             val_hash TEXT NOT NULL,
             val TEXT NOT NULL,
             UNIQUE (id)
@@ -149,7 +146,6 @@ class PDOSQLiteAdapter
         // o2val
         $sql = 'CREATE TABLE IF NOT EXISTS o2val (
             id INTEGER NOT NULL,
-            misc INTEGER UNSIGNED NOT NULL DEFAULT 0,
             val_hash TEXT NOT NULL,
             val TEXT NOT NULL,
             UNIQUE (id)
@@ -222,12 +218,7 @@ class PDOSQLiteAdapter
         return $quoted;
     }
 
-    /**
-     * @param string $sql
-     *
-     * @return array
-     */
-    public function fetchList($sql)
+    public function fetchList(string $sql, array $params = []): array
     {
         // save query
         $this->queries[] = [
@@ -236,14 +227,17 @@ class PDOSQLiteAdapter
         ];
 
         $stmt = $this->db->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
         $rows = $stmt->fetchAll();
         $stmt->closeCursor();
 
         return $rows;
     }
 
-    public function fetchRow($sql)
+    /**
+     * @return bool|array
+     */
+    public function fetchRow(string $sql, array $params = [])
     {
         // save query
         $this->queries[] = [
@@ -253,7 +247,7 @@ class PDOSQLiteAdapter
 
         $row = false;
         $stmt = $this->db->prepare($sql);
-        $stmt->execute();
+        $stmt->execute($params);
         $rows = $stmt->fetchAll();
         if (0 < \count($rows)) {
             $row = array_values($rows)[0];
@@ -299,12 +293,7 @@ class PDOSQLiteAdapter
         return $rowCount;
     }
 
-    /**
-     * @param string $sql Query
-     *
-     * @return bool true if query ran fine, false otherwise
-     */
-    public function simpleQuery($sql)
+    public function simpleQuery(string $sql): bool
     {
         // save query
         $this->queries[] = [
@@ -337,5 +326,49 @@ class PDOSQLiteAdapter
         ];
 
         return $this->db->exec($sql);
+    }
+
+    /**
+     * @return int ID of new entry
+     *
+     * @throws Exception if invalid table name was given
+     */
+    public function insert(string $table, array $data): int
+    {
+        $columns = array_keys($data);
+
+        // we reject fishy table names
+        if (1 !== preg_match('/^[a-zA-Z0-9_]+$/i', $table)) {
+            throw new Exception('Invalid table name given.');
+        }
+
+        /*
+         * start building SQL
+         */
+        $sql = 'INSERT INTO '.$table.' ('.implode(', ', $columns);
+        $sql .= ') VALUES (';
+
+        // add placeholders for each value; collect values
+        $placeholders = [];
+        $params = [];
+        foreach ($data as $v) {
+            $placeholders[] = '?';
+            $params[] = $v;
+        }
+        $sql .= implode(', ', $placeholders);
+
+        $sql .= ')';
+
+        /*
+         * SQL looks like the following now:
+         *
+         *      INSERT INTO foo (bar) (?)
+         */
+
+        // Setup and run prepared statement
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
+
+        return $this->db->lastInsertId();
     }
 }

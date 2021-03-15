@@ -34,42 +34,43 @@ class InsertIntoQueryTest extends ARC2_TestCase
     public function testInsertInto()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->fixture->query('INSERT INTO <http://ex/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
         $this->assertEquals(1, \count($res['result']['rows']));
     }
 
-    public function testInsertIntoAllKindsOfTriples()
+    public function testInsertIntoUriTriple()
     {
         // test data
-        $this->fixture->query('PREFIX ex: <http://example.com/> .
-        INSERT INTO <http://example.com/> {
-            <http://s> <http://p1> <http://o> .
-            <#make> <#me> <#happy> .
-            <http://s2> rdf:type <http://Person> .
-            <http://s2> <http://foo> 1 .
-            <http://s2> <http://foo> 2.0 .
-            <http://s2> <http://foo> "3" .
-            <http://s2> <http://foo> "4"^^xsd:integer .
-            <http://s2> ex:foo "5"@en .
-            _:foo <http://foo> "6" .
-        }');
+        $this->fixture->query('INSERT INTO <http://ex> { <http://s> <http://p> <http://o> .}');
 
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
-
+        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
         $this->assertEquals(
             [
                 [
                     's' => 'http://s',
                     's type' => 'uri',
-                    'p' => 'http://p1',
+                    'p' => 'http://p',
                     'p type' => 'uri',
                     'o' => 'http://o',
                     'o type' => 'uri',
                 ],
+            ],
+            $res['result']['rows']
+        );
+    }
+
+    public function testInsertIntoShortenedUri()
+    {
+        // test data
+        $this->fixture->query('INSERT INTO <http://ex> { <#make> <#me> <#happy> .}');
+
+        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $this->assertEquals(
+            [
                 [
                     's' => NamespaceHelper::BASE_NAMESPACE.'#make',
                     's type' => 'uri',
@@ -78,16 +79,50 @@ class InsertIntoQueryTest extends ARC2_TestCase
                     'o' => NamespaceHelper::BASE_NAMESPACE.'#happy',
                     'o type' => 'uri',
                 ],
+            ],
+            $res['result']['rows']
+        );
+    }
+
+    public function testInsertIntoPrefixedUri()
+    {
+        // test data
+        $query = '
+            PREFIX ex: <http://ex/>
+            INSERT INTO <http://ex> { <http://s> rdf:type ex:Person .}
+        ';
+        $this->fixture->query($query);
+
+        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $this->assertEquals(
+            [
                 [
-                    's' => 'http://s2',
+                    's' => 'http://s',
                     's type' => 'uri',
                     'p' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
                     'p type' => 'uri',
-                    'o' => 'http://Person',
+                    'o' => 'http://ex/Person',
                     'o type' => 'uri',
                 ],
+            ],
+            $res['result']['rows']
+        );
+    }
+
+    public function testInsertIntoNumbers()
+    {
+        // test data
+        $this->fixture->query('INSERT INTO <http://ex> {
+            <http://s> <http://foo> 1 .
+            <http://s> <http://foo> 2.0 .
+            <http://s> <http://foo> "3" .
+        }');
+
+        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $this->assertEquals(
+            [
                 [
-                    's' => 'http://s2',
+                    's' => 'http://s',
                     's type' => 'uri',
                     'p' => 'http://foo',
                     'p type' => 'uri',
@@ -96,7 +131,7 @@ class InsertIntoQueryTest extends ARC2_TestCase
                     'o datatype' => 'http://www.w3.org/2001/XMLSchema#integer',
                 ],
                 [
-                    's' => 'http://s2',
+                    's' => 'http://s',
                     's type' => 'uri',
                     'p' => 'http://foo',
                     'p type' => 'uri',
@@ -105,15 +140,30 @@ class InsertIntoQueryTest extends ARC2_TestCase
                     'o datatype' => 'http://www.w3.org/2001/XMLSchema#decimal',
                 ],
                 [
-                    's' => 'http://s2',
+                    's' => 'http://s',
                     's type' => 'uri',
                     'p' => 'http://foo',
                     'p type' => 'uri',
                     'o' => '3',
                     'o type' => 'literal',
                 ],
+            ],
+            $res['result']['rows']
+        );
+    }
+
+    public function testInsertIntoObjectWithDatatype()
+    {
+        // test data
+        $this->fixture->query('INSERT INTO <http://ex> {
+            <http://s> <http://foo> "4"^^xsd:integer .
+        }');
+
+        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $this->assertEquals(
+            [
                 [
-                    's' => 'http://s2',
+                    's' => 'http://s',
                     's type' => 'uri',
                     'p' => 'http://foo',
                     'p type' => 'uri',
@@ -121,17 +171,47 @@ class InsertIntoQueryTest extends ARC2_TestCase
                     'o type' => 'literal',
                     'o datatype' => 'http://www.w3.org/2001/XMLSchema#integer',
                 ],
+            ],
+            $res['result']['rows']
+        );
+    }
+
+    public function testInsertIntoObjectWithLanguage()
+    {
+        // test data
+        $this->fixture->query('INSERT INTO <http://ex> {
+            <http://s> <http://foo> "5"@en .
+        }');
+
+        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $this->assertEquals(
+            [
                 [
-                    's' => 'http://s2',
+                    's' => 'http://s',
                     's type' => 'uri',
-                    'p' => 'http://example.com/foo',
+                    'p' => 'http://foo',
                     'p type' => 'uri',
                     'o' => '5',
                     'o type' => 'literal',
                     'o lang' => 'en',
                 ],
+            ],
+            $res['result']['rows']
+        );
+    }
+
+    public function testInsertIntoBlankNode1()
+    {
+        // test data
+        $this->fixture->query('INSERT INTO <http://ex> {
+            _:foo <http://foo> "6" .
+        }');
+
+        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $this->assertEquals(
+            [
                 [
-                    's' => $res['result']['rows'][8]['s'],
+                    's' => $res['result']['rows'][0]['s'], // blank node ID is dynamic
                     's type' => 'bnode',
                     'p' => 'http://foo',
                     'p type' => 'uri',
@@ -143,16 +223,16 @@ class InsertIntoQueryTest extends ARC2_TestCase
         );
     }
 
-    public function testInsertIntoBlankNode()
+    public function testInsertIntoBlankNode2()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->fixture->query('INSERT INTO <http://ex/> {
             <http://s> <http://p1> [
                 <http://foo> <http://bar>
             ] .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
 
         // because bnode ID is random, we check only its structure
         $this->assertTrue(isset($res['result']['rows'][0]));
@@ -184,13 +264,13 @@ class InsertIntoQueryTest extends ARC2_TestCase
     public function testInsertIntoDate()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->fixture->query('INSERT INTO <http://ex/> {
             <http://s> <http://p1> "2009-05-28T18:03:38+09:00" .
             <http://s> <http://p1> "2009-05-28T18:03:38+09:00GMT" .
             <http://s> <http://p1> "21 August 2007" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
 
         $this->assertEquals(
             [
@@ -233,11 +313,11 @@ class InsertIntoQueryTest extends ARC2_TestCase
     public function testInsertIntoList()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->fixture->query('INSERT INTO <http://ex/> {
             <http://s> <http://p1> 1, 2, 3 .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
 
         $this->assertEquals(
             [
@@ -303,16 +383,16 @@ class InsertIntoQueryTest extends ARC2_TestCase
     public function testInsertIntoListMoreComplex()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->fixture->query('INSERT INTO <http://ex/> {
             _:b0  rdf:first  1 ;
                   rdf:rest   _:b1 .
-            _:b1  rdf:first  ?x ;
+            _:b1  rdf:first  2 ;
                   rdf:rest   _:b2 .
             _:b2  rdf:first  3 ;
                   rdf:rest   rdf:nil .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
 
         $this->assertEquals(
             [
@@ -336,13 +416,22 @@ class InsertIntoQueryTest extends ARC2_TestCase
                 [
                     's' => $res['result']['rows'][2]['s'],
                     's type' => 'bnode',
-                    'p' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest',
+                    'p' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',
                     'p type' => 'uri',
-                    'o' => $res['result']['rows'][2]['o'],
-                    'o type' => 'bnode',
+                    'o' => '2',
+                    'o type' => 'literal',
+                    'o datatype' => 'http://www.w3.org/2001/XMLSchema#integer',
                 ],
                 [
                     's' => $res['result']['rows'][3]['s'],
+                    's type' => 'bnode',
+                    'p' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest',
+                    'p type' => 'uri',
+                    'o' => $res['result']['rows'][3]['o'],
+                    'o type' => 'bnode',
+                ],
+                [
+                    's' => $res['result']['rows'][4]['s'],
                     's type' => 'bnode',
                     'p' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#first',
                     'p type' => 'uri',
@@ -351,7 +440,7 @@ class InsertIntoQueryTest extends ARC2_TestCase
                     'o datatype' => 'http://www.w3.org/2001/XMLSchema#integer',
                 ],
                 [
-                    's' => $res['result']['rows'][4]['s'],
+                    's' => $res['result']['rows'][5]['s'],
                     's type' => 'bnode',
                     'p' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#rest',
                     'p type' => 'uri',
@@ -366,19 +455,19 @@ class InsertIntoQueryTest extends ARC2_TestCase
     public function testInsertIntoConstruct()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> CONSTRUCT {
+        $this->fixture->query('INSERT INTO <http://ex/> CONSTRUCT {
             <http://baz> <http://location> "Leipzig" .
             <http://baz2> <http://location> "Grimma" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
         $this->assertEquals(2, \count($res['result']['rows']));
     }
 
     public function testInsertIntoWhere()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> CONSTRUCT {
+        $this->fixture->query('INSERT INTO <http://ex/> CONSTRUCT {
             <http://baz> <http://location> "Leipzig" .
             <http://baz2> <http://location> "Grimma" .
         } WHERE {
@@ -387,14 +476,100 @@ class InsertIntoQueryTest extends ARC2_TestCase
 
         // we expect that 1 element gets added to the store, because of the WHERE clause.
         // but ARC2 added none.
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
-        $this->assertEquals(0, \count($res['result']['rows']));
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+        $this->assertEquals(2, \count($res['result']['rows']));
 
         $this->markTestSkipped(
-            'ARC2 does not check the WHERE clause when inserting data. No data added at all.'
+            'ARC2 does not check the WHERE clause when inserting data.'
+            .' Too many triples were added.'
             .\PHP_EOL
             .\PHP_EOL.'FYI: https://www.w3.org/Submission/SPARQL-Update/#sec_examples and '
             .\PHP_EOL.'https://github.com/semsol/arc2/wiki/SPARQL-#insert-example'
+        );
+    }
+
+    public function testInsertInto2GraphsSameTriples()
+    {
+        /*
+         * Test behavior if same triple get inserted into two different graphs:
+         * 1. add
+         * 2. check additions
+         * 3. delete graph2 content
+         * 4. check again
+         */
+
+        $triple = '<http://foo> <http://location> "Leipzig" .';
+        $this->fixture->query('INSERT INTO <http://graph1/> {'.$triple.'}');
+        $this->fixture->query('INSERT INTO <http://graph2/> {'.$triple.'}');
+
+        // check additions (graph1)
+        $res = $this->fixture->query('SELECT * FROM <http://graph1/> {?s ?p ?o.}');
+        $this->assertEquals(1, \count($res['result']['rows']));
+
+        // check additions (graph2)
+        $res = $this->fixture->query('SELECT * FROM <http://graph2/> {?s ?p ?o.}');
+        $this->assertEquals(1, \count($res['result']['rows']));
+
+        /*
+         * test isolation by removing the triple from graph2
+         */
+        $this->fixture->query('DELETE FROM <http://graph2/>');
+
+        // check triples (graph1)
+        $res = $this->fixture->query('SELECT * FROM <http://graph1/> {?s ?p ?o.}');
+        $this->assertEquals(1, \count($res['result']['rows']));
+
+        // check triples (graph2)
+        $res = $this->fixture->query('SELECT * FROM <http://graph2/> {?s ?p ?o.}');
+        $this->assertEquals(0, \count($res['result']['rows']));
+    }
+
+    /**
+     * Tests old behavior of ARC2 store: its SQLite in-memory implementation was not able
+     * to add recognize all triples added by separate query calls.
+     */
+    public function testMultipleInsertsSameStore()
+    {
+        // add triples in separate query calls
+        $this->fixture->query('INSERT INTO <http://ex/> {<http://a> <http://b> <http://c> . }');
+        $this->fixture->query('INSERT INTO <http://ex/> {<http://a2> <http://b2> "c2"@de. }');
+        $this->fixture->query('INSERT INTO <http://ex/> {<http://a3> <http://b3> "c3"^^xsd:string . }');
+
+        // check result
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> WHERE {?s ?p ?o.}');
+
+        $this->assertEquals(3, \count($res['result']['rows']));
+
+        $this->assertEquals(
+            [
+                [
+                    's' => 'http://a',
+                    's type' => 'uri',
+                    'p' => 'http://b',
+                    'p type' => 'uri',
+                    'o' => 'http://c',
+                    'o type' => 'uri',
+                ],
+                [
+                    's' => 'http://a2',
+                    's type' => 'uri',
+                    'p' => 'http://b2',
+                    'p type' => 'uri',
+                    'o' => 'c2',
+                    'o type' => 'literal',
+                    'o lang' => 'de',
+                ],
+                [
+                    's' => 'http://a3',
+                    's type' => 'uri',
+                    'p' => 'http://b3',
+                    'p type' => 'uri',
+                    'o' => 'c3',
+                    'o type' => 'literal',
+                    'o datatype' => 'http://www.w3.org/2001/XMLSchema#string',
+                ],
+            ],
+            $res['result']['rows']
         );
     }
 }

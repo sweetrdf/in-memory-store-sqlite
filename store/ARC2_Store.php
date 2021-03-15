@@ -14,6 +14,7 @@
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
+use sweetrdf\InMemoryStoreSqlite\Store\InsertQueryHandler;
 
 class ARC2_Store
 {
@@ -135,7 +136,8 @@ class ARC2_Store
         }
 
         if (empty($data)) {
-            throw new Exception('$data is empty.');
+            // TODO required to throw something here?
+            return;
         }
 
         $infos = ['query' => ['url' => $g, 'target_graph' => $g]];
@@ -221,7 +223,12 @@ class ARC2_Store
     private function runQuery(array $infos, string $type, $keep_bnode_ids = 0, $q = '')
     {
         $type = ucfirst($type);
-        $cls = 'ARC2_Store'.$type.'QueryHandler';
+
+        if ('Insert' == $type) {
+            $cls = InsertQueryHandler::class;
+        } else {
+            $cls = 'ARC2_Store'.$type.'QueryHandler';
+        }
 
         $h = new $cls($this);
 
@@ -235,15 +242,12 @@ class ARC2_Store
         return $r;
     }
 
-    public function getValueHash($val, $_32bit = false)
+    /**
+     * @param int|float|string $val
+     */
+    public function getValueHash($val)
     {
-        $hash = crc32($val);
-        if ($_32bit && ($hash & 0x80000000)) {
-            $hash = sprintf('%u', $hash);
-        }
-        $hash = abs($hash);
-
-        return $hash;
+        return abs(crc32($val));
     }
 
     public function getTermID($val, $term = '')

@@ -110,47 +110,38 @@ class SelectQueryTest extends ARC2_TestCase
         ');
         $this->assertEquals(
             [
-                'query_type' => 'select',
-                'result' => [
-                    'variables' => [
-                        's', 'o', 'o2',
-                    ],
-                    'rows' => [
-                        // root subject: http://a
-                        [
-                            's' => 'http://a', 's type' => 'uri',
-                            'o' => 'http://b', 'o type' => 'uri',
-                            'o2' => 'http://d', 'o2 type' => 'uri',
-                        ],
-                        [
-                            's' => 'http://a', 's type' => 'uri',
-                            'o' => 'http://b', 'o type' => 'uri',
-                            'o2' => 'http://e', 'o2 type' => 'uri',
-                        ],
-                        [
-                            's' => 'http://a', 's type' => 'uri',
-                            'o' => 'http://c', 'o type' => 'uri',
-                            'o2' => 'http://f', 'o2 type' => 'uri',
-                        ],
-                        // root subject: http://b
-                        [
-                            's' => 'http://b', 's type' => 'uri',
-                            'o' => 'http://d', 'o type' => 'uri',
-                        ],
-                        [
-                            's' => 'http://b', 's type' => 'uri',
-                            'o' => 'http://e', 'o type' => 'uri',
-                        ],
-                        // root subject: http://c
-                        [
-                            's' => 'http://c', 's type' => 'uri',
-                            'o' => 'http://f', 'o type' => 'uri',
-                        ],
-                    ],
+                [
+                    's' => 'http://a',
+                    's type' => 'uri',
+                    'o' => 'http://b',
+                    'o type' => 'uri',
                 ],
-                'query_time' => $res['query_time'],
+                [
+                    's' => 'http://a',
+                    's type' => 'uri',
+                    'o' => 'http://c',
+                    'o type' => 'uri',
+                ],
+                [
+                    's' => 'http://b',
+                    's type' => 'uri',
+                    'o' => 'http://d',
+                    'o type' => 'uri',
+                ],
+                [
+                    's' => 'http://b',
+                    's type' => 'uri',
+                    'o' => 'http://e',
+                    'o type' => 'uri',
+                ],
+                [
+                    's' => 'http://c',
+                    's type' => 'uri',
+                    'o' => 'http://f',
+                    'o type' => 'uri',
+                ],
             ],
-            $res
+            $res['result']['rows']
         );
     }
 
