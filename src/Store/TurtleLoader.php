@@ -11,13 +11,16 @@
  * file that was distributed with this source code.
  */
 
+namespace sweetrdf\InMemoryStoreSqlite\Store;
+
 use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
+use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\LoadQueryHandler;
 
-class ARC2_StoreTurtleLoader extends TurtleParser
+class TurtleLoader extends TurtleParser
 {
-    private ARC2_StoreLoadQueryHandler $caller;
+    private LoadQueryHandler $caller;
 
-    public function setCaller(ARC2_StoreLoadQueryHandler $caller): void
+    public function setCaller(LoadQueryHandler $caller): void
     {
         $this->caller = $caller;
     }

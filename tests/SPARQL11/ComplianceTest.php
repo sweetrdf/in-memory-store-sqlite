@@ -13,10 +13,10 @@
 
 namespace Tests\SPARQL11;
 
-use ARC2_Store;
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\ARC2_TestCase;
 
 /**
@@ -29,7 +29,7 @@ use Tests\ARC2_TestCase;
 abstract class ComplianceTest extends ARC2_TestCase
 {
     /**
-     * @var ARC2_Store
+     * @var InMemoryStoreSqlite
      */
     protected $store;
 
@@ -64,7 +64,7 @@ abstract class ComplianceTest extends ARC2_TestCase
         /*
          * Setup a store instance to load test information and data.
          */
-        $this->store = new ARC2_Store(new PDOSQLiteAdapter(), new Logger());
+        $this->store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     /**

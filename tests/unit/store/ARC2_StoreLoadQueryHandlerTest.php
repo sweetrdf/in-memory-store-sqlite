@@ -13,10 +13,10 @@
 
 namespace Tests\unit\store;
 
-use ARC2_Store;
-use ARC2_StoreLoadQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
+use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\LoadQueryHandler;
 use Tests\ARC2_TestCase;
 
 class ARC2_StoreLoadQueryHandlerTest extends ARC2_TestCase
@@ -27,9 +27,9 @@ class ARC2_StoreLoadQueryHandlerTest extends ARC2_TestCase
     {
         parent::setUp();
 
-        $this->store = new ARC2_Store(new PDOSQLiteAdapter(), new Logger());
+        $this->store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
 
-        $this->fixture = new ARC2_StoreLoadQueryHandler($this->store);
+        $this->fixture = new LoadQueryHandler($this->store);
     }
 
     /*

@@ -11,7 +11,9 @@
  * file that was distributed with this source code.
  */
 
-class ARC2_StoreDescribeQueryHandler extends ARC2_StoreSelectQueryHandler
+namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
+
+class DescribeQueryHandler extends SelectQueryHandler
 {
     public function runQuery($infos)
     {
@@ -19,14 +21,14 @@ class ARC2_StoreDescribeQueryHandler extends ARC2_StoreSelectQueryHandler
         if ($vars = $infos['query']['result_vars']) {
             $sub_r = parent::runQuery($infos);
             $rf = $this->v('result_format', '', $infos);
-            if (in_array($rf, ['sql', 'structure', 'index'])) {
+            if (\in_array($rf, ['sql', 'structure', 'index'])) {
                 return $sub_r;
             }
             $rows = $this->v('rows', [], $sub_r);
             foreach ($rows as $row) {
                 foreach ($vars as $info) {
                     $val = isset($row[$info['var']]) ? $row[$info['var']] : '';
-                    if ($val && ('literal' != $row[$info['var'].' type']) && !in_array($val, $ids)) {
+                    if ($val && ('literal' != $row[$info['var'].' type']) && !\in_array($val, $ids)) {
                         $ids[] = $val;
                     }
                 }
@@ -42,7 +44,7 @@ class ARC2_StoreDescribeQueryHandler extends ARC2_StoreSelectQueryHandler
             $this->described_ids[] = $id;
             $q = 'CONSTRUCT { <'.$id.'> ?p ?o . } WHERE {<'.$id.'> ?p ?o .}';
             $sub_r = $this->store->query($q);
-            $sub_index = is_array($sub_r['result']) ? $sub_r['result'] : [];
+            $sub_index = \is_array($sub_r['result']) ? $sub_r['result'] : [];
             $this->mergeSubResults($sub_index, $is_sub_describe);
             $is_sub_describe = 1;
         }
@@ -65,10 +67,10 @@ class ARC2_StoreDescribeQueryHandler extends ARC2_StoreSelectQueryHandler
                     if (!isset($this->added_triples[$id])) {
                         if (1 || !$is_sub_describe) {
                             $this->r[$s][$p][] = $o;
-                            if (is_array($o) && ('bnode' == $o['type']) && !in_array($o['value'], $this->ids)) {
+                            if (\is_array($o) && ('bnode' == $o['type']) && !\in_array($o['value'], $this->ids)) {
                                 $this->ids[] = $o['value'];
                             }
-                        } elseif (!is_array($o) || ('bnode' != $o['type'])) {
+                        } elseif (!\is_array($o) || ('bnode' != $o['type'])) {
                             $this->r[$s][$p][] = $o;
                         }
                         $this->added_triples[$id] = 1;
@@ -80,7 +82,7 @@ class ARC2_StoreDescribeQueryHandler extends ARC2_StoreSelectQueryHandler
         $ids = $this->ids;
         $this->ids = [];
         foreach ($ids as $id) {
-            if (!in_array($id, $this->described_ids)) {
+            if (!\in_array($id, $this->described_ids)) {
                 $this->ids[] = $id;
             }
         }

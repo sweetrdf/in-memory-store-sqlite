@@ -11,9 +11,11 @@
  * file that was distributed with this source code.
  */
 
+namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
+
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
-class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
+class SelectQueryHandler extends QueryHandler
 {
     public function runQuery($infos)
     {
@@ -65,7 +67,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             if (!$set_sql && ($pd_count < $this->opt_sql_pd_count)) {
                 $set_sql = 1;
             }
-            if (!$set_sql && ($pd_count == $this->opt_sql_pd_count) && (strlen($r) < strlen($this->opt_sql))) {
+            if (!$set_sql && ($pd_count == $this->opt_sql_pd_count) && (\strlen($r) < \strlen($this->opt_sql))) {
                 $set_sql = 1;
             }
             if ($set_sql) {
@@ -101,7 +103,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
     public function createTempTable($q_sql)
     {
         $tbl = 'Q'.md5($q_sql.time().uniqid(rand()));
-        if (strlen($tbl) > 64) {
+        if (\strlen($tbl) > 64) {
             $tbl = 'Q'.md5($tbl);
         }
 
@@ -192,7 +194,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
         $rows = [];
         $types = [0 => 'uri', 1 => 'bnode', 2 => 'literal'];
-        if (0 < count($entries)) {
+        if (0 < \count($entries)) {
             foreach ($entries as $pre_row) {
                 $row = [];
                 foreach ($vars as $var) {
@@ -201,7 +203,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                         $row[$var.' type'] = isset($pre_row[$var.' type'])
                             ? $types[$pre_row[$var.' type']]
                             : (
-                                in_array($var, $aggregate_vars)
+                                \in_array($var, $aggregate_vars)
                                     ? 'literal'
                                     : 'uri'
                               );
@@ -240,7 +242,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         } else {
             $sub_patterns = $this->v('patterns', [], $pattern);
             $keys = array_keys($sub_patterns);
-            $spc = count($sub_patterns);
+            $spc = \count($sub_patterns);
             if ($spc > 4 && $this->pattern_order_offset) {
                 $keys = [];
                 for ($i = 0; $i < $spc; ++$i) {
@@ -357,7 +359,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
     public function getPattern($id)
     {
-        if (is_array($id)) {
+        if (\is_array($id)) {
             return $id;
         }
 
@@ -376,7 +378,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $min_depth = 1000;
         /* only process branches with minimum depth */
         foreach ($pre_index['union_branches'] as $id) {
-            $branches[$id] = count(preg_split('/\_/', $id));
+            $branches[$id] = \count(preg_split('/\_/', $id));
             $min_depth = min($min_depth, $branches[$id]);
         }
         foreach ($branches as $branch_id => $depth) {
@@ -454,7 +456,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
     public function getValueTable($col)
     {
-        return (preg_match('/^(s|o)$/', $col) ? $col.'2val' : 'id2val');
+        return preg_match('/^(s|o)$/', $col) ? $col.'2val' : 'id2val';
     }
 
     public function getGraphTable()
@@ -565,7 +567,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                         $added[$var_name] = 1;
                     }
                 }
-                if (!in_array($tbl_alias, $this->index['sub_joins'])) {
+                if (!\in_array($tbl_alias, $this->index['sub_joins'])) {
                     $this->index['sub_joins'][] = $tbl_alias;
                 }
             }
@@ -592,7 +594,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         }
         if ($this->is_union_query && !$ignore_initial_index) {
             if (($infos = $this->v($var, 0, $this->initial_index['vars'])) || ($infos = $this->v($var, 0, $this->initial_index['graph_vars']))) {
-                if (!in_array($var, $this->infos['null_vars'])) {
+                if (!\in_array($var, $this->infos['null_vars'])) {
                     $this->infos['null_vars'][] = $var;
                 }
                 $infos[0]['table_alias'] = 'NULL';
@@ -683,7 +685,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                     $deps[$id]['rank'] = 0;
                     unset($deps[$id][$next_id]);
                     foreach ($infos as $k => $v) {
-                        if (!in_array($k, ['rank', $next_id])) {
+                        if (!\in_array($k, ['rank', $next_id])) {
                             $deps[$id]['rank'] += $v;
                             $deps[$id][$k] = $v;
                         }
@@ -744,7 +746,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $d_tbls = $this->getDependentJoins($id);
         foreach ($d_tbls as $d_tbl) {
             if (preg_match('/^T_([0-9\_]+)\.[spo]+/', $d_tbl, $m) && ($m[1] != $id)) {
-                if ($this->isJoinedBefore($m[1], $id) && !in_array($m[1], array_merge($this->index['from'], $this->index['join']))) {
+                if ($this->isJoinedBefore($m[1], $id) && !\in_array($m[1], array_merge($this->index['from'], $this->index['join']))) {
                     $r .= $r ? $nl.'  AND ' : $nl.'  ';
                     $r .= '('.$d_tbl.' IS NOT NULL)';
                 }
@@ -774,7 +776,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         if (!isset($this->dependency_log[$id])) {
             $this->dependency_log[$id] = [];
         }
-        if (!in_array($tbl, $this->dependency_log[$id])) {
+        if (!\in_array($tbl, $this->dependency_log[$id])) {
             $this->dependency_log[$id][] = $tbl;
         }
     }
@@ -786,8 +788,8 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
     public function problematicDependencies()
     {
         foreach ($this->dependency_log as $id => $tbls) {
-            if (count($tbls) > 1) {
-                return count($tbls);
+            if (\count($tbls) > 1) {
+                return \count($tbls);
             }
         }
 
@@ -809,7 +811,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
     public function joinDependsOn($id, $id2)
     {
-        if (in_array($id2, array_merge($this->index['from'], $this->index['join']))) {
+        if (\in_array($id2, array_merge($this->index['from'], $this->index['join']))) {
             return 1;
         }
         $d_tbls = $this->getDependentJoins($id2);
@@ -835,12 +837,12 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         /* siblings in shared optional */
         $o_id = $this->getOptionalPattern($id);
         foreach ($this->index['sub_joins'] as $alias) {
-            if (preg_match('/^(T|V|G)_'.$o_id.'/', $alias) && !in_array($alias, $r)) {
+            if (preg_match('/^(T|V|G)_'.$o_id.'/', $alias) && !\in_array($alias, $r)) {
                 $r[] = $alias;
             }
         }
         foreach ($this->index['left_join'] as $alias) {
-            if (preg_match('/^'.$o_id.'/', $alias) && !in_array($alias, $r)) {
+            if (preg_match('/^'.$o_id.'/', $alias) && !\in_array($alias, $r)) {
                 $r[] = 'T_'.$alias.'.s';
             }
         }
@@ -885,7 +887,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                 $sub_sub_r = '';
                 $added_gts = [];
                 foreach ($gi as $set) {
-                    if (isset($set['graph']) && !in_array($set['graph'], $added_gts)) {
+                    if (isset($set['graph']) && !\in_array($set['graph'], $added_gts)) {
                         $sub_sub_r .= '' !== $sub_sub_r ? ',' : '';
                         $sub_sub_r .= $this->getTermID($set['graph'], 'g');
                         $added_gts[] = $set['graph'];
@@ -902,7 +904,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                         }
                     }
                     foreach ($occur_tbls as $tbl) {
-                        if (($tbl != $id) && in_array($id, $occur_tbls) && $this->isJoinedBefore($tbl, $id)) {
+                        if (($tbl != $id) && \in_array($id, $occur_tbls) && $this->isJoinedBefore($tbl, $id)) {
                             $sub_r .= $nl.'  AND (G_'.$id.'.g = G_'.$tbl.'.g)';
                         }
                     }
@@ -941,7 +943,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                     $suffix = $m[3];
                     /* get rid of dependency permutations and nested optionals */
                     if (($tbl_pattern_id >= $id) && $this->sameOptional($tbl_pattern_id, $id)) {
-                        if (!in_array($tbl_type.'_'.$tbl_pattern_id.$suffix, $added)) {
+                        if (!\in_array($tbl_type.'_'.$tbl_pattern_id.$suffix, $added)) {
                             $sub_r .= $sub_r ? ' AND ' : '';
                             $sub_r .= $alias.' IS NULL';
                             $d_aliases[] = $alias;
@@ -952,7 +954,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                 }
             }
             /* TODO fix this! */
-            if (count($d_aliases) > 2) {
+            if (\count($d_aliases) > 2) {
                 $sub_r1 = '  /* '.$id_alias.' dependencies */';
                 $sub_r2 = '(('.$id_alias.' IS NULL) OR (CONCAT('.implode(', ', $d_aliases).') IS NOT NULL))';
                 $r .= $r ? $nl.$sub_r1.$nl.'  AND '.$sub_r2 : $sub_r1.$nl.$sub_r2;
@@ -967,7 +969,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         if (!isset($this->index['constraints'][$id])) {
             $this->index['constraints'][$id] = [];
         }
-        if (!in_array($sql, $this->index['constraints'][$id])) {
+        if (!\in_array($sql, $this->index['constraints'][$id])) {
             $this->index['constraints'][$id][] = $sql;
         }
     }
@@ -1043,7 +1045,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                 }
             }
             if ($sub_r) {
-                if (preg_match('/^(join)/', $context) || (preg_match('/^where/', $context) && in_array($id, $this->index['from']))) {
+                if (preg_match('/^(join)/', $context) || (preg_match('/^where/', $context) && \in_array($id, $this->index['from']))) {
                     $r .= $r ? $nl.'  AND '.$sub_r : $sub_r;
                 }
             }
@@ -1051,7 +1053,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         /* g */
         if ($infos = $pattern['graph_infos']) {
             $tbl_alias = 'G_'.$id.'.g';
-            if (!in_array($tbl_alias, $this->index['sub_joins'])) {
+            if (!\in_array($tbl_alias, $this->index['sub_joins'])) {
                 $this->index['sub_joins'][] = $tbl_alias;
             }
             $sub_r = ['graph_var' => '', 'graph_uri' => '', 'from' => '', 'from_named' => ''];
@@ -1125,7 +1127,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         $sub_r = $this->hasUnconnectedFilterVars($id);
         if ($sub_r) {
             if ('alias' == $sub_r) {
-                if (!in_array($r, $this->index['havings'])) {
+                if (!\in_array($r, $this->index['havings'])) {
                     $this->index['havings'][] = $r;
                 }
 
@@ -1188,7 +1190,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
                 continue;
             }
             /* we are looking for the longest/deepest match */
-            if (strlen($id) > strlen($r)) {
+            if (\strlen($id) > \strlen($r)) {
                 $r = $id;
             }
         }
@@ -1214,7 +1216,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             } elseif (('built_in_call' == $p['type']) && ('bound' == $p['call'])) {
                 $var_name = $p['args'][0]['value'];
             }
-            if ($var_name && !in_array($var_name, $r)) {
+            if ($var_name && !\in_array($var_name, $r)) {
                 $r[] = $var_name;
             }
         }
@@ -1320,7 +1322,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             $pattern = $this->getPattern($id);
             $type = $this->v('type', '', $pattern);
             if (('literal' == $type) && isset($pattern['datatype'])) {
-                if (in_array($pattern['datatype'], [$this->xsd.'integer', $this->xsd.'float', $this->xsd.'double'])) {
+                if (\in_array($pattern['datatype'], [$this->xsd.'integer', $this->xsd.'float', $this->xsd.'double'])) {
                     return 'numeric';
                 }
             }
@@ -1434,7 +1436,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             $tbl_alias = 'T_'.$tbl.'.o_comp';
         } else {
             $tbl_alias = 'V_'.$tbl.'_'.$col.'.val';
-            if (!in_array($tbl_alias, $this->index['sub_joins'])) {
+            if (!\in_array($tbl_alias, $this->index['sub_joins'])) {
                 $this->index['sub_joins'][] = $tbl_alias;
             }
         }
@@ -1670,7 +1672,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
         }
         $col = 'o_lang_dt';
         $tbl_alias = 'V_'.$tbl.'_'.$col.'.val';
-        if (!in_array($tbl_alias, $this->index['sub_joins'])) {
+        if (!\in_array($tbl_alias, $this->index['sub_joins'])) {
             $this->index['sub_joins'][] = $tbl_alias;
         }
         $op = $this->v('operator', '', $pattern);
@@ -1691,7 +1693,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
     public function getLangmatchesCallSQL($pattern, $context)
     {
-        if (2 == count($pattern['args'])) {
+        if (2 == \count($pattern['args'])) {
             $arg_1 = $pattern['args'][0];
             $arg_2 = $pattern['args'][1];
             $sub_r_1 = $this->getBuiltInCallSQL($arg_1, $context); /* adds value join */
@@ -1720,7 +1722,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
      */
     public function getSametermCallSQL($pattern, $context)
     {
-        if (2 == count($pattern['args'])) {
+        if (2 == \count($pattern['args'])) {
             $arg_1 = $pattern['args'][0];
             $arg_2 = $pattern['args'][1];
             $sub_r_1 = $this->getExpressionSQL($arg_1, 'sameterm');
@@ -1736,7 +1738,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
 
     public function getRegexCallSQL($pattern, $context)
     {
-        $ac = count($pattern['args']);
+        $ac = \count($pattern['args']);
         if ($ac >= 2) {
             foreach ($pattern['args'] as $i => $arg) {
                 $var = 'sub_r_'.($i + 1);
@@ -1751,7 +1753,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             $is_simple_search = preg_match('/^[\(\"]+(\^)?([^\\\*\[\]\}\{\(\)\"\'\?\+\.]+)(\$)?[\)\"]+$/is', $sub_r_2, $m);
             $is_o_search = preg_match('/o\.val\)*$/', $sub_r_1);
             /* fulltext search (may have "|") */
-            if ($is_simple_search && $is_o_search && !$op && (strlen($m[2]) > 8) && $this->store->hasFulltextIndex()) {
+            if ($is_simple_search && $is_o_search && !$op && (\strlen($m[2]) > 8) && $this->store->hasFulltextIndex()) {
                 /* MATCH variations */
                 if (($val_parts = preg_split('/\|/', $m[2]))) {
                     return 'MATCH('.trim($sub_r_1, '()').') AGAINST("'.implode(' ', $val_parts).'")';
@@ -1854,7 +1856,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             $col = '';
             $tbl = '';
             if ('*' != $var_name) {
-                if (in_array($var_name, $this->infos['null_vars'])) {
+                if (\in_array($var_name, $this->infos['null_vars'])) {
                     if (isset($this->initial_index['vars'][$var_name])) {
                         $col = $this->initial_index['vars'][$var_name][0]['col'];
                         $tbl = $this->initial_index['vars'][$var_name][0]['table'];
@@ -1871,10 +1873,10 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             if ($var['aggregate']) {
                 $r .= 'TMP.`'.$var['alias'].'`';
             } else {
-                $join_type = in_array($tbl, array_merge($this->index['from'], $this->index['join'])) ? 'JOIN' : 'LEFT JOIN'; /* val may be NULL */
+                $join_type = \in_array($tbl, array_merge($this->index['from'], $this->index['join'])) ? 'JOIN' : 'LEFT JOIN'; /* val may be NULL */
                 $v_tbls[$join_type][] = ['t_col' => $col, 'q_col' => $var_name, 'vc' => $vc];
                 $r .= 'V'.$vc.'.val AS `'.$var_name.'`';
-                if (in_array($col, ['s', 'o'])) {
+                if (\in_array($col, ['s', 'o'])) {
                     if (strpos($q_sql, '`'.$var_name.' type`')) {
                         $r .= ', '.$nl.'    TMP.`'.$var_name.' type` AS `'.$var_name.' type`';
                     //$r .= ', ' . $nl . '    CASE TMP.`' . $var_name . ' type` WHEN 2 THEN "literal" WHEN 1 THEN "bnode" ELSE "uri" END AS `' . $var_name . ' type`';
@@ -1903,7 +1905,7 @@ class ARC2_StoreSelectQueryHandler extends ARC2_StoreQueryHandler
             foreach ($v_tbls[$join_type] as $v_tbl) {
                 $tbl = $this->getValueTable($v_tbl['t_col']);
                 $var_name = preg_replace('/^([^\s]+)(.*)$/', '\\1', $v_tbl['q_col']);
-                $cur_join_type = in_array($var_name, $this->infos['null_vars']) ? 'LEFT JOIN' : $join_type;
+                $cur_join_type = \in_array($var_name, $this->infos['null_vars']) ? 'LEFT JOIN' : $join_type;
                 if (!strpos($q_sql, '`'.$v_tbl['q_col'].'`')) {
                     continue;
                 }

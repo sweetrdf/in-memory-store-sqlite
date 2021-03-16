@@ -11,17 +11,20 @@
  * file that was distributed with this source code.
  */
 
-use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
 
-class ARC2_StoreQueryHandler
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
+
+abstract class QueryHandler
 {
     protected array $errors = [];
 
-    protected ARC2_Store $store;
+    protected InMemoryStoreSqlite $store;
 
     protected string $xsd = NamespaceHelper::NAMESPACE_XSD;
 
-    public function __construct(ARC2_Store $store)
+    public function __construct(InMemoryStoreSqlite $store)
     {
         $this->store = $store;
     }
@@ -34,7 +37,7 @@ class ARC2_StoreQueryHandler
         if (false === $o) {
             $o = $this;
         }
-        if (is_array($o)) {
+        if (\is_array($o)) {
             return isset($o[$name]) ? $o[$name] : $default;
         }
 
@@ -49,7 +52,7 @@ class ARC2_StoreQueryHandler
         if (false === $o) {
             $o = $this;
         }
-        if (is_array($o)) {
+        if (\is_array($o)) {
             return (isset($o[$name]) && $o[$name]) ? $o[$name] : $default;
         }
 

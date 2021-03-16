@@ -11,7 +11,9 @@
  * file that was distributed with this source code.
  */
 
-class ARC2_StoreConstructQueryHandler extends ARC2_StoreSelectQueryHandler
+namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
+
+class ConstructQueryHandler extends SelectQueryHandler
 {
     public function runQuery($infos)
     {
@@ -20,7 +22,7 @@ class ARC2_StoreConstructQueryHandler extends ARC2_StoreSelectQueryHandler
         $this->infos['query']['distinct'] = 1;
         $sub_r = parent::runQuery($this->infos);
         $rf = $this->v('result_format', '', $infos);
-        if (in_array($rf, ['sql', 'structure', 'index'])) {
+        if (\in_array($rf, ['sql', 'structure', 'index'])) {
             return $sub_r;
         }
 
@@ -33,7 +35,7 @@ class ARC2_StoreConstructQueryHandler extends ARC2_StoreSelectQueryHandler
         foreach ($this->infos['query']['construct_triples'] as $t) {
             foreach (['s', 'p', 'o'] as $term) {
                 if ('var' == $t[$term.'_type']) {
-                    if (!in_array($t[$term], $r)) {
+                    if (!\in_array($t[$term], $r)) {
                         $r[] = ['var' => $t[$term], 'aggregate' => '', 'alias' => ''];
                     }
                 }

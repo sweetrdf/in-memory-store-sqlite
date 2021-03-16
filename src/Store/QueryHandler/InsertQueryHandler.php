@@ -1,7 +1,5 @@
 <?php
 
-namespace sweetrdf\InMemoryStoreSqlite\Store;
-
 /*
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
  * the terms of the GPL-3 license.
@@ -13,7 +11,9 @@ namespace sweetrdf\InMemoryStoreSqlite\Store;
  * file that was distributed with this source code.
  */
 
-class InsertQueryHandler extends \ARC2_StoreQueryHandler
+namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
+
+class InsertQueryHandler extends QueryHandler
 {
     /**
      * Is being used for blank nodes to generate a hash which is not only dependent on

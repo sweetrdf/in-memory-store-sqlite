@@ -1,7 +1,5 @@
 <?php
 
-use function sweetrdf\InMemoryStoreSqlite\calcURI;
-
 /*
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
  * the terms of the GPL-3 license.
@@ -13,7 +11,12 @@ use function sweetrdf\InMemoryStoreSqlite\calcURI;
  * file that was distributed with this source code.
  */
 
-class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
+namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
+
+use function sweetrdf\InMemoryStoreSqlite\calcURI;
+use sweetrdf\InMemoryStoreSqlite\Store\TurtleLoader;
+
+class LoadQueryHandler extends QueryHandler
 {
     private string $target_graph;
 
@@ -32,7 +35,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $this->keep_bnode_ids = $keep_bnode_ids;
 
         // remove parameters
-        $loader = new ARC2_StoreTurtleLoader();
+        $loader = new TurtleLoader();
         $loader->setCaller($this);
 
         /* logging */
@@ -60,8 +63,8 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
     {
         $type_ids = ['uri' => '0', 'bnode' => '1', 'literal' => '2'];
         $g = $this->getStoredTermID($this->target_graph, '0', 'id');
-        $s = (('bnode' == $s_type) && !$this->keep_bnode_ids) ? '_:b'.abs(crc32($g.$s)).'_'.(strlen($s) > 12 ? substr(substr($s, 2), -10) : substr($s, 2)) : $s;
-        $o = (('bnode' == $o_type) && !$this->keep_bnode_ids) ? '_:b'.abs(crc32($g.$o)).'_'.(strlen($o) > 12 ? substr(substr($o, 2), -10) : substr($o, 2)) : $o;
+        $s = (('bnode' == $s_type) && !$this->keep_bnode_ids) ? '_:b'.abs(crc32($g.$s)).'_'.(\strlen($s) > 12 ? substr(substr($s, 2), -10) : substr($s, 2)) : $s;
+        $o = (('bnode' == $o_type) && !$this->keep_bnode_ids) ? '_:b'.abs(crc32($g.$o)).'_'.(\strlen($o) > 12 ? substr(substr($o, 2), -10) : substr($o, 2)) : $o;
         /* triple */
         $t = [
             's' => $this->getStoredTermID($s, $type_ids[$s_type], 's'),
@@ -73,7 +76,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
             'o_type' => $type_ids[$o_type],
         ];
         $t['t'] = $this->getTripleID($t);
-        if (is_array($t['t'])) {/* t exists already */
+        if (\is_array($t['t'])) {/* t exists already */
             $t['t'] = $t['t'][0];
         } else {
             $this->bufferTripleSQL($t);
@@ -103,7 +106,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
 
         $rows = $this->store->getDBObject()->fetchList($sql);
 
-        if (is_array($rows)) {
+        if (\is_array($rows)) {
             foreach ($rows as $row) {
                 $r = ($r < $row['id']) ? $row['id'] : $r;
             }
@@ -162,7 +165,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                     WHERE val_hash = "'.$this->getValueHash($val).'"';
 
                 $rows = $this->store->getDBObject()->fetchList($sql);
-                if (is_array($rows)) {
+                if (\is_array($rows)) {
                     foreach ($rows as $row) {
                         if ($row['val'] == $val) {
                             $id = $row['id'];
@@ -176,7 +179,7 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
                     $sql = 'SELECT id FROM '.$sub_tbl." WHERE val = '".$binaryValue."'";
 
                     $row = $this->store->getDBObject()->fetchRow($sql);
-                    if (is_array($row) && isset($row['id'])) {
+                    if (\is_array($row) && isset($row['id'])) {
                         $id = $row['id'];
                     }
                 }
@@ -221,11 +224,13 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         if (isset($row['t'])) {
             /* hack for "don't insert this triple" */
             $this->triple_ids[$val] = $row['t'];
+
             return [$row['t']];
         } else {
             /* new */
             $this->triple_ids[$val] = $this->max_triple_id;
             ++$this->max_triple_id;
+
             return $this->triple_ids[$val];
         }
     }
@@ -263,8 +268,8 @@ class ARC2_StoreLoadQueryHandler extends ARC2_StoreQueryHandler
         $re = '/[\PL\s]+/isu';
         $re = '/[\s\'\"\´\`]+/is';
         $val = trim(preg_replace($re, '-', strip_tags($val)));
-        if (strlen($val) > 35) {
-            $fnc = function_exists('mb_substr') ? 'mb_substr' : 'substr';
+        if (\strlen($val) > 35) {
+            $fnc = \function_exists('mb_substr') ? 'mb_substr' : 'substr';
             $val = $fnc($val, 0, 17).'-'.$fnc($val, -17);
         }
 

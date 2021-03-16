@@ -11,7 +11,11 @@
  * file that was distributed with this source code.
  */
 
-class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
+namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
+
+use Exception;
+
+class DeleteQueryHandler extends QueryHandler
 {
     private bool $refs_deleted;
 
@@ -114,7 +118,7 @@ class ARC2_StoreDeleteQueryHandler extends ARC2_StoreQueryHandler
 
     private function deleteConstructedGraph()
     {
-        $h = new ARC2_StoreConstructQueryHandler($this->store);
+        $h = new ConstructQueryHandler($this->store);
         $sub_r = $h->runQuery($this->infos);
         $triples = $this->getTriplesFromIndex($sub_r);
         $tgs = $this->infos['query']['target_graphs'];

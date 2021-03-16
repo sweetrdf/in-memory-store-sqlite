@@ -13,10 +13,10 @@
 
 namespace Tests\store\query;
 
-use ARC2_Store;
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\ARC2_TestCase;
 
 /**
@@ -28,7 +28,7 @@ class InsertIntoQueryTest extends ARC2_TestCase
     {
         parent::setUp();
 
-        $this->fixture = new ARC2_Store(new PDOSQLiteAdapter(), new Logger());
+        $this->fixture = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     public function testInsertInto()

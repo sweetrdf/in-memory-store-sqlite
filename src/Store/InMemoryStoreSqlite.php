@@ -11,13 +11,22 @@
  * file that was distributed with this source code.
  */
 
+namespace sweetrdf\InMemoryStoreSqlite\Store;
+
+use Exception;
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
-use sweetrdf\InMemoryStoreSqlite\Store\InsertQueryHandler;
+use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\AskQueryHandler;
+use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\ConstructQueryHandler;
+use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\DeleteQueryHandler;
+use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\DescribeQueryHandler;
+use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\InsertQueryHandler;
+use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\LoadQueryHandler;
+use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\SelectQueryHandler;
 
-class ARC2_Store
+class InMemoryStoreSqlite
 {
     protected PDOSQLiteAdapter $db;
 
@@ -98,7 +107,6 @@ class ARC2_Store
         return $this->db->simpleQuery('DELETE FROM '.$tbl." WHERE k = '".md5($k)."'");
     }
 
-
     public function reset($keep_settings = 0)
     {
         $tbls = $this->getTables();
@@ -132,7 +140,7 @@ class ARC2_Store
      */
     public function insert($data, $g, $keep_bnode_ids = 0)
     {
-        if (is_array($data)) {
+        if (\is_array($data)) {
             $data = $this->toTurtle($data);
         }
 
@@ -142,7 +150,8 @@ class ARC2_Store
         }
 
         $infos = ['query' => ['url' => $g, 'target_graph' => $g]];
-        $h = new ARC2_StoreLoadQueryHandler($this);
+        $h = new LoadQueryHandler($this);
+
         return $h->runQuery($infos, $data, $keep_bnode_ids);
     }
 
@@ -150,7 +159,7 @@ class ARC2_Store
     {
         if (!$doc) {
             $infos = ['query' => ['target_graphs' => [$g]]];
-            $h = new ARC2_StoreDeleteQueryHandler($this);
+            $h = new DeleteQueryHandler($this);
             $r = $h->runQuery($infos);
 
             return $r;
@@ -189,10 +198,10 @@ class ARC2_Store
 
         $infos['result_format'] = $result_format;
 
-        if (!isset($p) || 0 == count($errors)) {
+        if (!isset($p) || 0 == \count($errors)) {
             $qt = $infos['query']['type'];
             $validTypes = ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'];
-            if (!in_array($qt, $validTypes)) {
+            if (!\in_array($qt, $validTypes)) {
                 return $this->logger->error('Unsupported query type "'.$qt.'"');
             }
 
@@ -220,15 +229,25 @@ class ARC2_Store
 
     /**
      * Uses a relevant QueryHandler class to handle given $query.
+     *
+     * @todo remove $keep_bnode_ids
      */
     private function runQuery(array $infos, string $type, $keep_bnode_ids = 0)
     {
         $type = ucfirst($type);
 
-        if ('Insert' == $type) {
-            $cls = InsertQueryHandler::class;
-        } else {
-            $cls = 'ARC2_Store'.$type.'QueryHandler';
+        $cls = match ($type) {
+            'Ask' => AskQueryHandler::class,
+            'Construct' => ConstructQueryHandler::class,
+            'Describe' => DescribeQueryHandler::class,
+            'Delete' => DeleteQueryHandler::class,
+            'Insert' => InsertQueryHandler::class,
+            'Load' => LoadQueryHandler::class,
+            'Select' => SelectQueryHandler::class,
+        };
+
+        if (empty($cls)) {
+            throw new Exception('Inalid query $type given.');
         }
 
         return (new $cls($this))->runQuery($infos);
@@ -245,7 +264,7 @@ class ARC2_Store
     public function getTermID($val, $term = '')
     {
         /* mem cache */
-        if (!isset($this->term_id_cache) || (count(array_keys($this->term_id_cache)) > 100)) {
+        if (!isset($this->term_id_cache) || (\count(array_keys($this->term_id_cache)) > 100)) {
             $this->term_id_cache = [];
         }
         if (!isset($this->term_id_cache[$term])) {
@@ -253,7 +272,7 @@ class ARC2_Store
         }
         $tbl = preg_match('/^(s|o)$/', $term) ? $term.'2val' : 'id2val';
         /* cached? */
-        if ((strlen($val) < 100) && isset($this->term_id_cache[$term][$val])) {
+        if ((\strlen($val) < 100) && isset($this->term_id_cache[$term][$val])) {
             return $this->term_id_cache[$term][$val];
         }
         $r = 0;
@@ -262,7 +281,7 @@ class ARC2_Store
             $rows = $this->db->fetchList(
                 'SELECT id, val FROM '.$tbl." WHERE val_hash = '".$this->getValueHash($val)."' ORDER BY id"
             );
-            if (is_array($rows) && 0 < count($rows)) {
+            if (\is_array($rows) && 0 < \count($rows)) {
                 foreach ($rows as $row) {
                     if ($row['val'] == $val) {
                         $r = $row['id'];
@@ -280,7 +299,7 @@ class ARC2_Store
                 $r = $row['id'];
             }
         }
-        if ($r && (strlen($val) < 100)) {
+        if ($r && (\strlen($val) < 100)) {
             $this->term_id_cache[$term][$val] = $r;
         }
 

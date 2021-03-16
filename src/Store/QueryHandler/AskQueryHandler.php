@@ -11,7 +11,9 @@
  * file that was distributed with this source code.
  */
 
-class ARC2_StoreAskQueryHandler extends ARC2_StoreSelectQueryHandler
+namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
+
+class AskQueryHandler extends SelectQueryHandler
 {
     public function runQuery($infos)
     {
@@ -27,7 +29,7 @@ class ARC2_StoreAskQueryHandler extends ARC2_StoreSelectQueryHandler
         $this->infos['query']['result_vars'][] = [
             'var' => '1',
             'aggregate' => '',
-            'alias' => 'success'
+            'alias' => 'success',
         ];
     }
 
