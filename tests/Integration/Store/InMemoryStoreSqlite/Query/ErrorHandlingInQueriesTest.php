@@ -16,12 +16,12 @@ namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
-use Tests\ARC2_TestCase;
+use Tests\TestCase;
 
 /**
  * Tests for query method - focus on how the system reacts, when errors occur.
  */
-class ErrorHandlingInQueriesTest extends ARC2_TestCase
+class ErrorHandlingInQueriesTest extends TestCase
 {
     protected function setUp(): void
     {

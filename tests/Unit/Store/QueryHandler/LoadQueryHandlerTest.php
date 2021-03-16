@@ -17,9 +17,9 @@ use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\LoadQueryHandler;
-use Tests\ARC2_TestCase;
+use Tests\TestCase;
 
-class LoadQueryHandlerTest extends ARC2_TestCase
+class LoadQueryHandlerTest extends TestCase
 {
     protected $store;
 

@@ -17,7 +17,7 @@ use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
-use Tests\ARC2_TestCase;
+use Tests\TestCase;
 
 /**
  * Runs W3C tests from https://www.w3.org/2009/sparql/docs/tests/.
@@ -26,7 +26,7 @@ use Tests\ARC2_TestCase;
  *
  * Tests are located in the w3c-tests folder.
  */
-abstract class ComplianceTest extends ARC2_TestCase
+abstract class ComplianceTest extends TestCase
 {
     /**
      * @var InMemoryStoreSqlite

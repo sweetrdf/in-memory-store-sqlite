@@ -16,9 +16,9 @@ namespace Tests\Integration\Store;
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
-use Tests\ARC2_TestCase;
+use Tests\TestCase;
 
-class InMemoryStoreSqliteTest extends ARC2_TestCase
+class InMemoryStoreSqliteTest extends TestCase
 {
     protected function setUp(): void
     {

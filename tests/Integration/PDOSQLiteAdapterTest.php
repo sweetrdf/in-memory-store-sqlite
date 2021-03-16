@@ -15,9 +15,9 @@ namespace Tests\Integration;
 
 use Exception;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
-use Tests\ARC2_TestCase;
+use Tests\TestCase;
 
-class PDOSQLiteAdapterTest extends ARC2_TestCase
+class PDOSQLiteAdapterTest extends TestCase
 {
     protected function setUp(): void
     {

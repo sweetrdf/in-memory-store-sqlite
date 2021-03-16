@@ -13,7 +13,7 @@
     verbose="true"
     >
     <php>
-        <ini name="error_reporting" value="-1" />
+        <ini name="error_reporting" value="E_ALL" />
         <ini name="intl.error_level" value="0" />
         <ini name="display_errors" value="On"/>
     </php>
@@ -24,10 +24,7 @@
     </testsuites>
     <coverage>
         <include>
-            <directory>parsers</directory>
-            <directory>sparqlscript</directory>
             <directory>src</directory>
-            <directory>store</directory>
         </include>
     </coverage>
 </phpunit>
