@@ -159,7 +159,7 @@ class LoadQueryHandler extends QueryHandler
         foreach ($sub_tbls as $sub_tbl) {
             $id = 0;
             /* via hash */
-            if (preg_match('/^(s2val|o2val)$/', $sub_tbl) && $this->hasHashColumn($sub_tbl)) {
+            if (preg_match('/^(s2val|o2val)$/', $sub_tbl)) {
                 $sql = 'SELECT id, val
                     FROM '.$sub_tbl.'
                     WHERE val_hash = "'.$this->getValueHash($val).'"';
@@ -320,7 +320,7 @@ class LoadQueryHandler extends QueryHandler
         if ('id2val' == $tbl) {
             $cols = 'id, val, val_type';
             $vals = '('.$id.", '".$this->store->getDBObject()->escape($val)."', ".$val_type.')';
-        } elseif (preg_match('/^(s2val|o2val)$/', $tbl) && $this->hasHashColumn($tbl)) {
+        } elseif (preg_match('/^(s2val|o2val)$/', $tbl)) {
             $cols = 'id, val_hash, val';
             $vals = '('.$id.", '"
                 .$this->getValueHash($val)

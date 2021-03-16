@@ -53,16 +53,6 @@ class InMemoryStoreSqlite
         return $this->db->getServerVersion();
     }
 
-    public function hasHashColumn($tbl)
-    {
-        $var_name = 'has_hash_column_'.$tbl;
-        if (!isset($this->$var_name)) {
-            $this->$var_name = true;
-        }
-
-        return $this->$var_name;
-    }
-
     public function getTables()
     {
         return ['triple', 'g2t', 'id2val', 's2val', 'o2val', 'setting'];
@@ -277,7 +267,7 @@ class InMemoryStoreSqlite
         }
         $r = 0;
         /* via hash */
-        if (preg_match('/^(s2val|o2val)$/', $tbl) && $this->hasHashColumn($tbl)) {
+        if (preg_match('/^(s2val|o2val)$/', $tbl)) {
             $rows = $this->db->fetchList(
                 'SELECT id, val FROM '.$tbl." WHERE val_hash = '".$this->getValueHash($val)."' ORDER BY id"
             );

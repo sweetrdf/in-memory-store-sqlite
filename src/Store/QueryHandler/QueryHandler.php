@@ -64,11 +64,6 @@ abstract class QueryHandler
         return $this->store->getTermID($val, $term);
     }
 
-    public function hasHashColumn($tbl)
-    {
-        return $this->store->hasHashColumn($tbl);
-    }
-
     public function getValueHash($val)
     {
         return $this->store->getValueHash($val);
