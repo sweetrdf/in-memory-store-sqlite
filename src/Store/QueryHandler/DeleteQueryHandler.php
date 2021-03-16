@@ -85,8 +85,8 @@ class DeleteQueryHandler extends QueryHandler
                     $q .= ($q ? ' AND ' : '').'T.'.$term.'='.$term_id;
                     /* explicit lang/dt restricts the matching */
                     if ('o' == $term) {
-                        $o_lang = $this->v1('o_lang', '', $t);
-                        $o_lang_dt = $this->v1('o_datatype', $o_lang, $t);
+                        $o_lang = $t['o_lang'] ?? '';
+                        $o_lang_dt = $t['o_datatype'] ?? $o_lang;
                         if ($o_lang_dt) {
                             $q .= ($q ? ' AND ' : '').'T.o_lang_dt='.$this->getTermID($o_lang_dt, 'lang_dt');
                         }

@@ -1021,28 +1021,40 @@ class SelectQueryHandler extends QueryHandler
             $type = $pattern[$term.'_type'];
             if ('uri' == $type) {
                 $term_id = $this->getTermID($pattern[$term], $term);
-                $sub_r = '(T_'.$id.'.'.$term.' = '.$term_id.') /* '.preg_replace('/[\#\*\>]/', '::', $pattern[$term]).' */';
+                $sub_r = '(T_'.$id.'.'.$term.' = '.$term_id.') /* '
+                    .preg_replace('/[\#\*\>]/', '::', $pattern[$term]).' */';
             } elseif ('literal' == $type) {
                 $term_id = $this->getTermID($pattern[$term], $term);
-                $sub_r = '(T_'.$id.'.'.$term.' = '.$term_id.') /* '.preg_replace('/[\#\n\*\>]/', ' ', $pattern[$term]).' */';
-                if (($lang_dt = $this->v1($term.'_lang', '', $pattern)) || ($lang_dt = $this->v1($term.'_datatype', '', $pattern))) {
+                $sub_r = '(T_'.$id.'.'.$term.' = '.$term_id.') /* '
+                    .preg_replace('/[\#\n\*\>]/', ' ', $pattern[$term]).' */';
+                if (
+                    ($lang_dt = $pattern[$term.'_lang'] ?? '')
+                    || ($lang_dt = $pattern[$term.'_datatype'] ?? '')
+                ) {
                     $lang_dt_id = $this->getTermID($lang_dt);
-                    $sub_r .= $nl.'  AND (T_'.$id.'.'.$term.'_lang_dt = '.$lang_dt_id.') /* '.preg_replace('/[\#\*\>]/', '::', $lang_dt).' */';
+                    $sub_r .= $nl
+                        .'  AND (T_'.$id.'.'.$term.'_lang_dt = '.$lang_dt_id.') /* '
+                        .preg_replace('/[\#\*\>]/', '::', $lang_dt).' */';
                 }
             } elseif ('var' == $type) {
                 $val = $pattern[$term];
-                if (isset($vars[$val])) {/* repeated var in pattern */
+                if (isset($vars[$val])) {
+                    /* repeated var in pattern */
                     $sub_r = '(T_'.$id.'.'.$term.'='.'T_'.$id.'.'.$vars[$val].')';
                 }
                 $vars[$val] = $term;
-                if ($infos = $this->v($val, 0, $this->index['graph_vars'])) {/* graph var in triple pattern */
+                if ($infos = $this->v($val, 0, $this->index['graph_vars'])) {
+                    /* graph var in triple pattern */
                     $sub_r .= $sub_r ? $nl.'  AND ' : '';
                     $tbl = $infos[0]['table'];
                     $sub_r .= 'G_'.$tbl.'.g = T_'.$id.'.'.$term;
                 }
             }
             if ($sub_r) {
-                if (preg_match('/^(join)/', $context) || (preg_match('/^where/', $context) && \in_array($id, $this->index['from']))) {
+                if (
+                    preg_match('/^(join)/', $context)
+                    || (preg_match('/^where/', $context) && \in_array($id, $this->index['from']))
+                ) {
                     $r .= $r ? $nl.'  AND '.$sub_r : $sub_r;
                 }
             }
@@ -1060,7 +1072,8 @@ class SelectQueryHandler extends QueryHandler
                     if ($info['uri']) {
                         $term_id = $this->getTermID($info['uri'], 'g');
                         $sub_r['graph_uri'] .= $sub_r['graph_uri'] ? $nl.' AND ' : '';
-                        $sub_r['graph_uri'] .= '('.$tbl_alias.' = '.$term_id.') /* '.preg_replace('/[\#\*\>]/', '::', $info['uri']).' */';
+                        $sub_r['graph_uri'] .= '('.$tbl_alias.' = '.$term_id.') /* '
+                            .preg_replace('/[\#\*\>]/', '::', $info['uri']).' */';
                     }
                 }
             }
@@ -1104,7 +1117,7 @@ class SelectQueryHandler extends QueryHandler
     {
         $r = '';
         $id = $pattern['id'];
-        $constraint_id = $this->v1('constraint', '', $pattern);
+        $constraint_id = $pattern['constraint'] ?? '';
         $constraint = $this->getPattern($constraint_id);
         $constraint_type = $constraint['type'];
         if ('built_in_call' == $constraint_type) {
@@ -1262,9 +1275,8 @@ class SelectQueryHandler extends QueryHandler
     public function getExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
     {
         $r = '';
-        $nl = "\n";
-        $type = $this->v1('type', '', $pattern);
-        $sub_type = $this->v1('sub_type', $type, $pattern);
+        $type = $pattern['type'] ?? '';
+        $sub_type = $pattern['sub_type'] ?? $type;
         if (preg_match('/^(and|or)$/', $sub_type)) {
             foreach ($pattern['patterns'] as $sub_id) {
                 $sub_pattern = $this->getPattern($sub_id);
@@ -1482,9 +1494,14 @@ class SelectQueryHandler extends QueryHandler
     {
         $val = $pattern['value'];
         $r = $pattern['operator'];
+        $datatype = $pattern['datatype'] ?? '';
+
         if (is_numeric($val) && $this->v('datatype', 0, $pattern)) {
             $r .= ' '.$val;
-        } elseif (preg_match('/^(true|false)$/i', $val) && ('http://www.w3.org/2001/XMLSchema#boolean' == $this->v1('datatype', '', $pattern))) {
+        } elseif (
+            preg_match('/^(true|false)$/i', $val)
+            && 'http://www.w3.org/2001/XMLSchema#boolean' == $datatype
+        ) {
             $r .= ' '.strtoupper($val);
         } elseif ('regex' == $parent_type) {
             $sub_r = $this->store->getDBObject()->escape($val);
@@ -1492,7 +1509,9 @@ class SelectQueryHandler extends QueryHandler
         } else {
             $r .= ' "'.$this->store->getDBObject()->escape($val).'"';
         }
-        if (($lang_dt = $this->v1('lang', '', $pattern)) || ($lang_dt = $this->v1('datatype', '', $pattern))) {
+
+        $lang_dt = $pattern['lang'] ?? $pattern['datatype'] ?? '';
+        if ($lang_dt) {
             /* try table/alias via var in siblings */
             if ($var = $this->findSiblingVarExpression($pattern['id'])) {
                 if (isset($this->index['vars'][$var])) {

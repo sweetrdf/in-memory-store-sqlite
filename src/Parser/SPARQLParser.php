@@ -748,7 +748,7 @@ class SPARQLParser extends TurtleParser
         if ((list($sub_r, $sub_v) = $this->xPrimaryExpression($sub_v)) && $sub_r) {
             if (!\is_array($sub_r)) {
                 $sub_r = ['type' => 'unary', 'expression' => $sub_r];
-            } elseif ($sub_op = $this->v1('operator', '', $sub_r)) {
+            } elseif ($sub_op = $sub_r['operator'] ?? '') {
                 $ops = ['!!' => '', '++' => '+', '--' => '+', '+-' => '-', '-+' => '-'];
                 $op = isset($ops[$op.$sub_op]) ? $ops[$op.$sub_op] : $op.$sub_op;
             }

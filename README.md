@@ -1,6 +1,6 @@
-# sweetrdf - In-Memory Store (SQLite)
+# sweetrdf - RDF In-Memory Quad Store (SQLite)
 
-RDF In-memory store implementation using SQLite.
+RDF In-memory quad store implementation using PDO and SQLite.
 
 ## Performance
 

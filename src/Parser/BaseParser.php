@@ -73,18 +73,6 @@ abstract class BaseParser
         return isset($o->$name) ? $o->$name : $default;
     }
 
-    public function v1($name, $default = false, $o = false)
-    {/* value if 1 (= not empty) */
-        if (false === $o) {
-            $o = $this;
-        }
-        if (\is_array($o)) {
-            return (isset($o[$name]) && $o[$name]) ? $o[$name] : $default;
-        }
-
-        return (isset($o->$name) && $o->$name) ? $o->$name : $default;
-    }
-
     /**
      * @todo replace by Logger
      */

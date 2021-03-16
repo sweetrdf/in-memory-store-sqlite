@@ -544,7 +544,7 @@ class TurtleParser extends BaseParser
                 if (!\is_array($sub_r)) {
                     $sub_r = ['value' => $sub_r];
                 }
-                $sub_r['type'] = $this->v1('type', $type, $sub_r);
+                $sub_r['type'] = $sub_r['type'] ?? $type;
 
                 return [$sub_r, $sub_v];
             }
