@@ -628,7 +628,7 @@ class InsertIntoQueryTest extends ARC2_TestCase
         $amount = 1500;
 
         // add triples in separate query calls
-        for ($i=0; $i < $amount; $i++) {
+        for ($i = 0; $i < $amount; ++$i) {
             $this->fixture->query('INSERT INTO <http://ex/> {<http://a> <http://b> "'.$i.'" . }');
         }
 

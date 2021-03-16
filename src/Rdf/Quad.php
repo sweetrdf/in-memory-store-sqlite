@@ -87,7 +87,7 @@ class Quad implements iQuad
 
     public static function createFromArray(array $triple, string $graph): iQuad
     {
-        /**
+        /*
          * subject
          */
         if ('uri' == $triple['s_type']) {
@@ -101,7 +101,7 @@ class Quad implements iQuad
         // predicate
         $p = new NamedNode($triple['p']);
 
-        /**
+        /*
          * object
          */
         if ('uri' == $triple['o_type']) {

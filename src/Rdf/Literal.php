@@ -16,8 +16,8 @@ use Exception;
 use rdfInterface\Literal as iLiteral;
 use rdfInterface\Term;
 use rdfInterface\TYPE_LITERAL;
-use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use Stringable;
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
 class Literal implements iLiteral
 {
