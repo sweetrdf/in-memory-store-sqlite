@@ -400,7 +400,7 @@ class InsertIntoQueryTest extends TestCase
     }
 
     /**
-     * Demonstrates that store can't save long values
+     * Demonstrates that store can't save long values.
      */
     public function testInsertIntoLongValue()
     {

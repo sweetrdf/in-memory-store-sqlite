@@ -39,9 +39,9 @@ class LoggerTest extends TestCase
         $sut->error('error1');
         $sut->warning('warning1');
 
-        $this->assertEquals(2, count($sut->getEntries()));
-        $this->assertEquals(1, count($sut->getEntries('error')));
-        $this->assertEquals(1, count($sut->getEntries('warning')));
+        $this->assertEquals(2, \count($sut->getEntries()));
+        $this->assertEquals(1, \count($sut->getEntries('error')));
+        $this->assertEquals(1, \count($sut->getEntries('warning')));
     }
 
     public function testHasEntriesLevelNotSet()

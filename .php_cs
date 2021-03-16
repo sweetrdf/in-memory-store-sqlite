@@ -5,6 +5,7 @@ return PhpCsFixer\Config::create()
         '@Symfony' => true,
         '@Symfony:risky' => true,
         'array_indentation' => true,
+        'phpdoc_summary' => false,
     ])
     ->setRiskyAllowed(true)
     ->setFinder(
