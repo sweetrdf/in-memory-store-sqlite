@@ -198,12 +198,12 @@ class SyntaxUpdate1Test extends ComplianceTest
         // fire query
         $result = $this->store->query($query);
 
-        // check current reaction of ARC2, for compatible reasons
+        // check current reaction of the store, for compatibility reasons
         $this->assertTrue(\is_array($result));
 
         // check result
         $this->markTestSkipped(
-            'Query has to fail, but ARC2 returns an array as if query is considered valid. Query: '
+            'Query has to fail, but store returns an array as if query is considered valid. Query: '
             .\PHP_EOL
             .$this->makeQueryA1Liner($query)
         );

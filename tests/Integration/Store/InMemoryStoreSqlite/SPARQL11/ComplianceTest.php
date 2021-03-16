@@ -172,7 +172,7 @@ abstract class ComplianceTest extends TestCase
 
         $query = file_get_contents($query['result']['rows'][0]['queryFile']);
 
-        // add data graph information as FROM clause, because ARC2 can't handle default graph
+        // add data graph information as FROM clause, because store can't handle default graph
         // queries. for more information see https://github.com/semsol/arc2/issues/72.
         if (false !== strpos($query, 'ASK')
             || false !== strpos($query, 'CONSTRUCT')
@@ -203,7 +203,7 @@ abstract class ComplianceTest extends TestCase
     }
 
     /**
-     * Transforms ARC2 query result to a \SimpleXMLElement instance for later comparison.
+     * Transforms query result to a \SimpleXMLElement instance for later comparison.
      *
      * @return \SimpleXMLElement
      */
@@ -267,7 +267,7 @@ abstract class ComplianceTest extends TestCase
                         // example: <literal datatype="http://www.w3.org/2001/XMLSchema#integer">9</literal>
                         $w->startElement('literal');
 
-                        // its not part of the ARC2 result set, but expected later on
+                        // its not part of the result set, but expected later on
                         if (true === ctype_digit($row[$var])) {
                             $w->writeAttribute('datatype', 'http://www.w3.org/2001/XMLSchema#integer');
                         }
@@ -343,13 +343,13 @@ abstract class ComplianceTest extends TestCase
 
             $this->assertFalse(empty($testQuery), 'Can not test, because test query is empty.');
 
-            $arc2Result = $this->store->query($testQuery);
-            if (0 == $arc2Result) {
-                $this->assertEquals(0, $arc2Result);
-            } elseif (isset($arc2Result['result']['rows'])) {
-                $this->assertEquals(0, \count($arc2Result['result']['rows']));
+            $result = $this->store->query($testQuery);
+            if (0 == $result) {
+                $this->assertEquals(0, $result);
+            } elseif (isset($result['result']['rows'])) {
+                $this->assertEquals(0, \count($result['result']['rows']));
             } else {
-                throw new \Exception('Invalid result by query method: '.json_encode($arc2Result));
+                throw new \Exception('Invalid result by query method: '.json_encode($result));
             }
 
             // test has to be SUCCESSFUL

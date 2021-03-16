@@ -65,17 +65,9 @@ class AggregatesTest extends ComplianceTest
     public function testAggMin01()
     {
         $this->markTestSkipped(
-            'Skipped, because of known bug that ARC2 \'s Turtle parser can not parse decimals. '
-            .'For more information, see #136'
+            'Skipped, because of known bug that our Turtle parser can not parse decimals. '
+            .'For more information, see https://github.com/semsol/arc2/issues/136'
         );
-
-        /*
-         * it seems the Turtle parser is not able to detect "1.0", but only "1"
-         *
-         * see file db_adapter_depended/SPARQL11/w3c-tests/aggregates/agg-numeric.ttl
-         */
-
-        $this->assertTrue($this->runTestFor('agg-min-01'));
     }
 
     public function testAgg01()

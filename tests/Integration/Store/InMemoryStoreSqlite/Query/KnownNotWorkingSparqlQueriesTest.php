@@ -89,9 +89,13 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
     public function testSelectSameTerm()
     {
         $this->markTestSkipped(
-            'ARC2: solving sameterm does not work properly. The result contains elements multiple times. '
+            'Solving sameterm does not work properly. The result contains elements multiple times. '
             .\PHP_EOL.'Expected behavior is described here: https://www.w3.org/TR/rdf-sparql-query/#func-sameTerm'
         );
+
+        /*
+
+        demo code:
 
         // test data
         $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
@@ -148,6 +152,7 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
             10,
             true
         );
+        */
     }
 
     /**

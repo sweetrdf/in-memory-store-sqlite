@@ -27,7 +27,7 @@ SELECT ?who COUNT(?contact) AS ?contacts WHERE {
 GROUP BY ?who
 ```
 
-ARC2 currently has a bug in the `SUM` ([link](https://github.com/sweetrdf/in-memory-store-sqlite/issues/3)) and `AVG` ([link](https://github.com/sweetrdf/in-memory-store-sqlite/issues/4) function.
+Store implementation currently has a bug in the `SUM` ([link](https://github.com/sweetrdf/in-memory-store-sqlite/issues/3)) and `AVG` ([link](https://github.com/sweetrdf/in-memory-store-sqlite/issues/4) function.
 
 #### Supported aggregate functions
 

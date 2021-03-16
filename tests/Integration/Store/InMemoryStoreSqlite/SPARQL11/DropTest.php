@@ -62,7 +62,7 @@ class DropTest extends ComplianceTest
      */
 
     // this test is not part of the W3C test collection
-    // it tests DELETE FROM <...> command which is the ARC2 equivalent to DROP GRAPH <...>
+    // it tests DELETE FROM <...> command which is the store equivalent to DROP GRAPH <...>
     public function testDeleteGraph()
     {
         $graphUri = 'http://example.org/g1';

@@ -146,8 +146,7 @@ class SelectQueryTest extends TestCase
     }
 
     /*
-     * OPTIONAL, artifical query to extend coverage for store code.
-     * (ARC2_StoreSelectQueryHandler::sameOptional)
+     * OPTIONAL, artifical query to extend coverage for store code. (SelectQueryHandler::sameOptional)
      */
     public function testSelectOptional()
     {

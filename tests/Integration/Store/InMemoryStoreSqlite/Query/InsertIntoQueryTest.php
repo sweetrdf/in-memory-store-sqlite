@@ -399,7 +399,9 @@ class InsertIntoQueryTest extends TestCase
         );
     }
 
-    // show that ARC2 can't store long values
+    /**
+     * Demonstrates that store can't save long values
+     */
     public function testInsertIntoLongValue()
     {
         // create long URI (ca. 250 chars)
@@ -521,12 +523,12 @@ class InsertIntoQueryTest extends TestCase
         }');
 
         // we expect that 1 element gets added to the store, because of the WHERE clause.
-        // but ARC2 added none.
+        // but store added none.
         $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
         $this->assertEquals(2, \count($res['result']['rows']));
 
         $this->markTestSkipped(
-            'ARC2 does not check the WHERE clause when inserting data.'
+            'Store does not check the WHERE clause when inserting data.'
             .' Too many triples were added.'
             .\PHP_EOL
             .\PHP_EOL.'FYI: https://www.w3.org/Submission/SPARQL-Update/#sec_examples and '
@@ -572,7 +574,7 @@ class InsertIntoQueryTest extends TestCase
 
     /**
      * Tests old behavior of ARC2 store: its SQLite in-memory implementation was not able
-     * to add recognize all triples added by separate query calls.
+     * to recognize all triples added by separate query calls.
      */
     public function testMultipleInsertsSameStore()
     {
