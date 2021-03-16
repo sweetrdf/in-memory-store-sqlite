@@ -127,7 +127,7 @@ class ARC2_Store
     }
 
     /**
-     * @todo rework insert and delete functions (maybe force RDFInterface dataset instance?)
+     * @todo remove?
      */
     public function insert($data, $g, $keep_bnode_ids = 0)
     {
@@ -220,7 +220,7 @@ class ARC2_Store
     /**
      * Uses a relevant QueryHandler class to handle given $query.
      */
-    private function runQuery(array $infos, string $type, $keep_bnode_ids = 0, $q = '')
+    private function runQuery(array $infos, string $type, $keep_bnode_ids = 0)
     {
         $type = ucfirst($type);
 
@@ -230,16 +230,7 @@ class ARC2_Store
             $cls = 'ARC2_Store'.$type.'QueryHandler';
         }
 
-        $h = new $cls($this);
-
-        $r = [];
-        if ('Load' == $type) {/* the LoadQH supports raw data as 2nd parameter */
-            $r = $h->runQuery($infos, '', $keep_bnode_ids);
-        } else {
-            $r = $h->runQuery($infos, $keep_bnode_ids);
-        }
-
-        return $r;
+        return (new $cls($this))->runQuery($infos);
     }
 
     /**

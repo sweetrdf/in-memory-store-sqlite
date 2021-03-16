@@ -14,6 +14,9 @@
 use function sweetrdf\InMemoryStoreSqlite\calcBase;
 use function sweetrdf\InMemoryStoreSqlite\calcURI;
 
+/**
+ * @todo move to src folder
+ */
 class ARC2_Reader
 {
     private ?string $base;

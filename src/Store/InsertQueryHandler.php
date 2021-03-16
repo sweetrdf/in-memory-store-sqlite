@@ -15,14 +15,36 @@ namespace sweetrdf\InMemoryStoreSqlite\Store;
 
 class InsertQueryHandler extends \ARC2_StoreQueryHandler
 {
+    /**
+     * Is being used for blank nodes to generate a hash which is not only dependent on
+     * blank node ID and graph, but also on a random value.
+     * Otherwise blank nodes inserted in different "insert-sessions" will have the same reference.
+     */
+    private ?string $sessionId = null;
+
     public function runQuery(array $infos)
     {
-        foreach ($infos['query']['construct_triples'] as $triple) {
-            $this->addQuad($triple, $infos['query']['target_graph']);
-        }
+        $this->addTriplesToGraph(
+            $infos['query']['construct_triples'],
+            $infos['query']['target_graph']
+        );
     }
 
-    private function addQuad(array $triple, string $graph): void
+    public function addTriplesToGraph(array $triples, string $graph): void
+    {
+        $this->sessionId = bin2hex(random_bytes(8));
+
+        foreach ($triples as $triple) {
+            $this->addTripleToGraph($triple, $graph);
+        }
+
+        $this->sessionId = null;
+    }
+
+    /**
+     * @todo cache once loaded triples/quads
+     */
+    private function addTripleToGraph(array $triple, string $graph): void
     {
         /*
          * information:
@@ -150,7 +172,7 @@ class InsertQueryHandler extends \ARC2_StoreQueryHandler
             // transforms _:foo to _:b671320391_foo
             $s = $triple['s'];
             // TODO make bnode ID only unique for this session, not in general
-            $triple['s'] = '_:b'.$this->store->getValueHash($graph.$s).'_';
+            $triple['s'] = '_:b'.$this->store->getValueHash($this->sessionId.$graph.$s).'_';
             $triple['s'] .= substr($s, 2);
         }
 
@@ -171,7 +193,7 @@ class InsertQueryHandler extends \ARC2_StoreQueryHandler
             // transforms _:foo to _:b671320391_foo
             $o = $triple['o'];
             // TODO make bnode ID only unique for this session, not in general
-            $triple['o'] = '_:b'.$this->store->getValueHash($graph.$o).'_';
+            $triple['o'] = '_:b'.$this->store->getValueHash($this->sessionId.$graph.$o).'_';
             $triple['o'] .= substr($o, 2);
         }
 

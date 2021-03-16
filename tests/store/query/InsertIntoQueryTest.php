@@ -261,6 +261,52 @@ class InsertIntoQueryTest extends ARC2_TestCase
         );
     }
 
+    public function testInsertIntoBlankNode3()
+    {
+        // test data
+        $this->fixture->query('
+            PREFIX ex: <http://ex/>
+            INSERT INTO <http://ex/> {
+                ex:3 ex:action [
+                    ex:query  <agg-avg-01.rq> ;
+                    ex:data   <agg-numeric.ttl>
+                ] .
+            }
+        ');
+
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+
+        $this->assertEquals(
+            [
+                [
+                    's' => 'http://ex/3',
+                    's type' => 'uri',
+                    'p' => 'http://ex/action',
+                    'p type' => 'uri',
+                    'o' => $res['result']['rows'][0]['o'],
+                    'o type' => 'bnode',
+                ],
+                [
+                    's' => $res['result']['rows'][0]['o'],
+                    's type' => 'bnode',
+                    'p' => 'http://ex/query',
+                    'p type' => 'uri',
+                    'o' => NamespaceHelper::BASE_NAMESPACE.'agg-avg-01.rq',
+                    'o type' => 'uri',
+                ],
+                [
+                    's' => $res['result']['rows'][0]['o'],
+                    's type' => 'bnode',
+                    'p' => 'http://ex/data',
+                    'p type' => 'uri',
+                    'o' => NamespaceHelper::BASE_NAMESPACE.'agg-numeric.ttl',
+                    'o type' => 'uri',
+                ],
+            ],
+            $res['result']['rows']
+        );
+    }
+
     public function testInsertIntoDate()
     {
         // test data
@@ -571,5 +617,24 @@ class InsertIntoQueryTest extends ARC2_TestCase
             ],
             $res['result']['rows']
         );
+    }
+
+    /**
+     * Adds bulk of triples to test behavior.
+     * May take at least one second to finish.
+     */
+    public function testManyTriples()
+    {
+        $amount = 1500;
+
+        // add triples in separate query calls
+        for ($i=0; $i < $amount; $i++) {
+            $this->fixture->query('INSERT INTO <http://ex/> {<http://a> <http://b> "'.$i.'" . }');
+        }
+
+        // check result
+        $res = $this->fixture->query('SELECT * FROM <http://ex/> WHERE {?s ?p ?o.}');
+
+        $this->assertEquals($amount, \count($res['result']['rows']));
     }
 }

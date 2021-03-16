@@ -1,6 +1,10 @@
-# quickrdf - In-Memory Store (SQLite)
+# sweetrdf - In-Memory Store (SQLite)
 
 RDF In-memory store implementation using SQLite.
+
+## Performance
+
+At around 1000+ triples you may experience increasing execution time.
 
 ## License
 
