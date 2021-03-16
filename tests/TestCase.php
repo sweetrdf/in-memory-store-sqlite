@@ -17,12 +17,7 @@ use PHPUnit\Framework\TestCase as PHPUnitTestCase;
 
 class TestCase extends PHPUnitTestCase
 {
-    /**
-     * Subject under test.
-     *
-     * @var mixed
-     */
-    protected $fixture;
+    protected mixed $subjectUnderTest;
 
     protected string $rootPath = __DIR__;
 }

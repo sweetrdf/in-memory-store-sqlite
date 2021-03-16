@@ -27,7 +27,7 @@ class ErrorHandlingInQueriesTest extends TestCase
     {
         parent::setUp();
 
-        $this->fixture = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     /**
@@ -35,7 +35,7 @@ class ErrorHandlingInQueriesTest extends TestCase
      */
     public function testResultVariableNotUsedInQuery()
     {
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?not_used_in_query ?s WHERE {
                 ?s ?p ?o .
             }
@@ -57,6 +57,6 @@ class ErrorHandlingInQueriesTest extends TestCase
         );
 
         // TODO not bad if count is higher than 2
-        $this->assertEquals(2, \count($this->fixture->getLogger()->getEntries()));
+        $this->assertEquals(2, \count($this->subjectUnderTest->getLogger()->getEntries()));
     }
 }

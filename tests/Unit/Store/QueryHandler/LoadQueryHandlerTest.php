@@ -29,7 +29,7 @@ class LoadQueryHandlerTest extends TestCase
 
         $this->store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
 
-        $this->fixture = new LoadQueryHandler($this->store);
+        $this->subjectUnderTest = new LoadQueryHandler($this->store);
     }
 
     /*
@@ -43,10 +43,10 @@ class LoadQueryHandlerTest extends TestCase
     {
         // case with +hourse
         $string = '2009-05-28T18:03:38+09:00';
-        $this->assertEquals('2009-05-28T09:03:38Z', $this->fixture->getOComp($string));
+        $this->assertEquals('2009-05-28T09:03:38Z', $this->subjectUnderTest->getOComp($string));
 
         // GMT case
         $string = '2009-05-28T18:03:38GMT';
-        $this->assertEquals('2009-05-28T18:03:38Z', $this->fixture->getOComp($string));
+        $this->assertEquals('2009-05-28T18:03:38Z', $this->subjectUnderTest->getOComp($string));
     }
 }

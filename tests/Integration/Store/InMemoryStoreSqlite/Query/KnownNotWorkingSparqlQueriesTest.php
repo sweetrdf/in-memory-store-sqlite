@@ -27,7 +27,7 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
     {
         parent::setUp();
 
-        $this->fixture = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     /**
@@ -36,11 +36,11 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
     public function testSelectAlias()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT (?s AS ?s_alias) ?o FROM <http://example.com/> WHERE {?s <http://p1> ?o.}
         ');
 
@@ -56,13 +56,13 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
     public function testSelectFilterLangMatchesWithStar()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
             <http://s> <http://p1> "in de"@de .
             <http://s> <http://p1> "in en"@en .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER langMatches (lang(?o), "*")
@@ -94,12 +94,12 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
         );
 
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://container1> <http://weight> "100" .
             <http://container2> <http://weight> "100" .
         }');
 
-        $res = $this->fixture->query('SELECT ?c1 ?c2 WHERE {
+        $res = $this->subjectUnderTest->query('SELECT ?c1 ?c2 WHERE {
             ?c1 ?weight ?w1.
 
             ?c2 ?weight ?w2.
@@ -156,7 +156,7 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
     public function testSelectSubSelect()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://id> "1" .
             <http://person3> <http://id> "3" .
             <http://person2> <http://id> "2" .
@@ -166,7 +166,7 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
             <http://person3> <http://knows> <http://person2> .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE {
                 {
                     SELECT ?p WHERE {

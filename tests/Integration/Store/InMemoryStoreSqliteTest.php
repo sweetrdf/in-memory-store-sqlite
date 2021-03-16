@@ -24,7 +24,7 @@ class InMemoryStoreSqliteTest extends TestCase
     {
         parent::setUp();
 
-        $this->fixture = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     /**
@@ -40,7 +40,7 @@ class InMemoryStoreSqliteTest extends TestCase
         $query = 'SELECT id2val.val AS graphUri FROM g2t LEFT JOIN id2val ON g2t.g = id2val.id GROUP BY g';
 
         // send SQL query
-        $list = $this->fixture->getDBObject()->fetchList($query);
+        $list = $this->subjectUnderTest->getDBObject()->fetchList($query);
         $graphs = [];
 
         // collect graph URI's
@@ -58,18 +58,18 @@ class InMemoryStoreSqliteTest extends TestCase
     public function testDelete()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
             <http://s> <http://xmlns.com/foaf/0.1/name> "label1" .
         }');
 
-        $res = $this->fixture->query('SELECT * WHERE {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
         $this->assertEquals(2, \count($res['result']['rows']));
 
         // remove graph
-        $this->fixture->delete(false, 'http://example.com/');
+        $this->subjectUnderTest->delete(false, 'http://example.com/');
 
-        $res = $this->fixture->query('SELECT * WHERE {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
         $this->assertEquals(0, \count($res['result']['rows']));
     }
 
@@ -81,7 +81,7 @@ class InMemoryStoreSqliteTest extends TestCase
     public function testGetDBVersion()
     {
         $pattern = '/[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}/';
-        $result = preg_match($pattern, $this->fixture->getDBVersion(), $match);
+        $result = preg_match($pattern, $this->subjectUnderTest->getDBVersion(), $match);
         $this->assertEquals(1, $result);
     }
 
@@ -91,26 +91,26 @@ class InMemoryStoreSqliteTest extends TestCase
 
     public function testGetAndSetSetting()
     {
-        $this->assertEquals(0, $this->fixture->getSetting('foo'));
+        $this->assertEquals(0, $this->subjectUnderTest->getSetting('foo'));
 
-        $this->fixture->setSetting('foo', 'bar');
+        $this->subjectUnderTest->setSetting('foo', 'bar');
 
-        $this->assertEquals('bar', $this->fixture->getSetting('foo'));
+        $this->assertEquals('bar', $this->subjectUnderTest->getSetting('foo'));
     }
 
     public function testGetAndSetSettingUseDefault()
     {
-        $this->assertEquals('no-entry', $this->fixture->getSetting('not-available-'.time(), 'no-entry'));
+        $this->assertEquals('no-entry', $this->subjectUnderTest->getSetting('not-available-'.time(), 'no-entry'));
     }
 
     public function testGetAndSetSettingExistingSetting()
     {
-        $this->assertEquals(0, $this->fixture->getSetting('foo'));
+        $this->assertEquals(0, $this->subjectUnderTest->getSetting('foo'));
 
-        $this->fixture->setSetting('foo', 'bar');
-        $this->fixture->setSetting('foo', 'bar2'); // overrides existing setting
+        $this->subjectUnderTest->setSetting('foo', 'bar');
+        $this->subjectUnderTest->setSetting('foo', 'bar2'); // overrides existing setting
 
-        $this->assertEquals('bar2', $this->fixture->getSetting('foo'));
+        $this->assertEquals('bar2', $this->subjectUnderTest->getSetting('foo'));
     }
 
     /*
@@ -128,7 +128,7 @@ class InMemoryStoreSqliteTest extends TestCase
                 'http://www.w3.org/2004/02/skos/core#prefLabel',
                 'http://xmlns.com/foaf/0.1/nick',
             ],
-            $this->fixture->getLabelProps()
+            $this->subjectUnderTest->getLabelProps()
         );
     }
 
@@ -139,12 +139,12 @@ class InMemoryStoreSqliteTest extends TestCase
     public function testGetResourceLabel()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
             <http://s> <http://xmlns.com/foaf/0.1/name> "label1" .
         }');
 
-        $res = $this->fixture->getResourceLabel('http://s');
+        $res = $this->subjectUnderTest->getResourceLabel('http://s');
 
         $this->assertEquals('label1', $res);
     }
@@ -152,11 +152,11 @@ class InMemoryStoreSqliteTest extends TestCase
     public function testGetResourceLabelNoData()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->getResourceLabel('http://s');
+        $res = $this->subjectUnderTest->getResourceLabel('http://s');
 
         $this->assertEquals('s', $res);
     }
@@ -168,12 +168,12 @@ class InMemoryStoreSqliteTest extends TestCase
     public function testGetResourcePredicates()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
             <http://s> <http://p2> "bar" .
         }');
 
-        $res = $this->fixture->getResourcePredicates('http://s');
+        $res = $this->subjectUnderTest->getResourcePredicates('http://s');
 
         $this->assertEquals(
             [
@@ -187,17 +187,17 @@ class InMemoryStoreSqliteTest extends TestCase
     public function testGetResourcePredicatesMultipleGraphs()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
             <http://s> <http://p2> "bar" .
         }');
 
-        $this->fixture->query('INSERT INTO <http://example.com/2> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/2> {
             <http://s> <http://p3> "baz" .
             <http://s> <http://p4> "bar" .
         }');
 
-        $res = $this->fixture->getResourcePredicates('http://s');
+        $res = $this->subjectUnderTest->getResourcePredicates('http://s');
 
         $this->assertEquals(
             [
@@ -217,18 +217,18 @@ class InMemoryStoreSqliteTest extends TestCase
     public function testGetPredicateRange()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://p1> <http://www.w3.org/2000/01/rdf-schema#range> <http://foobar> .
         }');
 
-        $res = $this->fixture->getPredicateRange('http://p1');
+        $res = $this->subjectUnderTest->getPredicateRange('http://p1');
 
         $this->assertEquals('http://foobar', $res);
     }
 
     public function testGetPredicateRangeNotFound()
     {
-        $res = $this->fixture->getPredicateRange('http://not-available');
+        $res = $this->subjectUnderTest->getPredicateRange('http://not-available');
 
         $this->assertEquals('', $res);
     }
@@ -239,18 +239,18 @@ class InMemoryStoreSqliteTest extends TestCase
 
     public function testGetIDValue()
     {
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://p1> <http://www.w3.org/2000/01/rdf-schema#range> <http://foobar> .
         }');
 
-        $res = $this->fixture->getIDValue(1);
+        $res = $this->subjectUnderTest->getIDValue(1);
 
         $this->assertEquals('http://example.com/', $res);
     }
 
     public function testGetIDValueNoData()
     {
-        $res = $this->fixture->getIDValue(1);
+        $res = $this->subjectUnderTest->getIDValue(1);
 
         $this->assertEquals(0, $res);
     }
@@ -262,18 +262,18 @@ class InMemoryStoreSqliteTest extends TestCase
      */
     public function testInsertSaftRegressionTest1()
     {
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> WHERE { ?s ?p ?o. } ');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://example.com/> WHERE { ?s ?p ?o. } ');
         $this->assertEquals(0, \count($res['result']['rows']));
 
-        $this->fixture->insert(
+        $this->subjectUnderTest->insert(
             file_get_contents($this->rootPath.'/data/nt/saft-arc2-addition-regression1.nt'),
             'http://example.com/'
         );
 
-        $res1 = $this->fixture->query('SELECT * FROM <http://example.com/> WHERE { ?s ?p ?o. } ');
+        $res1 = $this->subjectUnderTest->query('SELECT * FROM <http://example.com/> WHERE { ?s ?p ?o. } ');
         $this->assertEquals(442, \count($res1['result']['rows']));
 
-        $res2 = $this->fixture->query('SELECT * WHERE { ?s ?p ?o. } ');
+        $res2 = $this->subjectUnderTest->query('SELECT * WHERE { ?s ?p ?o. } ');
         $this->assertEquals(442, \count($res2['result']['rows']));
     }
 
@@ -286,15 +286,15 @@ class InMemoryStoreSqliteTest extends TestCase
      */
     public function testInsertSaftRegressionTest2()
     {
-        $res = $this->fixture->query('INSERT INTO <http://localhost/Saft/TestGraph/> {<http://foo/1> <http://foo/2> <http://foo/3> . }');
+        $res = $this->subjectUnderTest->query('INSERT INTO <http://localhost/Saft/TestGraph/> {<http://foo/1> <http://foo/2> <http://foo/3> . }');
 
-        $res1 = $this->fixture->query('SELECT * FROM <http://localhost/Saft/TestGraph/> WHERE {?s ?p ?o.}');
+        $res1 = $this->subjectUnderTest->query('SELECT * FROM <http://localhost/Saft/TestGraph/> WHERE {?s ?p ?o.}');
         $this->assertEquals(1, \count($res1['result']['rows']));
 
-        $res2 = $this->fixture->query('SELECT * WHERE {?s ?p ?o.}');
+        $res2 = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
         $this->assertEquals(1, \count($res2['result']['rows']));
 
-        $res2 = $this->fixture->query('SELECT ?s ?p ?o WHERE {?s ?p ?o.}');
+        $res2 = $this->subjectUnderTest->query('SELECT ?s ?p ?o WHERE {?s ?p ?o.}');
         $this->assertEquals(1, \count($res2['result']['rows']));
     }
 
@@ -309,17 +309,17 @@ class InMemoryStoreSqliteTest extends TestCase
      */
     public function testInsertSaftRegressionTest3()
     {
-        $this->fixture->query(
+        $this->subjectUnderTest->query(
             'INSERT INTO <http://localhost/Saft/TestGraph/> {<http://localhost/Saft/TestGraph/> <http://localhost/Saft/TestGraph/> <http://localhost/Saft/TestGraph/> . }'
         );
-        $this->fixture->query(
+        $this->subjectUnderTest->query(
             'INSERT INTO <http://second-graph/> {<http://second-graph/0> <http://second-graph/1> <http://second-graph/2> . }'
         );
-        $this->fixture->query(
+        $this->subjectUnderTest->query(
             'DELETE FROM <http://localhost/Saft/TestGraph/>'
         );
 
-        $res = $this->fixture->query('SELECT * FROM <http://second-graph/> WHERE {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://second-graph/> WHERE {?s ?p ?o.}');
         $this->assertEquals(1, \count($res['result']['rows']));
     }
 
@@ -334,17 +334,17 @@ class InMemoryStoreSqliteTest extends TestCase
          * the following checks will not go through because of the bug in #114
          *
 
-        $this->fixture->query('INSERT INTO <http://graph1/> {<http://foo/1> <http://foo/2> <http://foo/3> . }');
-        $this->fixture->query('INSERT INTO <http://graph2/> {<http://foo/4> <http://foo/5> <http://foo/6> . }');
-        $this->fixture->query('INSERT INTO <http://graph2/> {<http://foo/a> <http://foo/b> <http://foo/c> . }');
+        $this->subjectUnderTest->query('INSERT INTO <http://graph1/> {<http://foo/1> <http://foo/2> <http://foo/3> . }');
+        $this->subjectUnderTest->query('INSERT INTO <http://graph2/> {<http://foo/4> <http://foo/5> <http://foo/6> . }');
+        $this->subjectUnderTest->query('INSERT INTO <http://graph2/> {<http://foo/a> <http://foo/b> <http://foo/c> . }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://graph1/> WHERE {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph1/> WHERE {?s ?p ?o.}');
         $this->assertEquals(1, \count($res['result']['rows']));
 
-        $res = $this->fixture->query('SELECT * FROM <http://graph2/> WHERE {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph2/> WHERE {?s ?p ?o.}');
         $this->assertEquals(2, \count($res['result']['rows']));
 
-        $res = $this->fixture->query('SELECT * WHERE {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
         $this->assertEquals(3, \count($res['result']['rows']));
         */
     }
@@ -355,11 +355,11 @@ class InMemoryStoreSqliteTest extends TestCase
 
     public function testResetKeepSettings()
     {
-        $this->fixture->setSetting('foo', 'bar');
-        $this->assertEquals(1, $this->fixture->hasSetting('foo'));
+        $this->subjectUnderTest->setSetting('foo', 'bar');
+        $this->assertEquals(1, $this->subjectUnderTest->hasSetting('foo'));
 
-        $this->fixture->reset(1);
+        $this->subjectUnderTest->reset(1);
 
-        $this->assertEquals(1, $this->fixture->hasSetting('foo'));
+        $this->assertEquals(1, $this->subjectUnderTest->hasSetting('foo'));
     }
 }

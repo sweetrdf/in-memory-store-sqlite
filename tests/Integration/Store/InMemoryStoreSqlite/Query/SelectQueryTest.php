@@ -27,17 +27,17 @@ class SelectQueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->fixture = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     public function testSelectDefaultGraph()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('SELECT * WHERE {<http://s> <http://p1> ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * WHERE {<http://s> <http://p1> ?o.}');
         $this->assertEquals(
             [
                 'query_type' => 'select',
@@ -61,11 +61,11 @@ class SelectQueryTest extends TestCase
     public function testSelectGraphSpecified()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> WHERE {<http://s> <http://p1> ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://example.com/> WHERE {<http://s> <http://p1> ?o.}');
         $this->assertEquals(
             [
                 'query_type' => 'select',
@@ -90,7 +90,7 @@ class SelectQueryTest extends TestCase
     public function testSelectLeftJoinUsingOptional()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://a> <http://p1> <http://b> .
             <http://a> <http://p1> <http://c> .
 
@@ -100,7 +100,7 @@ class SelectQueryTest extends TestCase
             <http://c> <http://p1> <http://f> .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE {
                 ?s <http://p1> ?o .
                 OPTIONAL {
@@ -152,11 +152,11 @@ class SelectQueryTest extends TestCase
     public function testSelectOptional()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s1> <http://p1> <http://s2> .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE {
                 ?s <http://p1> ?o .
                 OPTIONAL {
@@ -192,11 +192,11 @@ class SelectQueryTest extends TestCase
     public function testSelectNoWhereClause()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://example.com/> {<http://s> <http://p1> ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://example.com/> {<http://s> <http://p1> ?o.}');
         $this->assertEquals(
             [
                 'query_type' => 'select',
@@ -225,11 +225,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterBoundNotBounding()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p2> ?o .
                 FILTER (bound(?o))
@@ -254,11 +254,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterBoundVariableBounded()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (bound(?o))
@@ -290,11 +290,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterDatatype()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> 3 .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (datatype(?o) = xsd:integer)
@@ -327,11 +327,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterIsBlankFound()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> _:foo .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (isBlank(?o))
@@ -363,11 +363,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterIsBlankNotFound()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> <http://foo> .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (isBlank(?o))
@@ -392,11 +392,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterIsIriFound()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> <urn:id> .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (isIri(?o))
@@ -428,11 +428,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterIsIriNotFound()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (isIri(?o))
@@ -457,11 +457,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterIsLiteralFound()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (isLiteral(?o))
@@ -493,11 +493,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterIsLiteralNotFound()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> <http://foo> .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (isLiteral(?o))
@@ -522,11 +522,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterIsUriFound()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> <urn:id> .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (isUri(?o))
@@ -558,11 +558,11 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterIsUriNotFound()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (isUri(?o))
@@ -587,13 +587,13 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterLang()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
             <http://s> <http://p1> "in de"@de .
             <http://s> <http://p1> "in en"@en .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (lang(?o) = "en")
@@ -626,13 +626,13 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterLangMatches()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
             <http://s> <http://p1> "in de"@de .
             <http://s> <http://p1> "in en"@en .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER langMatches (lang(?o), "en")
@@ -665,12 +665,12 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterRegex()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "Alice".
             <http://s2> <http://p1> "Bob" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER regex (?o, "^Ali")
@@ -702,12 +702,12 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterRegexWithModifier()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "Alice".
             <http://s2> <http://p1> "Bob" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER regex (?o, "^ali", "i")
@@ -739,13 +739,13 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterStr()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
             <http://s> <http://p1> "in de"@de .
             <http://s> <http://p1> "in en"@en .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (str(?o) = "in en")
@@ -778,13 +778,13 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterStrNotFound()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "foo" .
             <http://s> <http://p1> "in de"@de .
             <http://s> <http://p1> "in en"@en .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT ?s ?o WHERE {
                 ?s <http://p1> ?o .
                 FILTER (str(?o) = "in it")
@@ -809,12 +809,12 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterRelationalGreaterThan()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://container1> <http://weight> "150" .
             <http://container2> <http://weight> "50" .
         }');
 
-        $res = $this->fixture->query('SELECT ?c WHERE {
+        $res = $this->subjectUnderTest->query('SELECT ?c WHERE {
             ?c <http://weight> ?w .
 
             FILTER (?w > 100)
@@ -843,12 +843,12 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterRelationalSmallerThan()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://container1> <http://weight> "150" .
             <http://container2> <http://weight> "50" .
         }');
 
-        $res = $this->fixture->query('SELECT ?c WHERE {
+        $res = $this->subjectUnderTest->query('SELECT ?c WHERE {
             ?c <http://weight> ?w .
 
             FILTER (?w < 100)
@@ -877,12 +877,12 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterRelationalSmallerThan2()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://container1> <http://weight> "150" .
             <http://container2> <http://weight> "50" .
         }');
 
-        $res = $this->fixture->query('SELECT ?c WHERE {
+        $res = $this->subjectUnderTest->query('SELECT ?c WHERE {
             ?c <http://weight> ?w .
 
             FILTER (?w < 100 && ?w > 10)
@@ -902,12 +902,12 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterRelationalEqual()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://container1> <http://weight> "150" .
             <http://container2> <http://weight> "50" .
         }');
 
-        $res = $this->fixture->query('SELECT ?c WHERE {
+        $res = $this->subjectUnderTest->query('SELECT ?c WHERE {
             ?c <http://weight> ?w .
 
             FILTER (?w = 150)
@@ -936,12 +936,12 @@ class SelectQueryTest extends TestCase
     public function testSelectFilterRelationalNotEqual()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://container1> <http://weight> "150" .
             <http://container2> <http://weight> "50" .
         }');
 
-        $res = $this->fixture->query('SELECT ?c WHERE {
+        $res = $this->subjectUnderTest->query('SELECT ?c WHERE {
             ?c <http://weight> ?w .
 
             FILTER (?w != 150)
@@ -973,13 +973,13 @@ class SelectQueryTest extends TestCase
     public function testSelectCount()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://name> "baz" .
             <http://person2> <http://name> "baz" .
             <http://person3> <http://name> "baz" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT COUNT(?s) AS ?count WHERE {
                 ?s <http://name> "baz" .
             }
@@ -1018,12 +1018,12 @@ class SelectQueryTest extends TestCase
         ';
 
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://knows> <http://person2>, <http://person3> .
             <http://person2> <http://knows> <http://person3> .
         }');
 
-        $res = $this->fixture->query($query);
+        $res = $this->subjectUnderTest->query($query);
         $this->assertEquals(
             [
                 'query_type' => 'select',
@@ -1060,13 +1060,13 @@ class SelectQueryTest extends TestCase
     public function testSelectOffset()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://id> "1" .
             <http://person3> <http://id> "3" .
             <http://person2> <http://id> "2" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE { ?s ?p ?o . }
             OFFSET 1
         ');
@@ -1106,13 +1106,13 @@ class SelectQueryTest extends TestCase
     public function testSelectOffsetLimit()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://id> "1" .
             <http://person3> <http://id> "3" .
             <http://person2> <http://id> "2" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE { ?s ?p ?o . }
             OFFSET 1 LIMIT 2
         ');
@@ -1152,13 +1152,13 @@ class SelectQueryTest extends TestCase
     public function testSelectLimit()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://id> "1" .
             <http://person3> <http://id> "3" .
             <http://person2> <http://id> "2" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE { ?s ?p ?o . }
             LIMIT 2
         ');
@@ -1202,13 +1202,13 @@ class SelectQueryTest extends TestCase
     public function testSelectOrderByAsc()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://id> "1" .
             <http://person3> <http://id> "3" .
             <http://person2> <http://id> "2" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE {
                 ?s <http://id> ?id .
             }
@@ -1252,13 +1252,13 @@ class SelectQueryTest extends TestCase
     public function testSelectOrderByDesc()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://id> "1" .
             <http://person3> <http://id> "3" .
             <http://person2> <http://id> "2" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE {
                 ?s <http://id> ?id .
             }
@@ -1301,7 +1301,7 @@ class SelectQueryTest extends TestCase
 
     public function testSelectOrderByWithoutContent()
     {
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE {
                 ?s <http://id> ?id .
             }
@@ -1319,11 +1319,11 @@ class SelectQueryTest extends TestCase
     public function testSelectPrefix()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://example.com/kennt> <http://person2> .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             PREFIX ex: <http://example.com/>
             SELECT * WHERE {
                 ?s ex:kennt ?o
@@ -1359,13 +1359,13 @@ class SelectQueryTest extends TestCase
     public function testSelectUnion()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://id> "1" .
             <http://person3> <http://id> "3" .
             <http://person2> <http://id> "2" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * WHERE {
                 {
                     ?p <http://id> "1" .
@@ -1406,13 +1406,13 @@ class SelectQueryTest extends TestCase
     public function testSelectOrderByAscWithFromClause()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://person1> <http://id> "1" .
             <http://person3> <http://id> "3" .
             <http://person2> <http://id> "2" .
         }');
 
-        $res = $this->fixture->query('
+        $res = $this->subjectUnderTest->query('
             SELECT * FROM <http://example.com/> WHERE {
                 ?s <http://id> ?id .
             }

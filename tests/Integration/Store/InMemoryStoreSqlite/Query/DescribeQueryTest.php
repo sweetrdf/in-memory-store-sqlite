@@ -27,17 +27,17 @@ class DescribeQueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->fixture = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     public function testDescribeDefaultGraph()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('DESCRIBE <http://s>');
+        $res = $this->subjectUnderTest->query('DESCRIBE <http://s>');
         $this->assertEquals(
             [
                 'query_type' => 'describe',
@@ -60,11 +60,11 @@ class DescribeQueryTest extends TestCase
     public function testDescribeWhereDefaultGraph()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('DESCRIBE ?s WHERE {?s ?p "baz".}');
+        $res = $this->subjectUnderTest->query('DESCRIBE ?s WHERE {?s ?p "baz".}');
         $this->assertEquals(
             [
                 'query_type' => 'describe',
@@ -87,11 +87,11 @@ class DescribeQueryTest extends TestCase
     public function testDescribeWhereDefaultGraph2()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('DESCRIBE * WHERE {?s ?p "baz".}');
+        $res = $this->subjectUnderTest->query('DESCRIBE * WHERE {?s ?p "baz".}');
         $this->assertEquals(
             [
                 'query_type' => 'describe',

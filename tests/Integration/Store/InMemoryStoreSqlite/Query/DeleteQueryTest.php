@@ -27,29 +27,29 @@ class DeleteQueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->fixture = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     protected function runSPOQuery($g = null)
     {
         return null == $g
-            ? $this->fixture->query('SELECT * WHERE {?s ?p ?o.}')
-            : $this->fixture->query('SELECT * FROM <'.$g.'> WHERE {?s ?p ?o.}');
+            ? $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}')
+            : $this->subjectUnderTest->query('SELECT * FROM <'.$g.'> WHERE {?s ?p ?o.}');
     }
 
     public function testDelete()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/1> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/1> {
             <http://s> <http://p1> "baz" .
         }');
-        $this->fixture->query('INSERT INTO <http://example.com/2> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/2> {
             <http://s> <http://p1> "bar" .
         }');
 
         $this->assertEquals(2, \count($this->runSPOQuery()['result']['rows']));
 
-        $this->fixture->query('DELETE {<http://s> ?p ?o .}');
+        $this->subjectUnderTest->query('DELETE {<http://s> ?p ?o .}');
 
         $this->assertEquals(0, \count($this->runSPOQuery()['result']['rows']));
     }
@@ -57,16 +57,16 @@ class DeleteQueryTest extends TestCase
     public function testDelete2()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/1> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/1> {
             <http://s> <http://p1> "baz" .
         }');
-        $this->fixture->query('INSERT INTO <http://example.com/2> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/2> {
             <http://s> <http://p2> "bar" .
         }');
 
         $this->assertEquals(2, \count($this->runSPOQuery()['result']['rows']));
 
-        $this->fixture->query('DELETE {<http://s> <http://p1> ?o .}');
+        $this->subjectUnderTest->query('DELETE {<http://s> <http://p1> ?o .}');
 
         $this->assertEquals(1, \count($this->runSPOQuery()['result']['rows']));
     }
@@ -74,13 +74,13 @@ class DeleteQueryTest extends TestCase
     public function testDeleteAGraph()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/1> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/1> {
             <http://s> <http://p1> "baz" .
         }');
 
         $this->assertEquals(1, \count($this->runSPOQuery()['result']['rows']));
 
-        $this->fixture->query('DELETE FROM <http://example.com/1>');
+        $this->subjectUnderTest->query('DELETE FROM <http://example.com/1>');
 
         $this->assertEquals(0, \count($this->runSPOQuery()['result']['rows']));
     }
@@ -88,7 +88,7 @@ class DeleteQueryTest extends TestCase
     public function testDeleteWhere()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/1> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/1> {
             <http://s> <http://to-delete> 1, 2 .
             <http://s> <http://to-check> 1, 2 .
             <http://s> rdf:type <http://Test> .
@@ -96,7 +96,7 @@ class DeleteQueryTest extends TestCase
 
         $this->assertEquals(5, \count($this->runSPOQuery()['result']['rows']));
 
-        $this->fixture->query('DELETE {
+        $this->subjectUnderTest->query('DELETE {
             <http://s> <http://to-delete> 1, 2 .
         } WHERE {
             <http://s> <http://to-check> 1, 2 .
@@ -108,14 +108,14 @@ class DeleteQueryTest extends TestCase
     public function testDeleteWhereWithBlankNode()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/1> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/1> {
             _:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://Person> ;
                 <http://foo> <http://bar > .
         }');
 
         $this->assertEquals(2, \count($this->runSPOQuery()['result']['rows']));
 
-        $this->fixture->query('DELETE {
+        $this->subjectUnderTest->query('DELETE {
             _:a ?p ?o .
         } WHERE {
             _:a <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://Person> .
@@ -130,7 +130,7 @@ class DeleteQueryTest extends TestCase
     public function testDeleteFromWhere()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/1> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/1> {
             <http://s> <http://to-delete> 1, 2 .
             <http://s> <http://to-check> 1, 2 .
             <http://s> rdf:type <http://Test> .
@@ -138,7 +138,7 @@ class DeleteQueryTest extends TestCase
 
         $this->assertEquals(5, \count($this->runSPOQuery('http://example.com/1')['result']['rows']));
 
-        $this->fixture->query('DELETE FROM <http://example.com/1> {
+        $this->subjectUnderTest->query('DELETE FROM <http://example.com/1> {
             <http://s> <http://to-delete> 1, 2 .
         } WHERE {
             <http://s> <http://to-check> 1, 2 .

@@ -27,17 +27,17 @@ class AskQueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->fixture = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     public function testAskDefaultGraph()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('ASK {<http://s> <http://p1> ?o.}');
+        $res = $this->subjectUnderTest->query('ASK {<http://s> <http://p1> ?o.}');
         $this->assertEquals(
             [
                 'query_type' => 'ask',
@@ -51,11 +51,11 @@ class AskQueryTest extends TestCase
     public function testAskGraphSpecified()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://example.com/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('ASK FROM <http://example.com/> {<http://s> <http://p1> ?o.}');
+        $res = $this->subjectUnderTest->query('ASK FROM <http://example.com/> {<http://s> <http://p1> ?o.}');
         $this->assertEquals(
             [
                 'query_type' => 'ask',

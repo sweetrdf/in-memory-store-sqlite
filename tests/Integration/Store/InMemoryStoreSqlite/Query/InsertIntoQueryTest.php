@@ -28,26 +28,26 @@ class InsertIntoQueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->fixture = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
     public function testInsertInto()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
         $this->assertEquals(1, \count($res['result']['rows']));
     }
 
     public function testInsertIntoUriTriple()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex> { <http://s> <http://p> <http://o> .}');
+        $this->subjectUnderTest->query('INSERT INTO <http://ex> { <http://s> <http://p> <http://o> .}');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
         $this->assertEquals(
             [
                 [
@@ -66,9 +66,9 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoShortenedUri()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex> { <#make> <#me> <#happy> .}');
+        $this->subjectUnderTest->query('INSERT INTO <http://ex> { <#make> <#me> <#happy> .}');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
         $this->assertEquals(
             [
                 [
@@ -91,9 +91,9 @@ class InsertIntoQueryTest extends TestCase
             PREFIX ex: <http://ex/>
             INSERT INTO <http://ex> { <http://s> rdf:type ex:Person .}
         ';
-        $this->fixture->query($query);
+        $this->subjectUnderTest->query($query);
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
         $this->assertEquals(
             [
                 [
@@ -112,13 +112,13 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoNumbers()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex> {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex> {
             <http://s> <http://foo> 1 .
             <http://s> <http://foo> 2.0 .
             <http://s> <http://foo> "3" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
         $this->assertEquals(
             [
                 [
@@ -155,11 +155,11 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoObjectWithDatatype()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex> {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex> {
             <http://s> <http://foo> "4"^^xsd:integer .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
         $this->assertEquals(
             [
                 [
@@ -179,11 +179,11 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoObjectWithLanguage()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex> {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex> {
             <http://s> <http://foo> "5"@en .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
         $this->assertEquals(
             [
                 [
@@ -203,11 +203,11 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoBlankNode1()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex> {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex> {
             _:foo <http://foo> "6" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex> {?s ?p ?o.}');
         $this->assertEquals(
             [
                 [
@@ -226,13 +226,13 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoBlankNode2()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> {
             <http://s> <http://p1> [
                 <http://foo> <http://bar>
             ] .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
 
         // because bnode ID is random, we check only its structure
         $this->assertTrue(isset($res['result']['rows'][0]));
@@ -264,7 +264,7 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoBlankNode3()
     {
         // test data
-        $this->fixture->query('
+        $this->subjectUnderTest->query('
             PREFIX ex: <http://ex/>
             INSERT INTO <http://ex/> {
                 ex:3 ex:action [
@@ -274,7 +274,7 @@ class InsertIntoQueryTest extends TestCase
             }
         ');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
 
         $this->assertEquals(
             [
@@ -310,13 +310,13 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoDate()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> {
             <http://s> <http://p1> "2009-05-28T18:03:38+09:00" .
             <http://s> <http://p1> "2009-05-28T18:03:38+09:00GMT" .
             <http://s> <http://p1> "21 August 2007" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
 
         $this->assertEquals(
             [
@@ -359,11 +359,11 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoList()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> {
             <http://s> <http://p1> 1, 2, 3 .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
 
         $this->assertEquals(
             [
@@ -407,12 +407,12 @@ class InsertIntoQueryTest extends TestCase
             .hash('sha512', 'URI');
 
         // test data
-        $this->fixture->query('INSERT INTO <http://graph> {
+        $this->subjectUnderTest->query('INSERT INTO <http://graph> {
             <'.$longURI.'/s> <'.$longURI.'/p> <'.$longURI.'/o> ;
                              <'.$longURI.'/p2> <'.$longURI.'/o2> .
         ');
 
-        $res = $this->fixture->query('SELECT * {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * {?s ?p ?o.}');
         $this->assertEquals(
             [
                 'query_type' => 'select',
@@ -429,7 +429,7 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoListMoreComplex()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex/> {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> {
             _:b0  rdf:first  1 ;
                   rdf:rest   _:b1 .
             _:b1  rdf:first  2 ;
@@ -438,7 +438,7 @@ class InsertIntoQueryTest extends TestCase
                   rdf:rest   rdf:nil .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
 
         $this->assertEquals(
             [
@@ -501,19 +501,19 @@ class InsertIntoQueryTest extends TestCase
     public function testInsertIntoConstruct()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex/> CONSTRUCT {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> CONSTRUCT {
             <http://baz> <http://location> "Leipzig" .
             <http://baz2> <http://location> "Grimma" .
         }');
 
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
         $this->assertEquals(2, \count($res['result']['rows']));
     }
 
     public function testInsertIntoWhere()
     {
         // test data
-        $this->fixture->query('INSERT INTO <http://ex/> CONSTRUCT {
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> CONSTRUCT {
             <http://baz> <http://location> "Leipzig" .
             <http://baz2> <http://location> "Grimma" .
         } WHERE {
@@ -522,7 +522,7 @@ class InsertIntoQueryTest extends TestCase
 
         // we expect that 1 element gets added to the store, because of the WHERE clause.
         // but ARC2 added none.
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> {?s ?p ?o.}');
         $this->assertEquals(2, \count($res['result']['rows']));
 
         $this->markTestSkipped(
@@ -545,28 +545,28 @@ class InsertIntoQueryTest extends TestCase
          */
 
         $triple = '<http://foo> <http://location> "Leipzig" .';
-        $this->fixture->query('INSERT INTO <http://graph1/> {'.$triple.'}');
-        $this->fixture->query('INSERT INTO <http://graph2/> {'.$triple.'}');
+        $this->subjectUnderTest->query('INSERT INTO <http://graph1/> {'.$triple.'}');
+        $this->subjectUnderTest->query('INSERT INTO <http://graph2/> {'.$triple.'}');
 
         // check additions (graph1)
-        $res = $this->fixture->query('SELECT * FROM <http://graph1/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph1/> {?s ?p ?o.}');
         $this->assertEquals(1, \count($res['result']['rows']));
 
         // check additions (graph2)
-        $res = $this->fixture->query('SELECT * FROM <http://graph2/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph2/> {?s ?p ?o.}');
         $this->assertEquals(1, \count($res['result']['rows']));
 
         /*
          * test isolation by removing the triple from graph2
          */
-        $this->fixture->query('DELETE FROM <http://graph2/>');
+        $this->subjectUnderTest->query('DELETE FROM <http://graph2/>');
 
         // check triples (graph1)
-        $res = $this->fixture->query('SELECT * FROM <http://graph1/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph1/> {?s ?p ?o.}');
         $this->assertEquals(1, \count($res['result']['rows']));
 
         // check triples (graph2)
-        $res = $this->fixture->query('SELECT * FROM <http://graph2/> {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph2/> {?s ?p ?o.}');
         $this->assertEquals(0, \count($res['result']['rows']));
     }
 
@@ -577,12 +577,12 @@ class InsertIntoQueryTest extends TestCase
     public function testMultipleInsertsSameStore()
     {
         // add triples in separate query calls
-        $this->fixture->query('INSERT INTO <http://ex/> {<http://a> <http://b> <http://c> . }');
-        $this->fixture->query('INSERT INTO <http://ex/> {<http://a2> <http://b2> "c2"@de. }');
-        $this->fixture->query('INSERT INTO <http://ex/> {<http://a3> <http://b3> "c3"^^xsd:string . }');
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> {<http://a> <http://b> <http://c> . }');
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> {<http://a2> <http://b2> "c2"@de. }');
+        $this->subjectUnderTest->query('INSERT INTO <http://ex/> {<http://a3> <http://b3> "c3"^^xsd:string . }');
 
         // check result
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> WHERE {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> WHERE {?s ?p ?o.}');
 
         $this->assertEquals(3, \count($res['result']['rows']));
 
@@ -629,11 +629,11 @@ class InsertIntoQueryTest extends TestCase
 
         // add triples in separate query calls
         for ($i = 0; $i < $amount; ++$i) {
-            $this->fixture->query('INSERT INTO <http://ex/> {<http://a> <http://b> "'.$i.'" . }');
+            $this->subjectUnderTest->query('INSERT INTO <http://ex/> {<http://a> <http://b> "'.$i.'" . }');
         }
 
         // check result
-        $res = $this->fixture->query('SELECT * FROM <http://ex/> WHERE {?s ?p ?o.}');
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> WHERE {?s ?p ?o.}');
 
         $this->assertEquals($amount, \count($res['result']['rows']));
     }
