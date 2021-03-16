@@ -55,7 +55,13 @@ class SyntaxUpdate1Test extends ComplianceTest
             }
         ');
 
-        return file_get_contents($query['result']['rows'][0]['queryFile']);
+        $path = $query['result']['rows'][0]['queryFile'];
+        if (DIRECTORY_SEPARATOR === '\\') {
+            // windows only
+            $path = str_replace('file://', '', $path);
+        }
+
+        return file_get_contents($path);
     }
 
     /*
