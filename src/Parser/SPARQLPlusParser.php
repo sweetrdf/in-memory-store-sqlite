@@ -11,7 +11,9 @@
  * file that was distributed with this source code.
  */
 
-class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
+namespace sweetrdf\InMemoryStoreSqlite\Parser;
+
+class SPARQLPlusParser extends SPARQLParser
 {
     /* +1 */
 
@@ -89,7 +91,7 @@ class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
                         $sub_v = $sub_r[1];
                     }
                     /* construct template */
-                    if ((list($sub_r, $sub_v) = $this->xConstructTemplate($sub_v)) && is_array($sub_r)) {
+                    if ((list($sub_r, $sub_v) = $this->xConstructTemplate($sub_v)) && \is_array($sub_r)) {
                         $r['construct_triples'] = $sub_r;
                     } else {
                         $this->addError('Construct Template not found');
@@ -143,7 +145,7 @@ class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
                 $sub_v = $sub_r[1];
             }
             /* construct template */
-            if ((list($sub_r, $sub_v) = $this->xConstructTemplate($sub_v)) && is_array($sub_r)) {
+            if ((list($sub_r, $sub_v) = $this->xConstructTemplate($sub_v)) && \is_array($sub_r)) {
                 $r['construct_triples'] = $sub_r;
                 /* dataset */
                 while ((list($sub_r, $sub_v) = $this->xDatasetClause($sub_v)) && $sub_r) {
@@ -200,7 +202,7 @@ class ARC2_SPARQLPlusParser extends ARC2_SPARQLParser
                     }
                 }
             } while ($proceed);
-            if (count($r)) {
+            if (\count($r)) {
                 return [$r, $sub_v];
             } else {
                 $this->addError('No columns specified in GROUP BY clause.');

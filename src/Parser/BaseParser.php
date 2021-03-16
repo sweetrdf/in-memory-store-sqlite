@@ -16,7 +16,7 @@ namespace sweetrdf\InMemoryStoreSqlite\Parser;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\StringReader;
 
-class BaseParser
+abstract class BaseParser
 {
     /**
      * @var array

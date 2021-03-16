@@ -12,6 +12,7 @@
  */
 
 use sweetrdf\InMemoryStoreSqlite\Logger;
+use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
 use sweetrdf\InMemoryStoreSqlite\Store\InsertQueryHandler;
@@ -176,7 +177,7 @@ class ARC2_Store
         if (preg_match('/^dump/i', $q)) {
             $infos = ['query' => ['type' => 'dump']];
         } else {
-            $p = new ARC2_SPARQLPlusParser();
+            $p = new SPARQLPlusParser();
             $p->parse($q, $src);
             $infos = $p->getQueryInfos();
             $errors = $p->getErrors();

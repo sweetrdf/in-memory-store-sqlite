@@ -10,7 +10,6 @@ return PhpCsFixer\Config::create()
     ->setFinder(
         PhpCsFixer\Finder::create()
         ->in(__DIR__.'/src')
-        ->in(__DIR__.'/parsers')
         ->in(__DIR__.'/tests')
         ->name('*.php')
         ->append([__FILE__])

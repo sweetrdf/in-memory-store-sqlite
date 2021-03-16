@@ -14,8 +14,8 @@
 namespace Tests\SPARQL11;
 
 use ARC2_Store;
-use ARC2_TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\Logger;
+use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use Tests\ARC2_TestCase;
 
@@ -98,23 +98,6 @@ abstract class ComplianceTest extends ARC2_TestCase
     }
 
     /**
-     * Helper function to get the number of rows in a table.
-     *
-     * @param string $tableName
-     *
-     * @return int number of rows in the target table
-     */
-    protected function getRowCount($tableName)
-    {
-        $row = $this->store->getDBObject()->fetchRow(
-            'SELECT COUNT(*) as count FROM '.$tableName,
-            $this->store->getDBCon()
-        );
-
-        return $row['count'];
-    }
-
-    /**
      * Helper function to load data for a given test.
      *
      * @param string $testUri
@@ -141,7 +124,7 @@ abstract class ComplianceTest extends ARC2_TestCase
         // if no result was given, expect test is of type NegativeSyntaxTest11,
         // which has no data (group-data-X.ttl) and result (.srx) file.
         if (0 < \count($file['result']['rows'])) {
-            $parser = new ARC2_TurtleParser([], $this);
+            $parser = new TurtleParser();
             $data = file_get_contents($file['result']['rows'][0]['file']);
             $uri = $file['result']['rows'][0]['file'];
             $parser->parse($uri, $data);
@@ -325,7 +308,7 @@ abstract class ComplianceTest extends ARC2_TestCase
     protected function loadManifestFileIntoStore($folderPath)
     {
         // parse manifest.ttl and load its content into $this->manifestGraphUri
-        $parser = new ARC2_TurtleParser();
+        $parser = new TurtleParser();
         $data = file_get_contents($folderPath.'/manifest.ttl');
         $uri = $folderPath.'/manifest.ttl';
         $parser->parse($uri, $data);

@@ -11,7 +11,9 @@
  * file that was distributed with this source code.
  */
 
-class ARC2_StoreTurtleLoader extends ARC2_TurtleParser
+use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
+
+class ARC2_StoreTurtleLoader extends TurtleParser
 {
     private ARC2_StoreLoadQueryHandler $caller;
 

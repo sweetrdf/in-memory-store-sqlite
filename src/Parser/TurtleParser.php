@@ -11,12 +11,13 @@
  * file that was distributed with this source code.
  */
 
+namespace sweetrdf\InMemoryStoreSqlite\Parser;
+
 use function sweetrdf\InMemoryStoreSqlite\calcURI;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
-use sweetrdf\InMemoryStoreSqlite\Parser\BaseParser;
 use sweetrdf\InMemoryStoreSqlite\StringReader;
 
-class ARC2_TurtleParser extends BaseParser
+class TurtleParser extends BaseParser
 {
     public function __construct()
     {
@@ -100,7 +101,7 @@ class ARC2_TurtleParser extends BaseParser
                 if (
                     $prologue_done
                     && (list($sub_r, $sub_v, $more_triples, $sub_v2) = $this->xTriplesBlock($sub_v))
-                    && is_array($sub_r)
+                    && \is_array($sub_r)
                 ) {
                     $proceed = 1;
                     $loops = 0;
@@ -119,7 +120,7 @@ class ARC2_TurtleParser extends BaseParser
         foreach ($more_triples as $t) {
             $this->addT($t);
         }
-        $sub_v = count($more_triples) ? $sub_v2 : $sub_v;
+        $sub_v = \count($more_triples) ? $sub_v2 : $sub_v;
         $buffer = $sub_v;
         $this->unparsed_code = $buffer;
 
@@ -313,7 +314,7 @@ class ARC2_TurtleParser extends BaseParser
             }
         } while ($proceed);
 
-        return count($r) ? [$r, $buffer, $pre_r, $sub_v] : [0, $buffer, $pre_r, $sub_v];
+        return \count($r) ? [$r, $buffer, $pre_r, $sub_v] : [0, $buffer, $pre_r, $sub_v];
     }
 
     /* 39.. */
@@ -514,7 +515,7 @@ class ARC2_TurtleParser extends BaseParser
     {
         if ($r = $this->x('(\?|\$)([^\s]+)', $v)) {
             if ((list($sub_r, $sub_v) = $this->xVARNAME($r[2])) && $sub_r) {
-                if (!in_array($sub_r, $this->r['vars'])) {
+                if (!\in_array($sub_r, $this->r['vars'])) {
                     $this->r['vars'][] = $sub_r;
                 }
 
@@ -540,7 +541,7 @@ class ARC2_TurtleParser extends BaseParser
         ] as $term => $type) {
             $m = 'x'.$term;
             if ((list($sub_r, $sub_v) = $this->$m($v)) && $sub_r) {
-                if (!is_array($sub_r)) {
+                if (!\is_array($sub_r)) {
                     $sub_r = ['value' => $sub_r];
                 }
                 $sub_r['type'] = $this->v1('type', $type, $sub_r);
@@ -625,9 +626,9 @@ class ARC2_TurtleParser extends BaseParser
             if (false === $delim_pos) {
                 break;
             }
-            $new_rest = substr($rest, $delim_pos + strlen($delim));
+            $new_rest = substr($rest, $delim_pos + \strlen($delim));
             $r = substr($rest, 0, $delim_pos);
-            if (!preg_match('/([\x5c]+)$/s', $r, $m) || !(strlen($m[1]) % 2)) {
+            if (!preg_match('/([\x5c]+)$/s', $r, $m) || !(\strlen($m[1]) % 2)) {
                 $rest = $new_rest;
             } else {
                 $r = false;
@@ -929,13 +930,13 @@ class ARC2_TurtleParser extends BaseParser
         while (preg_match('/\\\(U)([0-9A-F]{8})/', $v, $m) || preg_match('/\\\(u)([0-9A-F]{4})/', $v, $m)) {
             $no = hexdec($m[2]);
             if ($no < 128) {
-                $char = chr($no);
+                $char = \chr($no);
             } elseif ($no < 2048) {
-                $char = chr(($no >> 6) + 192).chr(($no & 63) + 128);
+                $char = \chr(($no >> 6) + 192).\chr(($no & 63) + 128);
             } elseif ($no < 65536) {
-                $char = chr(($no >> 12) + 224).chr((($no >> 6) & 63) + 128).chr(($no & 63) + 128);
+                $char = \chr(($no >> 12) + 224).\chr((($no >> 6) & 63) + 128).\chr(($no & 63) + 128);
             } elseif ($no < 2097152) {
-                $char = chr(($no >> 18) + 240).chr((($no >> 12) & 63) + 128).chr((($no >> 6) & 63) + 128).chr(($no & 63) + 128);
+                $char = \chr(($no >> 18) + 240).\chr((($no >> 12) & 63) + 128).\chr((($no >> 6) & 63) + 128).\chr(($no & 63) + 128);
             } else {
                 $char = '';
             }
@@ -951,11 +952,11 @@ class ARC2_TurtleParser extends BaseParser
         if ($r = $this->x('(\?|\$)', $v)) {
             if (preg_match('/(\{(?:[^{}]+|(?R))*\})/', $r[2], $m) && 0 === strpos(trim($r[2]), $m[1])) {
                 $ph = substr($m[1], 1, -1);
-                $rest = substr(trim($r[2]), strlen($m[1]));
+                $rest = substr(trim($r[2]), \strlen($m[1]));
                 if (!isset($this->r['placeholders'])) {
                     $this->r['placeholders'] = [];
                 }
-                if (!in_array($ph, $this->r['placeholders'])) {
+                if (!\in_array($ph, $this->r['placeholders'])) {
                     $this->r['placeholders'][] = $ph;
                 }
 

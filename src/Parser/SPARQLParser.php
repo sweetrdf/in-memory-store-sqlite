@@ -11,10 +11,12 @@
  * file that was distributed with this source code.
  */
 
+namespace sweetrdf\InMemoryStoreSqlite\Parser;
+
 use function sweetrdf\InMemoryStoreSqlite\calcBase;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
-class ARC2_SPARQLParser extends ARC2_TurtleParser
+class SPARQLParser extends TurtleParser
 {
     public function __construct()
     {
@@ -112,7 +114,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
                     $r['result_vars'][] = $sub_r;
                 }
             }
-            if (!$all_vars && !count($r['result_vars'])) {
+            if (!$all_vars && !\count($r['result_vars'])) {
                 $this->addError('No result bindings specified.');
             }
             /* dataset */
@@ -161,7 +163,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
             ];
             $sub_v = $sub_r[1];
             /* construct template */
-            if ((list($sub_r, $sub_v) = $this->xConstructTemplate($sub_v)) && is_array($sub_r)) {
+            if ((list($sub_r, $sub_v) = $this->xConstructTemplate($sub_v)) && \is_array($sub_r)) {
                 $r['construct_triples'] = $sub_r;
             } else {
                 $this->addError('Construct Template not found');
@@ -219,7 +221,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
                     }
                 } while ($proceed);
             }
-            if (!$all_vars && !count($r['result_vars']) && !count($r['result_uris'])) {
+            if (!$all_vars && !\count($r['result_vars']) && !\count($r['result_uris'])) {
                 $this->addError('No result bindings specified.');
             }
             /* dataset */
@@ -345,7 +347,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
             while ((list($sub_r, $sub_v) = $this->xOrderCondition($sub_v)) && $sub_r) {
                 $r[] = $sub_r;
             }
-            if (count($r)) {
+            if (\count($r)) {
                 return [$r, $sub_v];
             } else {
                 $this->addError('No order conditions specified.');
@@ -435,7 +437,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
 
     protected function indexBnodes($triples, $pattern_id)
     {
-        $index_id = count($this->bnode_pattern_index['patterns']);
+        $index_id = \count($this->bnode_pattern_index['patterns']);
         $index_id = $pattern_id;
         $this->bnode_pattern_index['patterns'][] = $triples;
         foreach ($triples as $t) {
@@ -474,7 +476,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
                 }
             }
         } while ($proceed);
-        $pc = count($r['patterns']);
+        $pc = \count($r['patterns']);
         if (1 == $pc) {
             return [$r['patterns'][0], $sub_v];
         } elseif ($pc > 1) {
@@ -593,7 +595,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
     {
         if ($sub_r = $this->x('\{', $v)) {
             $r = [];
-            if ((list($sub_r, $sub_v) = $this->xTriplesBlock($sub_r[1])) && is_array($sub_r)) {
+            if ((list($sub_r, $sub_v) = $this->xTriplesBlock($sub_r[1])) && \is_array($sub_r)) {
                 $r = $sub_r;
             }
             if ($sub_r = $this->x('\}', $sub_v)) {
@@ -621,7 +623,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
                 }
             } while ($proceed);
 
-            return 1 == count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
+            return 1 == \count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
         }
 
         return [0, $v];
@@ -644,7 +646,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
                 }
             } while ($proceed);
 
-            return 1 == count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
+            return 1 == \count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
         }
 
         return [0, $v];
@@ -674,7 +676,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
                 }
             } while ($proceed);
 
-            return 1 == count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
+            return 1 == \count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
         }
 
         return [0, $v];
@@ -702,7 +704,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
                 }
             } while ($proceed);
             //return array($r, $sub_v);
-            return 1 == count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
+            return 1 == \count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
         }
 
         return [0, $v];
@@ -727,7 +729,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
                 }
             } while ($proceed);
 
-            return 1 == count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
+            return 1 == \count($r['patterns']) ? [$r['patterns'][0], $sub_v] : [$r, $sub_v];
         }
 
         return [0, $v];
@@ -744,7 +746,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
             $sub_v = $sub_r[2];
         }
         if ((list($sub_r, $sub_v) = $this->xPrimaryExpression($sub_v)) && $sub_r) {
-            if (!is_array($sub_r)) {
+            if (!\is_array($sub_r)) {
                 $sub_r = ['type' => 'unary', 'expression' => $sub_r];
             } elseif ($sub_op = $this->v1('operator', '', $sub_r)) {
                 $ops = ['!!' => '', '++' => '+', '--' => '+', '+-' => '-', '-+' => '-'];
@@ -793,7 +795,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
     {
         if ($sub_r = $this->x('(str|lang|langmatches|datatype|bound|sameterm|isiri|isuri|isblank|isliteral|regex)\s*\(', $v)) {
             $r = ['type' => 'built_in_call', 'call' => strtolower($sub_r[1])];
-            if ((list($sub_r, $sub_v) = $this->xArgList('('.$sub_r[2])) && is_array($sub_r)) {
+            if ((list($sub_r, $sub_v) = $this->xArgList('('.$sub_r[2])) && \is_array($sub_r)) {
                 $r['args'] = $sub_r;
 
                 return [$r, $sub_v];
@@ -808,7 +810,7 @@ class ARC2_SPARQLParser extends ARC2_TurtleParser
     protected function xIRIrefOrFunction($v)
     {
         if ((list($r, $v) = $this->xIRIref($v)) && $r) {
-            if ((list($sub_r, $sub_v) = $this->xArgList($v)) && is_array($sub_r)) {
+            if ((list($sub_r, $sub_v) = $this->xArgList($v)) && \is_array($sub_r)) {
                 return [['type' => 'function', 'uri' => $r, 'args' => $sub_r], $sub_v];
             }
 

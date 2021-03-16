@@ -22,8 +22,8 @@
         "phpunit/phpunit": "^9.0"
     },
     "autoload": {
-        "classmap": ["parsers/", "store/"],
-        "files": ["./src/functions.php"],
+        "classmap": ["store/"],
+        "files": ["src/functions.php"],
         "psr-4": {
             "sweetrdf\\InMemoryStoreSqlite\\": ["src/"]
         }
