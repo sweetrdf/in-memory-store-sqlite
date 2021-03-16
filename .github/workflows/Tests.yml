@@ -30,7 +30,7 @@ jobs:
                     ini-values: memory_limit=1G
 
             -   name: Install Composer dependencies
-                run: composer install --no-progress --no-suggest --prefer-dist --optimize-autoloader
+                run: composer install --no-progress --prefer-dist --optimize-autoloader
 
             -   name: Tests
                 run: vendor/bin/phpunit -v
@@ -52,10 +52,11 @@ jobs:
                 uses: shivammathur/setup-php@v2
                 with:
                     php-version: ${{ matrix.php-versions }}
-                    ini-values: memory_limit=1G
+                    ini-values: memory_limit=1G,
+                    extensions: pdo_sqlite
 
             -   name: Install Composer dependencies
-                run: composer update --no-progress --no-suggest --prefer-dist --optimize-autoloader
+                run: composer update --no-progress --prefer-dist --optimize-autoloader
 
             -   name: Tests
                 run: vendor/bin/phpunit
