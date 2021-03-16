@@ -11,7 +11,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\integration;
+namespace Tests\Integration;
 
 use Exception;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;

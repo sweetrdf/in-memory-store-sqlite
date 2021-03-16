@@ -11,14 +11,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\store;
+namespace Tests\Integration\Store;
 
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\ARC2_TestCase;
 
-class ARC2_StoreTest extends ARC2_TestCase
+class InMemoryStoreSqliteTest extends ARC2_TestCase
 {
     protected function setUp(): void
     {
@@ -266,7 +266,7 @@ class ARC2_StoreTest extends ARC2_TestCase
         $this->assertEquals(0, \count($res['result']['rows']));
 
         $this->fixture->insert(
-            file_get_contents(__DIR__.'/../data/nt/saft-arc2-addition-regression1.nt'),
+            file_get_contents($this->rootPath.'/data/nt/saft-arc2-addition-regression1.nt'),
             'http://example.com/'
         );
 

@@ -11,7 +11,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\unit\store;
+namespace Tests\Unit\Store\QueryHandler;
 
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
@@ -19,7 +19,7 @@ use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\LoadQueryHandler;
 use Tests\ARC2_TestCase;
 
-class ARC2_StoreLoadQueryHandlerTest extends ARC2_TestCase
+class LoadQueryHandlerTest extends ARC2_TestCase
 {
     protected $store;
 

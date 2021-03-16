@@ -11,7 +11,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\store\query;
+namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;

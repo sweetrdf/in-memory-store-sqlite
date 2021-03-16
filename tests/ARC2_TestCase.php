@@ -32,6 +32,8 @@ class ARC2_TestCase extends TestCase
      */
     protected $fixture;
 
+    protected string $rootPath;
+
     protected function setUp(): void
     {
         global $dbConfig;
@@ -45,6 +47,8 @@ class ARC2_TestCase extends TestCase
         ) {
             $this->dbConfig['cache_instance']->clear();
         }
+
+        $this->rootPath = __DIR__;
     }
 
     protected function tearDown(): void

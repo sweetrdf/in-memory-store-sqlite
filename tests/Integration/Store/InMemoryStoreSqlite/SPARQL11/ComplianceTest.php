@@ -11,7 +11,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Tests\SPARQL11;
+namespace Tests\Integration\Store\InMemoryStoreSqlite\SPARQL11;
 
 use sweetrdf\InMemoryStoreSqlite\Logger;
 use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
