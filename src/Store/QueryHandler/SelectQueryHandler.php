@@ -100,7 +100,7 @@ class SelectQueryHandler extends QueryHandler
         $this->indexes = $this->is_union_query ? $this->getUnionIndexes($this->index) : [$this->index];
     }
 
-    public function createTempTable($q_sql)
+    private function createTempTable($q_sql)
     {
         $tbl = 'Q'.md5($q_sql.time().uniqid(rand()));
         if (\strlen($tbl) > 64) {
@@ -113,6 +113,7 @@ class SelectQueryHandler extends QueryHandler
         if (
             !$this->store->getDBObject()->simpleQuery($tmp_sql)
             && !$this->store->getDBObject()->simpleQuery($tmpSql2)
+            && !empty($this->store->getDBObject()->getErrorMessage())
         ) {
             return $this->store->getLogger()->error(
                 $this->store->getDBObject()->getErrorMessage()
@@ -125,7 +126,7 @@ class SelectQueryHandler extends QueryHandler
         return $tbl;
     }
 
-    public function getEmptyIndex()
+    private function getEmptyIndex()
     {
         return [
             'from' => [],
@@ -184,9 +185,8 @@ class SelectQueryHandler extends QueryHandler
         $r = ['variables' => $vars];
         $v_sql = $this->getValueSQL($tmp_tbl, $q_sql);
 
+        $entries = [];
         try {
-            $entries = []; // in case an exception gets thrown
-
             $entries = $this->store->getDBObject()->fetchList($v_sql);
         } catch (\Exception $e) {
             $this->store->getLogger()->error($e->getMessage());
@@ -517,10 +517,10 @@ class SelectQueryHandler extends QueryHandler
             } elseif (1 == $var_name) {/* ASK query */
                 $r .= '1 AS `success`';
             } else {
-                $this->store->getLogger()->warning(
-                    'Result variable "'.$var_name.'" not used in query.'
-                );
+                $msg = 'Result variable "'.$var_name.'" not used in query.';
+                $this->store->getLogger()->warning($msg);
             }
+
             if ($tbl_alias) {
                 /* aggregate */
                 if ($var['aggregate']) {
@@ -693,9 +693,6 @@ class SelectQueryHandler extends QueryHandler
                 }
             }
         } while ($next_id);
-        if ($deps) {
-            $this->store->getLogger()->notice('Not all patterns could be rewritten to SQL JOINs');
-        }
 
         return $r;
     }

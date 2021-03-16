@@ -192,7 +192,7 @@ class InMemoryStoreSqlite
             $qt = $infos['query']['type'];
             $validTypes = ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'];
             if (!\in_array($qt, $validTypes)) {
-                return $this->logger->error('Unsupported query type "'.$qt.'"');
+                throw new Exception('Unsupported query type "'.$qt.'"');
             }
 
             $result = $this->runQuery($infos, $qt, $keep_bnode_ids, $q);
