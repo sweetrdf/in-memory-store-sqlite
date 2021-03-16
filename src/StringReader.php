@@ -1,5 +1,7 @@
 <?php
 
+namespace sweetrdf\InMemoryStoreSqlite;
+
 /*
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
  * the terms of the GPL-3 license.
@@ -11,13 +13,10 @@
  * file that was distributed with this source code.
  */
 
-use function sweetrdf\InMemoryStoreSqlite\calcBase;
-use function sweetrdf\InMemoryStoreSqlite\calcURI;
-
 /**
- * @todo move to src folder
+ * Provides a way to read a given string in chunks.
  */
-class ARC2_Reader
+final class StringReader
 {
     private ?string $base;
 
@@ -28,7 +27,7 @@ class ARC2_Reader
         return $this->base;
     }
 
-    public function activate($path, $data)
+    public function init($path, $data)
     {
         $this->base = calcBase($path);
         $this->uri = calcURI($path, $this->base);
@@ -37,7 +36,7 @@ class ARC2_Reader
             'type' => 'data',
             'pos' => 0,
             'headers' => [],
-            'size' => strlen($data),
+            'size' => \strlen($data),
             'data' => $data,
             'buffer' => '',
         ];
@@ -61,7 +60,7 @@ class ARC2_Reader
             }
         }
 
-        $s['pos'] += strlen($d);
+        $s['pos'] += \strlen($d);
 
         $this->stream = $s;
 

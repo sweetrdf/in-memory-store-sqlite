@@ -23,24 +23,14 @@
     },
     "autoload": {
         "classmap": ["parsers/", "store/"],
-        "files": [
-            "./ARC2_Reader.php",
-            "./src/functions.php"
-        ],
+        "files": ["./src/functions.php"],
         "psr-4": {
-            "sweetrdf\\InMemoryStoreSqlite\\": [
-                "src/"
-            ],
-            "ARC2\\": [
-                "src/ARC2/"
-            ]
+            "sweetrdf\\InMemoryStoreSqlite\\": ["src/"]
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Tests\\": [
-                "tests"
-            ]
+            "Tests\\": ["tests"]
         }
     },
     "scripts": {

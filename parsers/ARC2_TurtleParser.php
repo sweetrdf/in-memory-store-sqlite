@@ -14,6 +14,7 @@
 use function sweetrdf\InMemoryStoreSqlite\calcURI;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\Parser\BaseParser;
+use sweetrdf\InMemoryStoreSqlite\StringReader;
 
 class ARC2_TurtleParser extends BaseParser
 {
@@ -63,8 +64,8 @@ class ARC2_TurtleParser extends BaseParser
 
     public function parse($path, $data = ''): void
     {
-        $this->reader = new ARC2_Reader();
-        $this->reader->activate($path, $data);
+        $this->reader = new StringReader();
+        $this->reader->init($path, $data);
         $this->base = $this->reader->getBase();
         $this->r = ['vars' => []];
         /* parse */
@@ -121,7 +122,6 @@ class ARC2_TurtleParser extends BaseParser
         $sub_v = count($more_triples) ? $sub_v2 : $sub_v;
         $buffer = $sub_v;
         $this->unparsed_code = $buffer;
-        unset($this->reader);
 
         /* remove trailing comments */
         while (preg_match('/^\s*(\#[^\xd\xa]*)(.*)$/si', $this->unparsed_code, $m)) {

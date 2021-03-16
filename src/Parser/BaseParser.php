@@ -13,8 +13,8 @@
 
 namespace sweetrdf\InMemoryStoreSqlite\Parser;
 
-use ARC2_Reader;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+use sweetrdf\InMemoryStoreSqlite\StringReader;
 
 class BaseParser
 {
@@ -48,7 +48,7 @@ class BaseParser
     public function __construct()
     {
         // TODO pass logger as parameter
-        $this->reader = new ARC2_Reader();
+        $this->reader = new StringReader();
 
         /*
          * @todo make it a constructor param

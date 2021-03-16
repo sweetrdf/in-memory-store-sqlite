@@ -325,7 +325,7 @@ abstract class ComplianceTest extends ARC2_TestCase
     protected function loadManifestFileIntoStore($folderPath)
     {
         // parse manifest.ttl and load its content into $this->manifestGraphUri
-        $parser = new ARC2_TurtleParser([], $this);
+        $parser = new ARC2_TurtleParser();
         $data = file_get_contents($folderPath.'/manifest.ttl');
         $uri = $folderPath.'/manifest.ttl';
         $parser->parse($uri, $data);
