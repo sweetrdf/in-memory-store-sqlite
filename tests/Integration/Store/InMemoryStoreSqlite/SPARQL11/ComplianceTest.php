@@ -130,6 +130,7 @@ abstract class ComplianceTest extends TestCase
             if (DIRECTORY_SEPARATOR === '\\') {
                 // windows only
                 $path = str_replace('file://', '', $path);
+                $path = str_replace('/', '\\', $path);
             }
 
             $data = file_get_contents($path);

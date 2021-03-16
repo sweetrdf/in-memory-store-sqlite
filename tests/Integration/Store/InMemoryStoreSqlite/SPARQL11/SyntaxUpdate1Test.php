@@ -59,6 +59,7 @@ class SyntaxUpdate1Test extends ComplianceTest
         if (DIRECTORY_SEPARATOR === '\\') {
             // windows only
             $path = str_replace('file://', '', $path);
+            $path = str_replace('/', '\\', $path);
         }
 
         return file_get_contents($path);
