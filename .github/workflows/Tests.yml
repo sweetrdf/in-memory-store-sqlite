@@ -3,9 +3,8 @@ name: Tests
 on: push
 
 jobs:
-    tests:
-        name: |
-            Tests - PHP ${{ matrix.php }}
+    linux-tests:
+        name: Linux-Tests with PHP ${{ matrix.php-versions }}
         runs-on: ubuntu-latest
 
         env:
@@ -35,3 +34,28 @@ jobs:
 
             -   name: Tests
                 run: vendor/bin/phpunit -v
+
+    windows-tests:
+        name: Windows-Tests with PHP ${{ matrix.php-versions }}
+        runs-on: windows-2019
+
+        strategy:
+            fail-fast: true
+            matrix:
+                php-versions: ['8.0']
+
+        steps:
+            -   name: Checkout
+                uses: actions/checkout@v2
+
+            -   name: Install PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php-versions }}
+                    ini-values: memory_limit=1G
+
+            -   name: Install Composer dependencies
+                run: composer update --no-progress --no-suggest --prefer-dist --optimize-autoloader
+
+            -   name: Tests
+                run: vendor/bin/phpunit
