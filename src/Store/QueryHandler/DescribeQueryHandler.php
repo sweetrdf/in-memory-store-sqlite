@@ -20,15 +20,18 @@ class DescribeQueryHandler extends SelectQueryHandler
         $ids = $infos['query']['result_uris'];
         if ($vars = $infos['query']['result_vars']) {
             $sub_r = parent::runQuery($infos);
-            $rf = $this->v('result_format', '', $infos);
+            $rf = $infos['result_format'] ?? '';
             if (\in_array($rf, ['sql', 'structure', 'index'])) {
                 return $sub_r;
             }
-            $rows = $this->v('rows', [], $sub_r);
+            $rows = $sub_r['rows'] ?? [];
             foreach ($rows as $row) {
                 foreach ($vars as $info) {
                     $val = isset($row[$info['var']]) ? $row[$info['var']] : '';
-                    if ($val && ('literal' != $row[$info['var'].' type']) && !\in_array($val, $ids)) {
+                    if (
+                        $val
+                        && ('literal' != $row[$info['var'].' type']) && !\in_array($val, $ids)
+                    ) {
                         $ids[] = $val;
                     }
                 }

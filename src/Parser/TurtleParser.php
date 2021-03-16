@@ -264,8 +264,8 @@ class TurtleParser extends BaseParser
                 if ((list($sub_r, $sub_v) = $this->xVarOrTerm($sub_v)) && $sub_r) {
                     $t['o'] = $sub_r['value'];
                     $t['o_type'] = $sub_r['type'];
-                    $t['o_lang'] = $this->v('lang', '', $sub_r);
-                    $t['o_datatype'] = $this->v('datatype', '', $sub_r);
+                    $t['o_lang'] = $sub_r['lang'] ?? '';
+                    $t['o_datatype'] = $sub_r['datatype'] ?? '';
                     $pre_r[] = $t;
                     $state = 4;
                     $proceed = 1;
@@ -348,8 +348,8 @@ class TurtleParser extends BaseParser
                     if ((list($sub_r, $sub_v) = $this->xVarOrTerm($sub_v)) && $sub_r) {
                         $t['o'] = $sub_r['value'];
                         $t['o_type'] = $sub_r['type'];
-                        $t['o_lang'] = $this->v('lang', '', $sub_r);
-                        $t['o_datatype'] = $this->v('datatype', '', $sub_r);
+                        $t['o_lang'] = $sub_r['lang'] ?? '';
+                        $t['o_datatype'] = $sub_r['datatype'] ?? '';
                         $r['triples'][] = $t;
                         $state = 4;
                         $proceed = 1;
@@ -422,8 +422,8 @@ class TurtleParser extends BaseParser
                         'p_type' => 'uri',
                         'o' => $sub_r['value'],
                         'o_type' => $sub_r['type'],
-                        'o_lang' => $this->v('lang', '', $sub_r),
-                        'o_datatype' => $this->v('datatype', '', $sub_r),
+                        'o_lang' => $sub_r['lang'] ?? '',
+                        'o_datatype' => $sub_r['datatype'] ?? '',
                     ];
                     $proceed = 1;
                 } elseif ((list($sub_r, $sub_v) = $this->xCollection($sub_v)) && $sub_r) {

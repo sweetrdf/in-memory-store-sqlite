@@ -21,7 +21,7 @@ class ConstructQueryHandler extends SelectQueryHandler
         $this->buildResultVars();
         $this->infos['query']['distinct'] = 1;
         $sub_r = parent::runQuery($this->infos);
-        $rf = $this->v('result_format', '', $infos);
+        $rf = $infos['result_format'] ?? '';
         if (\in_array($rf, ['sql', 'structure', 'index'])) {
             return $sub_r;
         }
@@ -48,7 +48,7 @@ class ConstructQueryHandler extends SelectQueryHandler
     {
         $r = [];
         $added = [];
-        $rows = $this->v('rows', [], $qr);
+        $rows = $qr['rows'] ?? [];
         $cts = $this->infos['query']['construct_triples'];
         $bnc = 0;
         foreach ($rows as $row) {

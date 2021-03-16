@@ -25,15 +25,15 @@ class DeleteQueryHandler extends QueryHandler
         /* delete */
         $this->refs_deleted = false;
         /* graph(s) only */
-        if (!$this->v('construct_triples', [], $this->infos['query'])) {
+        $constructTriples = $this->infos['query']['construct_triples'] ?? [];
+        $pattern = $this->infos['query']['pattern'] ?? [];
+        if (!$constructTriples) {
             $tc = $this->deleteTargetGraphs();
-        }
-        /* graph(s) + explicit triples */
-        elseif (!$this->v('pattern', [], $this->infos['query'])) {
+        } elseif (!$pattern) {
+            /* graph(s) + explicit triples */
             $tc = $this->deleteTriples();
-        }
-        /* graph(s) + constructed triples */
-        else {
+        } else {
+            /* graph(s) + constructed triples */
             $tc = $this->deleteConstructedGraph();
         }
         /* clean up */

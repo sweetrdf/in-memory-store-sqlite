@@ -1451,4 +1451,35 @@ class SelectQueryTest extends TestCase
             $res
         );
     }
+
+    /**
+     * Select Distinct
+     *
+     * @see https://www.w3.org/TR/rdf-sparql-query/#modDistinct
+     */
+    public function testSelectDistinct()
+    {
+        // test data
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
+            <http://person1> <http://example.com/kennt> "Test" .
+            <http://person2> <http://example.com/kennt> "Test" .
+            <http://person3> <http://example.com/kennt> "Test" .
+            <http://person4> <http://example.com/kennt> "Test2" .
+        }');
+
+        $res = $this->subjectUnderTest->query('
+            PREFIX ex: <http://example.com/>
+            SELECT DISTINCT ?name WHERE {
+                ?s ex:kennt ?name
+            }
+        ');
+
+        $this->assertEquals(
+            [
+                ['name' => 'Test', 'name type' => 'literal'],
+                ['name' => 'Test2', 'name type' => 'literal'],
+            ],
+            $res['result']['rows']
+        );
+    }
 }

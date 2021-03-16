@@ -61,18 +61,6 @@ abstract class BaseParser
         $this->bnode_id = 0;
     }
 
-    public function v($name, $default = false, $o = false)
-    {/* value if set */
-        if (false === $o) {
-            $o = $this;
-        }
-        if (\is_array($o)) {
-            return isset($o[$name]) ? $o[$name] : $default;
-        }
-
-        return isset($o->$name) ? $o->$name : $default;
-    }
-
     /**
      * @todo replace by Logger
      */

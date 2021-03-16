@@ -29,21 +29,6 @@ abstract class QueryHandler
         $this->store = $store;
     }
 
-    /**
-     * @todo refactor and remove it
-     */
-    public function v($name, $default = false, $o = false)
-    {/* value if set */
-        if (false === $o) {
-            $o = $this;
-        }
-        if (\is_array($o)) {
-            return isset($o[$name]) ? $o[$name] : $default;
-        }
-
-        return isset($o->$name) ? $o->$name : $default;
-    }
-
     public function getTermID($val, $term = '')
     {
         return $this->store->getTermID($val, $term);
