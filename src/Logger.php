@@ -4,7 +4,7 @@ namespace sweetrdf\InMemoryStoreSqlite;
 
 use Exception;
 
-class Logger
+final class Logger
 {
     /**
      * @var array<string,array<integer,mixed>>

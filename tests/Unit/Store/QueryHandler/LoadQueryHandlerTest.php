@@ -21,15 +21,13 @@ use Tests\TestCase;
 
 class LoadQueryHandlerTest extends TestCase
 {
-    protected $store;
-
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
 
-        $this->subjectUnderTest = new LoadQueryHandler($this->store);
+        $this->subjectUnderTest = new LoadQueryHandler($store);
     }
 
     /*
