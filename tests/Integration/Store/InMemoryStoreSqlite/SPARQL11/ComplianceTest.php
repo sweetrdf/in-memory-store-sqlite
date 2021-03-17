@@ -125,15 +125,7 @@ abstract class ComplianceTest extends TestCase
         // which has no data (group-data-X.ttl) and result (.srx) file.
         if (0 < \count($file['result']['rows'])) {
             $parser = new TurtleParser();
-
-            $path = $file['result']['rows'][0]['file'];
-            if (DIRECTORY_SEPARATOR === '\\') {
-                // windows only
-                $path = str_replace('file://', '', $path);
-                $path = str_replace('/', '\\', $path);
-            }
-
-            $data = file_get_contents($path);
+            $data = file_get_contents($file['result']['rows'][0]['file']);
             $uri = $file['result']['rows'][0]['file'];
             $parser->parse($uri, $data);
 

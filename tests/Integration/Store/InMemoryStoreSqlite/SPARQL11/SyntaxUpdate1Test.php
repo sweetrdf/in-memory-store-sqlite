@@ -19,6 +19,8 @@ namespace Tests\Integration\Store\InMemoryStoreSqlite\SPARQL11;
  * Version: 2012-10-23 20:52 (sparql11-test-suite-20121023.tar.gz)
  *
  * Tests are located in the w3c-tests folder.
+ *
+ * @group linux
  */
 class SyntaxUpdate1Test extends ComplianceTest
 {
@@ -55,14 +57,7 @@ class SyntaxUpdate1Test extends ComplianceTest
             }
         ');
 
-        $path = $query['result']['rows'][0]['queryFile'];
-        if (DIRECTORY_SEPARATOR === '\\') {
-            // windows only
-            $path = str_replace('file://', '', $path);
-            $path = str_replace('/', '\\', $path);
-        }
-
-        return file_get_contents($path);
+        return file_get_contents($query['result']['rows'][0]['queryFile']);
     }
 
     /*

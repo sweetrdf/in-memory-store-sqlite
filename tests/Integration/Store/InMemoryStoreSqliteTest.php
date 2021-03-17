@@ -259,6 +259,8 @@ class InMemoryStoreSqliteTest extends TestCase
      * Saft frameworks ARC2 addition fails to run with ARC2 2.4.
      *
      * https://github.com/SaftIng/Saft/tree/master/src/Saft/Addition/ARC2
+     *
+     * @group linux
      */
     public function testInsertSaftRegressionTest1()
     {

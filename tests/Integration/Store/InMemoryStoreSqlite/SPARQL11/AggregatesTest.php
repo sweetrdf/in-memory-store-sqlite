@@ -19,6 +19,8 @@ namespace Tests\Integration\Store\InMemoryStoreSqlite\SPARQL11;
  * Version: 2012-10-23 20:52 (sparql11-test-suite-20121023.tar.gz)
  *
  * Tests are located in the w3c-tests folder.
+ *
+ * @group linux
  */
 class AggregatesTest extends ComplianceTest
 {
