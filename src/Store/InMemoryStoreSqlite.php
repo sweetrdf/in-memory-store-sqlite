@@ -136,7 +136,21 @@ class InMemoryStoreSqlite
                 throw new Exception('Unsupported query type "'.$qt.'"');
             }
 
-            $result = $this->runQuery($infos, $qt, $keep_bnode_ids, $q);
+            $cls = match (ucfirst($qt)) {
+                'Ask' => AskQueryHandler::class,
+                'Construct' => ConstructQueryHandler::class,
+                'Describe' => DescribeQueryHandler::class,
+                'Delete' => DeleteQueryHandler::class,
+                'Insert' => InsertQueryHandler::class,
+                'Load' => LoadQueryHandler::class,
+                'Select' => SelectQueryHandler::class,
+            };
+
+            if (empty($cls)) {
+                throw new Exception('Inalid query $type given.');
+            }
+
+            $result = (new $cls($this))->runQuery($infos);
 
             $r = ['query_type' => $qt, 'result' => $result];
             $r['query_time'] = 0;
@@ -156,36 +170,5 @@ class InMemoryStoreSqlite
         }
 
         return 0;
-    }
-
-    /**
-     * Uses a relevant QueryHandler class to handle given $query.
-     *
-     * @todo remove $keep_bnode_ids
-     */
-    private function runQuery(array $infos, string $type, $keep_bnode_ids = 0)
-    {
-        $type = ucfirst($type);
-
-        $cls = match ($type) {
-            'Ask' => AskQueryHandler::class,
-            'Construct' => ConstructQueryHandler::class,
-            'Describe' => DescribeQueryHandler::class,
-            'Delete' => DeleteQueryHandler::class,
-            'Insert' => InsertQueryHandler::class,
-            'Load' => LoadQueryHandler::class,
-            'Select' => SelectQueryHandler::class,
-        };
-
-        if (empty($cls)) {
-            throw new Exception('Inalid query $type given.');
-        }
-
-        return (new $cls($this))->runQuery($infos);
-    }
-
-    public function getValueHash(int | float | string $val): int | float
-    {
-        return abs(crc32($val));
     }
 }

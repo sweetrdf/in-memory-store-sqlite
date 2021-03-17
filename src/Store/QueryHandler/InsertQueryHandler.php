@@ -76,7 +76,7 @@ class InsertQueryHandler extends QueryHandler
             $this->store->getDBObject()->insert('s2val', [
                 'id' => $subjectId,
                 'val' => $triple['s'],
-                'val_hash' => $this->store->getValueHash($triple['s']),
+                'val_hash' => $this->getValueHash($triple['s']),
             ]);
         }
 
@@ -102,7 +102,7 @@ class InsertQueryHandler extends QueryHandler
             $this->store->getDBObject()->insert('o2val', [
                 'id' => $objectId,
                 'val' => $triple['o'],
-                'val_hash' => $this->store->getValueHash($triple['o']),
+                'val_hash' => $this->getValueHash($triple['o']),
             ]);
         }
 
@@ -172,7 +172,7 @@ class InsertQueryHandler extends QueryHandler
             // transforms _:foo to _:b671320391_foo
             $s = $triple['s'];
             // TODO make bnode ID only unique for this session, not in general
-            $triple['s'] = '_:b'.$this->store->getValueHash($this->sessionId.$graph.$s).'_';
+            $triple['s'] = '_:b'.$this->getValueHash($this->sessionId.$graph.$s).'_';
             $triple['s'] .= substr($s, 2);
         }
 
@@ -193,7 +193,7 @@ class InsertQueryHandler extends QueryHandler
             // transforms _:foo to _:b671320391_foo
             $o = $triple['o'];
             // TODO make bnode ID only unique for this session, not in general
-            $triple['o'] = '_:b'.$this->store->getValueHash($this->sessionId.$graph.$o).'_';
+            $triple['o'] = '_:b'.$this->getValueHash($this->sessionId.$graph.$o).'_';
             $triple['o'] .= substr($o, 2);
         }
 
@@ -292,7 +292,7 @@ class InsertQueryHandler extends QueryHandler
             // subject or object
             $table = 'subject' == $quadPart ? 's2val' : 'o2val';
             $sql = 'SELECT id, val FROM '.$table.' WHERE val_hash = ?';
-            $params = [$this->store->getValueHash($value)];
+            $params = [$this->getValueHash($value)];
             $entry = $this->store->getDBObject()->fetchRow($sql, $params);
 
             // entry found, use its ID

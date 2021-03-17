@@ -80,8 +80,8 @@ abstract class QueryHandler
         return $r;
     }
 
-    public function getValueHash($val)
+    public function getValueHash(int | float | string $val): int | float
     {
-        return $this->store->getValueHash($val);
+        return abs(crc32($val));
     }
 }
