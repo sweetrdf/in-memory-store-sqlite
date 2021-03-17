@@ -13,6 +13,7 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
+use Exception;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
@@ -31,7 +32,7 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
     }
 
     /**
-     * Variable alias.
+     * Variable alias not working.
      */
     public function testSelectAlias()
     {
@@ -40,11 +41,10 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->subjectUnderTest->query('
+        $this->expectException(Exception::class);
+        $this->subjectUnderTest->query('
             SELECT (?s AS ?s_alias) ?o FROM <http://example.com/> WHERE {?s <http://p1> ?o.}
         ');
-
-        $this->assertEquals(0, $res);
     }
 
     /**
@@ -171,7 +171,8 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
             <http://person3> <http://knows> <http://person2> .
         }');
 
-        $res = $this->subjectUnderTest->query('
+        $this->expectException(Exception::class);
+        $this->subjectUnderTest->query('
             SELECT * WHERE {
                 {
                     SELECT ?p WHERE {
@@ -181,7 +182,5 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
                 ?p <http://knows> ?who .
             }
         ');
-
-        $this->assertEquals(0, $res);
     }
 }

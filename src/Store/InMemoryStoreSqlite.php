@@ -104,13 +104,12 @@ class InMemoryStoreSqlite
     /**
      * Executes a SPARQL query.
      *
-     * @param string $q             SPARQL query
-     * @param string $result_format Possible values: infos, raw, rows, row
-     * @param string $src
+     * @param string $q      SPARQL query
+     * @param string $format One of: array, instances
      *
      * @return array|int array if query returned a result, 0 otherwise
      */
-    public function query($q, $result_format = '', $src = '')
+    public function query(string $q, string $format = '')
     {
         $errors = [];
 
@@ -119,58 +118,41 @@ class InMemoryStoreSqlite
         } else {
             $parserLogger = $this->loggerPool->createNewLogger('SPARQL');
             $p = new SPARQLPlusParser($parserLogger);
-            $p->parse($q, $src);
+            $p->parse($q);
             $infos = $p->getQueryInfos();
             $errors = $parserLogger->getEntries('error');
+
+            if (0 < \count($errors)) {
+                throw new Exception('Query failed: '.json_encode($errors));
+            }
         }
 
-        if ('infos' == $result_format) {
-            return $infos;
+        $qt = $infos['query']['type'];
+        $validTypes = ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'];
+        if (!\in_array($qt, $validTypes)) {
+            throw new Exception('Unsupported query type "'.$qt.'"');
         }
 
-        $infos['result_format'] = $result_format;
+        $cls = match (ucfirst($qt)) {
+            'Ask' => AskQueryHandler::class,
+            'Construct' => ConstructQueryHandler::class,
+            'Describe' => DescribeQueryHandler::class,
+            'Delete' => DeleteQueryHandler::class,
+            'Insert' => InsertQueryHandler::class,
+            'Load' => LoadQueryHandler::class,
+            'Select' => SelectQueryHandler::class,
+        };
 
-        if (!isset($p) || 0 == \count($errors)) {
-            $qt = $infos['query']['type'];
-            $validTypes = ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'];
-            if (!\in_array($qt, $validTypes)) {
-                throw new Exception('Unsupported query type "'.$qt.'"');
-            }
-
-            $cls = match (ucfirst($qt)) {
-                'Ask' => AskQueryHandler::class,
-                'Construct' => ConstructQueryHandler::class,
-                'Describe' => DescribeQueryHandler::class,
-                'Delete' => DeleteQueryHandler::class,
-                'Insert' => InsertQueryHandler::class,
-                'Load' => LoadQueryHandler::class,
-                'Select' => SelectQueryHandler::class,
-            };
-
-            if (empty($cls)) {
-                throw new Exception('Inalid query $type given.');
-            }
-
-            $queryHandlerLogger = $this->loggerPool->createNewLogger('QueryHandler');
-            $result = (new $cls($this, $queryHandlerLogger))->runQuery($infos);
-
-            $r = ['query_type' => $qt, 'result' => $result];
-            $r['query_time'] = 0;
-
-            /* query result */
-            if ('raw' == $result_format) {
-                return $r['result'];
-            }
-            if ('rows' == $result_format) {
-                return $r['result']['rows'] ? $r['result']['rows'] : [];
-            }
-            if ('row' == $result_format) {
-                return $r['result']['rows'] ? $r['result']['rows'][0] : [];
-            }
-
-            return $r;
+        if (empty($cls)) {
+            throw new Exception('Inalid query $type given.');
         }
 
-        return 0;
+        $queryHandlerLogger = $this->loggerPool->createNewLogger('QueryHandler');
+        $result = (new $cls($this, $queryHandlerLogger))->runQuery($infos);
+
+        $r = ['query_type' => $qt, 'result' => $result];
+        $r['query_time'] = 0;
+
+        return $r;
     }
 }

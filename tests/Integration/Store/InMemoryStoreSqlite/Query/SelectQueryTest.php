@@ -13,6 +13,7 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
+use Exception;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
@@ -1300,15 +1301,14 @@ class SelectQueryTest extends TestCase
 
     public function testSelectOrderByWithoutContent()
     {
-        $res = $this->subjectUnderTest->query('
+        $this->expectException(Exception::class);
+
+        $this->subjectUnderTest->query('
             SELECT * WHERE {
                 ?s <http://id> ?id .
             }
             ORDER BY
         ');
-
-        // query false, therefore 0 as result
-        $this->assertEquals(0, $res);
     }
 
     /*

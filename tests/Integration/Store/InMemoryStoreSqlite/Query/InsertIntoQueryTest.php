@@ -13,6 +13,7 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
+use Exception;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
@@ -408,24 +409,13 @@ class InsertIntoQueryTest extends TestCase
         $longURI = 'http://'.hash('sha512', 'long')
             .hash('sha512', 'URI');
 
+        $this->expectException(Exception::class);
+
         // test data
         $this->subjectUnderTest->query('INSERT INTO <http://graph> {
             <'.$longURI.'/s> <'.$longURI.'/p> <'.$longURI.'/o> ;
                              <'.$longURI.'/p2> <'.$longURI.'/o2> .
         ');
-
-        $res = $this->subjectUnderTest->query('SELECT * {?s ?p ?o.}');
-        $this->assertEquals(
-            [
-                'query_type' => 'select',
-                'result' => [
-                    'variables' => ['s', 'p', 'o'],
-                    'rows' => [],
-                ],
-                'query_time' => $res['query_time'],
-            ],
-            $res
-        );
     }
 
     public function testInsertIntoListMoreComplex()
