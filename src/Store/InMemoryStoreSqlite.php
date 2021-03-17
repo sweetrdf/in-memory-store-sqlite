@@ -38,6 +38,14 @@ class InMemoryStoreSqlite
         $this->loggerPool = $loggerPool;
     }
 
+    /**
+     * Shortcut for people who want a ready-to-use instance.
+     */
+    public static function createInstance()
+    {
+        return new self(new PDOSQLiteAdapter(), new LoggerPool());
+    }
+
     public function getLoggerPool(): LoggerPool
     {
         return $this->loggerPool;

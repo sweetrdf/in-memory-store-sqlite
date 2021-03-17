@@ -28,6 +28,18 @@ class InMemoryStoreSqliteTest extends TestCase
     }
 
     /*
+     * Tests for createInstance
+     */
+
+    public function testCreateInstance()
+    {
+        $this->assertEquals(
+            InMemoryStoreSqlite::createInstance(),
+            new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool())
+        );
+    }
+
+    /*
      * Tests for delete
      */
 
