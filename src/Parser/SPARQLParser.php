@@ -14,7 +14,6 @@
 namespace sweetrdf\InMemoryStoreSqlite\Parser;
 
 use function sweetrdf\InMemoryStoreSqlite\calcBase;
-
 use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 

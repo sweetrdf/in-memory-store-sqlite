@@ -13,9 +13,8 @@
 
 namespace sweetrdf\InMemoryStoreSqlite\Parser;
 
-use function sweetrdf\InMemoryStoreSqlite\calcURI;
-
 use Exception;
+use function sweetrdf\InMemoryStoreSqlite\calcURI;
 use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\StringReader;

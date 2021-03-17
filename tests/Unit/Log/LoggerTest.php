@@ -5,13 +5,12 @@
  * the terms of the GPL-3 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
- * (c) Benjamin Nowack
  *
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
-namespace Tests\Unit;
+namespace Tests\Unit\Log;
 
 use Exception;
 use sweetrdf\InMemoryStoreSqlite\Log\Logger;
@@ -24,7 +23,7 @@ class LoggerTest extends TestCase
         return new Logger();
     }
 
-    public function testGetEntriesLevelNotSet()
+    public function testGetEntriesWithInvalidLevel()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Level invalid not set');
@@ -44,7 +43,7 @@ class LoggerTest extends TestCase
         $this->assertEquals(1, \count($sut->getEntries('warning')));
     }
 
-    public function testHasEntriesLevelNotSet()
+    public function testHasEntriesWithInvalidLevel()
     {
         $this->expectException(Exception::class);
         $this->expectExceptionMessage('Level invalid not set');

@@ -14,6 +14,7 @@ final class LoggerPool
     public function createNewLogger(string $id): Logger
     {
         $this->logger[$id] = new Logger();
+
         return $this->logger[$id];
     }
 

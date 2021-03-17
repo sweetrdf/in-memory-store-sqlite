@@ -96,8 +96,8 @@ class InMemoryStoreSqlite
     /**
      * Executes a SPARQL query.
      *
-     * @param string $q              SPARQL query
-     * @param string $result_format  Possible values: infos, raw, rows, row
+     * @param string $q             SPARQL query
+     * @param string $result_format Possible values: infos, raw, rows, row
      * @param string $src
      *
      * @return array|int array if query returned a result, 0 otherwise
