@@ -86,53 +86,6 @@ class InMemoryStoreSqliteTest extends TestCase
     }
 
     /*
-     * Tests for getSetting and setSetting
-     */
-
-    public function testGetAndSetSetting()
-    {
-        $this->assertEquals(0, $this->subjectUnderTest->getSetting('foo'));
-
-        $this->subjectUnderTest->setSetting('foo', 'bar');
-
-        $this->assertEquals('bar', $this->subjectUnderTest->getSetting('foo'));
-    }
-
-    public function testGetAndSetSettingUseDefault()
-    {
-        $this->assertEquals('no-entry', $this->subjectUnderTest->getSetting('not-available-'.time(), 'no-entry'));
-    }
-
-    public function testGetAndSetSettingExistingSetting()
-    {
-        $this->assertEquals(0, $this->subjectUnderTest->getSetting('foo'));
-
-        $this->subjectUnderTest->setSetting('foo', 'bar');
-        $this->subjectUnderTest->setSetting('foo', 'bar2'); // overrides existing setting
-
-        $this->assertEquals('bar2', $this->subjectUnderTest->getSetting('foo'));
-    }
-
-    /*
-     * Tests for getLabelProps
-     */
-
-    public function testGetLabelProps()
-    {
-        $this->assertEquals(
-            [
-                'http://www.w3.org/2000/01/rdf-schema#label',
-                'http://xmlns.com/foaf/0.1/name',
-                'http://purl.org/dc/elements/1.1/title',
-                'http://purl.org/rss/1.0/title',
-                'http://www.w3.org/2004/02/skos/core#prefLabel',
-                'http://xmlns.com/foaf/0.1/nick',
-            ],
-            $this->subjectUnderTest->getLabelProps()
-        );
-    }
-
-    /*
      * Tests for getResourceLabel
      */
 
@@ -323,45 +276,5 @@ class InMemoryStoreSqliteTest extends TestCase
 
         $res = $this->subjectUnderTest->query('SELECT * FROM <http://second-graph/> WHERE {?s ?p ?o.}');
         $this->assertEquals(1, \count($res['result']['rows']));
-    }
-
-    public function testMultipleInsertQuerysInDifferentGraphs()
-    {
-        $this->markTestSkipped(
-            'Adding the same triple into two graphs does not work.'
-            .\PHP_EOL.'Bug report: https://github.com/semsol/arc2/issues/114'
-        );
-
-        /*
-         * the following checks will not go through because of the bug in #114
-         *
-
-        $this->subjectUnderTest->query('INSERT INTO <http://graph1/> {<http://foo/1> <http://foo/2> <http://foo/3> . }');
-        $this->subjectUnderTest->query('INSERT INTO <http://graph2/> {<http://foo/4> <http://foo/5> <http://foo/6> . }');
-        $this->subjectUnderTest->query('INSERT INTO <http://graph2/> {<http://foo/a> <http://foo/b> <http://foo/c> . }');
-
-        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph1/> WHERE {?s ?p ?o.}');
-        $this->assertEquals(1, \count($res['result']['rows']));
-
-        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph2/> WHERE {?s ?p ?o.}');
-        $this->assertEquals(2, \count($res['result']['rows']));
-
-        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
-        $this->assertEquals(3, \count($res['result']['rows']));
-        */
-    }
-
-    /*
-     * Tests for reset
-     */
-
-    public function testResetKeepSettings()
-    {
-        $this->subjectUnderTest->setSetting('foo', 'bar');
-        $this->assertEquals(1, $this->subjectUnderTest->hasSetting('foo'));
-
-        $this->subjectUnderTest->reset(1);
-
-        $this->assertEquals(1, $this->subjectUnderTest->hasSetting('foo'));
     }
 }

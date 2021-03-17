@@ -621,11 +621,27 @@ class InsertIntoQueryTest extends TestCase
         );
     }
 
+    public function testMultipleInsertQueriesInDifferentGraphs()
+    {
+        $this->subjectUnderTest->query('INSERT INTO <http://graph1/> {<http://foo/1> <http://foo/2> <http://foo/3> . }');
+        $this->subjectUnderTest->query('INSERT INTO <http://graph2/> {<http://foo/4> <http://foo/5> <http://foo/6> . }');
+        $this->subjectUnderTest->query('INSERT INTO <http://graph2/> {<http://foo/a> <http://foo/b> <http://foo/c> . }');
+
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph1/> WHERE {?s ?p ?o.}');
+        $this->assertEquals(1, \count($res['result']['rows']));
+
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph2/> WHERE {?s ?p ?o.}');
+        $this->assertEquals(2, \count($res['result']['rows']));
+
+        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
+        $this->assertEquals(3, \count($res['result']['rows']));
+    }
+
     /**
      * Adds bulk of triples to test behavior.
      * May take at least one second to finish.
      */
-    public function testManyTriples()
+    public function testAdditionOfManyTriples()
     {
         $amount = 1500;
 

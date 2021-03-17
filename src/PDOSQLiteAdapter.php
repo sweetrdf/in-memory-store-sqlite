@@ -152,15 +152,6 @@ class PDOSQLiteAdapter
         )';
 
         $this->exec($sql);
-
-        // setting
-        $sql = 'CREATE TABLE IF NOT EXISTS setting (
-            k TEXT NOT NULL,
-            val TEXT NOT NULL,
-            UNIQUE (k)
-        )';
-
-        $this->exec($sql);
     }
 
     /**

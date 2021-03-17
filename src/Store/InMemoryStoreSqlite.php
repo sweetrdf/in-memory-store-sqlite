@@ -28,9 +28,18 @@ use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\SelectQueryHandler;
 
 class InMemoryStoreSqlite
 {
-    protected PDOSQLiteAdapter $db;
+    private PDOSQLiteAdapter $db;
 
-    protected Logger $logger;
+    private array $labelProperties = [
+        'http://www.w3.org/2000/01/rdf-schema#label',
+        'http://xmlns.com/foaf/0.1/name',
+        'http://purl.org/dc/elements/1.1/title',
+        'http://purl.org/rss/1.0/title',
+        'http://www.w3.org/2004/02/skos/core#prefLabel',
+        'http://xmlns.com/foaf/0.1/nick',
+    ];
+
+    private Logger $logger;
 
     public function __construct(PDOSQLiteAdapter $db, Logger $logger)
     {
@@ -51,69 +60,6 @@ class InMemoryStoreSqlite
     public function getDBVersion()
     {
         return $this->db->getServerVersion();
-    }
-
-    public function getTables()
-    {
-        return ['triple', 'g2t', 'id2val', 's2val', 'o2val', 'setting'];
-    }
-
-    public function hasSetting($k)
-    {
-        $tbl = 'setting';
-
-        return $this->db->fetchRow('SELECT val FROM '.$tbl." WHERE k = '".md5($k)."'")
-            ? 1
-            : 0;
-    }
-
-    public function getSetting($k, $default = 0)
-    {
-        $tbl = 'setting';
-        $row = $this->db->fetchRow('SELECT val FROM '.$tbl." WHERE k = '".md5($k)."'");
-        if (isset($row['val'])) {
-            return unserialize($row['val']);
-        }
-
-        return $default;
-    }
-
-    public function setSetting($k, $v)
-    {
-        $tbl = 'setting';
-        if ($this->hasSetting($k)) {
-            $sql = 'UPDATE '.$tbl." SET val = '".$this->db->escape(serialize($v))."' WHERE k = '".md5($k)."'";
-        } else {
-            $sql = 'INSERT INTO '.$tbl." (k, val) VALUES ('".md5($k)."', '".$this->db->escape(serialize($v))."')";
-        }
-
-        return $this->db->simpleQuery($sql);
-    }
-
-    public function removeSetting($k)
-    {
-        $tbl = 'setting';
-
-        return $this->db->simpleQuery('DELETE FROM '.$tbl." WHERE k = '".md5($k)."'");
-    }
-
-    public function reset($keep_settings = 0)
-    {
-        $tbls = $this->getTables();
-        /* remove split tables */
-        $ps = $this->getSetting('split_predicates', []);
-        foreach ($ps as $p) {
-            $tbl = 'triple_'.abs(crc32($p));
-            $this->db->simpleQuery('DROP TABLE '.$tbl);
-        }
-        $this->removeSetting('split_predicates');
-        /* truncate tables */
-        foreach ($tbls as $tbl) {
-            if ($keep_settings && ('setting' == $tbl)) {
-                continue;
-            }
-            $this->db->simpleQuery('DELETE FROM '.$tbl);
-        }
     }
 
     private function toTurtle($v): string
@@ -154,11 +100,6 @@ class InMemoryStoreSqlite
 
             return $r;
         }
-    }
-
-    public function dump()
-    {
-        throw new Exception('Implement dump by loading all triples and create a RDF file.');
     }
 
     /**
@@ -243,57 +184,9 @@ class InMemoryStoreSqlite
         return (new $cls($this))->runQuery($infos);
     }
 
-    /**
-     * @param int|float|string $val
-     */
-    public function getValueHash($val)
+    public function getValueHash(int | float | string $val): int | float
     {
         return abs(crc32($val));
-    }
-
-    public function getTermID($val, $term = '')
-    {
-        /* mem cache */
-        if (!isset($this->term_id_cache) || (\count(array_keys($this->term_id_cache)) > 100)) {
-            $this->term_id_cache = [];
-        }
-        if (!isset($this->term_id_cache[$term])) {
-            $this->term_id_cache[$term] = [];
-        }
-        $tbl = preg_match('/^(s|o)$/', $term) ? $term.'2val' : 'id2val';
-        /* cached? */
-        if ((\strlen($val) < 100) && isset($this->term_id_cache[$term][$val])) {
-            return $this->term_id_cache[$term][$val];
-        }
-        $r = 0;
-        /* via hash */
-        if (preg_match('/^(s2val|o2val)$/', $tbl)) {
-            $rows = $this->db->fetchList(
-                'SELECT id, val FROM '.$tbl." WHERE val_hash = '".$this->getValueHash($val)."' ORDER BY id"
-            );
-            if (\is_array($rows) && 0 < \count($rows)) {
-                foreach ($rows as $row) {
-                    if ($row['val'] == $val) {
-                        $r = $row['id'];
-                        break;
-                    }
-                }
-            }
-        }
-        /* exact match */
-        else {
-            $sql = 'SELECT id FROM '.$tbl." WHERE val = '".$this->db->escape($val)."' LIMIT 1";
-            $row = $this->db->fetchRow($sql);
-
-            if (null !== $row && isset($row['id'])) {
-                $r = $row['id'];
-            }
-        }
-        if ($r && (\strlen($val) < 100)) {
-            $this->term_id_cache[$term][$val] = $r;
-        }
-
-        return $r;
     }
 
     public function getIDValue($id, $term = '')
@@ -330,12 +223,9 @@ class InMemoryStoreSqlite
             return $res;
         }
 
-        $ps = $this->getLabelProps();
-        if ($this->getSetting('store_label_properties', '-') != md5(serialize($ps))) {
-            $this->inferLabelProps($ps);
-        }
+        $this->inferLabelProps();
 
-        foreach ($ps as $labelProperty) {
+        foreach ($this->labelProperties as $labelProperty) {
             // send a query for each label property
             $result = $this->query('SELECT ?label WHERE { <'.$res.'> <'.$labelProperty.'> ?label }');
             if (isset($result['result']['rows'][0])) {
@@ -354,29 +244,14 @@ class InMemoryStoreSqlite
         return $r;
     }
 
-    public function getLabelProps()
-    {
-        return [
-            'http://www.w3.org/2000/01/rdf-schema#label',
-            'http://xmlns.com/foaf/0.1/name',
-            'http://purl.org/dc/elements/1.1/title',
-            'http://purl.org/rss/1.0/title',
-            'http://www.w3.org/2004/02/skos/core#prefLabel',
-            'http://xmlns.com/foaf/0.1/nick',
-        ];
-    }
-
-    public function inferLabelProps($ps)
+    private function inferLabelProps(): void
     {
         $this->query('DELETE FROM <label-properties>');
         $sub_q = '';
-        foreach ($ps as $p) {
+        foreach ($this->labelProperties as $p) {
             $sub_q .= ' <'.$p.'> a <http://semsol.org/ns/arc#LabelProperty> . ';
         }
         $this->query('INSERT INTO <label-properties> { '.$sub_q.' }');
-
-        // TODO is that required? move to standalone property if so
-        $this->setSetting('store_label_properties', md5(serialize($ps)));
     }
 
     public function getResourcePredicates($res)
