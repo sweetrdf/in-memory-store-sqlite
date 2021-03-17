@@ -118,10 +118,13 @@ class DeleteQueryHandler extends QueryHandler
 
     private function deleteConstructedGraph()
     {
-        $h = new ConstructQueryHandler($this->store);
+        $subLogger = $this->store->getLoggerPool()->createNewLogger('Construct');
+        $h = new ConstructQueryHandler($this->store, $subLogger);
+
         $sub_r = $h->runQuery($this->infos);
         $triples = $this->getTriplesFromIndex($sub_r);
         $tgs = $this->infos['query']['target_graphs'];
+
         $this->infos = ['query' => ['construct_triples' => $triples, 'target_graphs' => $tgs]];
 
         return $this->deleteTriples();

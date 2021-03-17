@@ -13,12 +13,13 @@
 
 namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
 
+use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 
 abstract class QueryHandler
 {
-    protected array $errors = [];
+    protected Logger $logger;
 
     protected InMemoryStoreSqlite $store;
 
@@ -26,8 +27,9 @@ abstract class QueryHandler
 
     protected string $xsd = NamespaceHelper::NAMESPACE_XSD;
 
-    public function __construct(InMemoryStoreSqlite $store)
+    public function __construct(InMemoryStoreSqlite $store, Logger $logger)
     {
+        $this->logger = $logger;
         $this->store = $store;
     }
 

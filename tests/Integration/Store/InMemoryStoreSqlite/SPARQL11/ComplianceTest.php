@@ -13,7 +13,8 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\SPARQL11;
 
-use sweetrdf\InMemoryStoreSqlite\Logger;
+use sweetrdf\InMemoryStoreSqlite\Log\Logger;
+use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
@@ -64,7 +65,7 @@ abstract class ComplianceTest extends TestCase
         /*
          * Setup a store instance to load test information and data.
          */
-        $this->store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
     }
 
     /**
@@ -124,7 +125,7 @@ abstract class ComplianceTest extends TestCase
         // if no result was given, expect test is of type NegativeSyntaxTest11,
         // which has no data (group-data-X.ttl) and result (.srx) file.
         if (0 < \count($file['result']['rows'])) {
-            $parser = new TurtleParser();
+            $parser = new TurtleParser(new Logger());
             $data = file_get_contents($file['result']['rows'][0]['file']);
             $uri = $file['result']['rows'][0]['file'];
             $parser->parse($uri, $data);
@@ -308,7 +309,7 @@ abstract class ComplianceTest extends TestCase
     protected function loadManifestFileIntoStore($folderPath)
     {
         // parse manifest.ttl and load its content into $this->manifestGraphUri
-        $parser = new TurtleParser();
+        $parser = new TurtleParser(new Logger());
         $data = file_get_contents($folderPath.'/manifest.ttl');
         $uri = $folderPath.'/manifest.ttl';
         $parser->parse($uri, $data);

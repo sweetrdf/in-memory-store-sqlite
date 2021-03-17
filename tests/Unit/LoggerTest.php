@@ -14,7 +14,7 @@
 namespace Tests\Unit;
 
 use Exception;
-use sweetrdf\InMemoryStoreSqlite\Logger;
+use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use Tests\TestCase;
 
 class LoggerTest extends TestCase

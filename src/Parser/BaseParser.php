@@ -13,6 +13,7 @@
 
 namespace sweetrdf\InMemoryStoreSqlite\Parser;
 
+use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\StringReader;
 
@@ -29,7 +30,7 @@ abstract class BaseParser
 
     protected array $blocks;
 
-    private array $errors = [];
+    protected Logger $logger;
 
     /**
      * @var array<string, string>
@@ -45,36 +46,20 @@ abstract class BaseParser
 
     protected int $t_count = 0;
 
-    public function __construct()
+    public function __construct(Logger $logger)
     {
-        // TODO pass logger as parameter
+        // TODO pass as constructor param
         $this->reader = new StringReader();
 
-        /*
-         * @todo make it a constructor param
-         */
+        $this->logger = $logger;
+
+        // TODO make it a constructor param
         $this->prefixes = (new NamespaceHelper())->getNamespaces();
 
         // generates random prefix for blank nodes
         $this->bnode_prefix = bin2hex(random_bytes(4)).'b';
 
         $this->bnode_id = 0;
-    }
-
-    /**
-     * @todo replace by Logger
-     */
-    protected function addError(string $error): void
-    {
-        $this->errors[] = $error;
-    }
-
-    /**
-     * @todo replace by Logger
-     */
-    public function getErrors(): array
-    {
-        return $this->errors;
     }
 
     public function getQueryInfos()

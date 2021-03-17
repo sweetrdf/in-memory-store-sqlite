@@ -117,12 +117,12 @@ class SelectQueryHandler extends QueryHandler
             && !$this->store->getDBObject()->simpleQuery($tmpSql2)
             && !empty($this->store->getDBObject()->getErrorMessage())
         ) {
-            return $this->store->getLogger()->error(
+            return $this->logger->error(
                 $this->store->getDBObject()->getErrorMessage()
             );
         }
         if (false === $this->store->getDBObject()->exec('INSERT INTO '.$tbl.' '."\n".$q_sql)) {
-            $this->store->getLogger()->error($this->store->getDBObject()->getErrorMessage());
+            $this->logger->error($this->store->getDBObject()->getErrorMessage());
         }
 
         return $tbl;
@@ -191,7 +191,7 @@ class SelectQueryHandler extends QueryHandler
         try {
             $entries = $this->store->getDBObject()->fetchList($v_sql);
         } catch (\Exception $e) {
-            $this->store->getLogger()->error($e->getMessage());
+            $this->logger->error($e->getMessage());
         }
 
         $rows = [];
@@ -526,7 +526,7 @@ class SelectQueryHandler extends QueryHandler
                 $r .= '1 AS `success`';
             } else {
                 $msg = 'Result variable "'.$var_name.'" not used in query.';
-                $this->store->getLogger()->warning($msg);
+                $this->logger->warning($msg);
             }
 
             if ($tbl_alias) {

@@ -14,14 +14,17 @@
 namespace sweetrdf\InMemoryStoreSqlite\Parser;
 
 use function sweetrdf\InMemoryStoreSqlite\calcURI;
+
+use Exception;
+use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\StringReader;
 
 class TurtleParser extends BaseParser
 {
-    public function __construct()
+    public function __construct(Logger $logger)
     {
-        parent::__construct();
+        parent::__construct($logger);
 
         $this->state = 0;
         $this->unparsed_code = '';
@@ -129,10 +132,10 @@ class TurtleParser extends BaseParser
             $this->unparsed_code = $m[2];
         }
 
-        if ($this->unparsed_code && !$this->getErrors()) {
+        if ($this->unparsed_code && !$this->logger->hasEntries('error')) {
             $rest = preg_replace('/[\x0a|\x0d]/i', ' ', substr($this->unparsed_code, 0, 30));
             if (trim($rest)) {
-                $this->addError('Could not parse "'.$rest.'"');
+                $this->logger->error('Could not parse "'.$rest.'"');
             }
         }
     }
@@ -214,7 +217,7 @@ class TurtleParser extends BaseParser
                         if ('placeholder' == $t['s_type']) {
                             $state = 4;
                         } else {
-                            $this->addError('"'.$sub_r[1].'" after subject found.');
+                            $this->logger->error('"'.$sub_r[1].'" after subject found.');
                         }
                     }
                 } elseif ((list($sub_r, $sub_v) = $this->xCollection($sub_v)) && $sub_r) {
@@ -224,7 +227,7 @@ class TurtleParser extends BaseParser
                     $state = 2;
                     $proceed = 1;
                     if ($sub_r = $this->x('\.', $sub_v)) {
-                        $this->addError('DOT after subject found.');
+                        $this->logger->error('DOT after subject found.');
                     }
                 } elseif ((list($sub_r, $sub_v) = $this->xBlankNodePropertyList($sub_v)) && $sub_r) {
                     $t['s'] = $sub_r['id'];
@@ -233,7 +236,7 @@ class TurtleParser extends BaseParser
                     $state = 2;
                     $proceed = 1;
                 } elseif ($sub_r = $this->x('\.', $sub_v)) {
-                    $this->addError('Subject expected, DOT found.'.$sub_v);
+                    $this->logger->error('Subject expected, DOT found.'.$sub_v);
                 }
             }
             if (2 == $state) {/* expecting predicate */
@@ -245,7 +248,7 @@ class TurtleParser extends BaseParser
                     $proceed = 1;
                 } elseif ((list($sub_r, $sub_v) = $this->xVarOrTerm($sub_v)) && $sub_r) {
                     if ('bnode' == $sub_r['type']) {
-                        $this->addError('Blank node used as triple predicate');
+                        $this->logger->error('Blank node used as triple predicate');
                     }
                     $t['p'] = $sub_r['value'];
                     $t['p_type'] = $sub_r['type'];
@@ -302,7 +305,7 @@ class TurtleParser extends BaseParser
                     $state = 3;
                     $proceed = 1;
                     if ($sub_r = $this->x('\}', $sub_v)) {
-                        $this->addError('Object expected, } found.');
+                        $this->logger->error('Object expected, } found.');
                     }
                 }
                 if ($sub_r = $this->x('(\}|\{|OPTIONAL|FILTER|GRAPH)', $sub_v)) {

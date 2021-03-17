@@ -35,7 +35,8 @@ class LoadQueryHandler extends QueryHandler
         $this->keep_bnode_ids = $keep_bnode_ids;
 
         // remove parameters
-        $loader = new TurtleLoader();
+        $parserLogger = $this->store->getLoggerPool()->createNewLogger('Turtle');
+        $loader = new TurtleLoader($parserLogger);
         $loader->setCaller($this);
 
         /* logging */

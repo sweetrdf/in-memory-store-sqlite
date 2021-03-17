@@ -94,7 +94,7 @@ class SPARQLPlusParser extends SPARQLParser
                     if ((list($sub_r, $sub_v) = $this->xConstructTemplate($sub_v)) && \is_array($sub_r)) {
                         $r['construct_triples'] = $sub_r;
                     } else {
-                        $this->addError('Construct Template not found');
+                        $this->logger->error('Construct Template not found');
 
                         return [0, $v];
                     }
@@ -205,7 +205,7 @@ class SPARQLPlusParser extends SPARQLParser
             if (\count($r)) {
                 return [$r, $sub_v];
             } else {
-                $this->addError('No columns specified in GROUP BY clause.');
+                $this->logger->error('No columns specified in GROUP BY clause.');
             }
         }
 

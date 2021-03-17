@@ -13,7 +13,7 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
-use sweetrdf\InMemoryStoreSqlite\Logger;
+use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
@@ -27,7 +27,7 @@ class ErrorHandlingInQueriesTest extends TestCase
     {
         parent::setUp();
 
-        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
+        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
     }
 
     /**
@@ -57,6 +57,7 @@ class ErrorHandlingInQueriesTest extends TestCase
         );
 
         // TODO not bad if count is higher than 2
-        $this->assertEquals(2, \count($this->subjectUnderTest->getLogger()->getEntries()));
+        $errors = \count($this->subjectUnderTest->getLoggerPool()->getEntriesFromAllLoggerInstances());
+        $this->assertEquals(2, $errors);
     }
 }

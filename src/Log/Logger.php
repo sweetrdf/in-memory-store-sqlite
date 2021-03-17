@@ -1,6 +1,6 @@
 <?php
 
-namespace sweetrdf\InMemoryStoreSqlite;
+namespace sweetrdf\InMemoryStoreSqlite\Log;
 
 use Exception;
 

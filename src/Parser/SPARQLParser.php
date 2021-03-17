@@ -14,13 +14,15 @@
 namespace sweetrdf\InMemoryStoreSqlite\Parser;
 
 use function sweetrdf\InMemoryStoreSqlite\calcBase;
+
+use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
 class SPARQLParser extends TurtleParser
 {
-    public function __construct()
+    public function __construct(Logger $logger)
     {
-        parent::__construct();
+        parent::__construct($logger);
 
         $this->bnode_prefix = 'arc'.substr(md5(uniqid(rand())), 0, 4).'b';
         $this->bnode_id = 0;
@@ -40,8 +42,8 @@ class SPARQLParser extends TurtleParser
         if ($r) {
             $this->r['query'] = $r;
             $this->unparsed_code = trim($v);
-        } elseif (!$this->getErrors() && !$this->unparsed_code) {
-            $this->addError('Query not properly closed');
+        } elseif (!$this->logger->hasEntries('error') && !$this->unparsed_code) {
+            $this->logger->error('Query not properly closed');
         }
         $this->r['prefixes'] = $this->prefixes;
         $this->r['base'] = $this->base;
@@ -49,10 +51,10 @@ class SPARQLParser extends TurtleParser
         while (preg_match('/^\s*(\#[^\xd\xa]*)(.*)$/si', $this->unparsed_code, $m)) {
             $this->unparsed_code = $m[2];
         }
-        if ($this->unparsed_code && !$this->getErrors()) {
+        if ($this->unparsed_code && !$this->logger->hasEntries('error')) {
             $rest = preg_replace('/[\x0a|\x0d]/i', ' ', substr($this->unparsed_code, 0, 30));
             $msg = trim($rest) ? 'Could not properly handle "'.$rest.'"' : 'Syntax error, probably an incomplete pattern';
-            $this->addError($msg);
+            $this->logger->error($msg);
         }
     }
 
@@ -115,7 +117,7 @@ class SPARQLParser extends TurtleParser
                 }
             }
             if (!$all_vars && !\count($r['result_vars'])) {
-                $this->addError('No result bindings specified.');
+                $this->logger->error('No result bindings specified.');
             }
             /* dataset */
             while ((list($sub_r, $sub_v) = $this->xDatasetClause($sub_v)) && $sub_r) {
@@ -166,7 +168,7 @@ class SPARQLParser extends TurtleParser
             if ((list($sub_r, $sub_v) = $this->xConstructTemplate($sub_v)) && \is_array($sub_r)) {
                 $r['construct_triples'] = $sub_r;
             } else {
-                $this->addError('Construct Template not found');
+                $this->logger->error('Construct Template not found');
 
                 return [0, $v];
             }
@@ -222,7 +224,7 @@ class SPARQLParser extends TurtleParser
                 } while ($proceed);
             }
             if (!$all_vars && !\count($r['result_vars']) && !\count($r['result_uris'])) {
-                $this->addError('No result bindings specified.');
+                $this->logger->error('No result bindings specified.');
             }
             /* dataset */
             while ((list($sub_r, $sub_v) = $this->xDatasetClause($sub_v)) && $sub_r) {
@@ -269,7 +271,7 @@ class SPARQLParser extends TurtleParser
 
                 return [$r, $sub_v];
             } else {
-                $this->addError('Missing or invalid WHERE clause.');
+                $this->logger->error('Missing or invalid WHERE clause.');
             }
         }
 
@@ -350,7 +352,7 @@ class SPARQLParser extends TurtleParser
             if (\count($r)) {
                 return [$r, $sub_v];
             } else {
-                $this->addError('No order conditions specified.');
+                $this->logger->error('No order conditions specified.');
             }
         }
 
@@ -429,7 +431,7 @@ class SPARQLParser extends TurtleParser
                 return [$r, $sub_v];
             }
             $rest = preg_replace('/[\x0a|\x0d]/i', ' ', substr($sub_v, 0, 30));
-            $this->addError('Incomplete or invalid Group Graph pattern. Could not handle "'.$rest.'"');
+            $this->logger->error('Incomplete or invalid Group Graph pattern. Could not handle "'.$rest.'"');
         }
 
         return [0, $v];
@@ -445,7 +447,7 @@ class SPARQLParser extends TurtleParser
                 if ('bnode' == $t[$term.'_type']) {
                     $val = $t[$term];
                     if (isset($this->bnode_pattern_index['bnodes'][$val]) && ($this->bnode_pattern_index['bnodes'][$val] != $index_id)) {
-                        $this->addError('Re-used bnode label "'.$val.'" across graph patterns');
+                        $this->logger->error('Re-used bnode label "'.$val.'" across graph patterns');
                     } else {
                         $this->bnode_pattern_index['bnodes'][$val] = $index_id;
                     }
@@ -495,7 +497,7 @@ class SPARQLParser extends TurtleParser
             if ((list($sub_r, $sub_v) = $this->xGroupGraphPattern($sub_v)) && $sub_r) {
                 return [['type' => 'optional', 'patterns' => $sub_r['patterns']], $sub_v];
             }
-            $this->addError('Missing or invalid Group Graph Pattern after OPTIONAL');
+            $this->logger->error('Missing or invalid Group Graph Pattern after OPTIONAL');
         }
 
         return [0, $v];
@@ -519,7 +521,7 @@ class SPARQLParser extends TurtleParser
 
                     return [$r, $sub_v];
                 }
-                $this->addError('Missing or invalid Graph Pattern');
+                $this->logger->error('Missing or invalid Graph Pattern');
             }
         }
 
@@ -541,7 +543,7 @@ class SPARQLParser extends TurtleParser
             if ((list($r, $sub_v) = $this->xFunctionCall($sub_v)) && $r) {
                 return [$r, $sub_v];
             }
-            $this->addError('Incomplete FILTER');
+            $this->logger->error('Incomplete FILTER');
         }
 
         return [0, $v];
@@ -662,7 +664,7 @@ class SPARQLParser extends TurtleParser
                 $proceed = 0;
                 /* don't mistake '<' + uriref with '<'-operator ("longest token" rule) */
                 if ((list($sub_r, $sub_v) = $this->xIRI_REF($sub_v)) && $sub_r) {
-                    $this->addError('Expected operator, found IRIref: "'.$sub_r.'".');
+                    $this->logger->error('Expected operator, found IRIref: "'.$sub_r.'".');
                 }
                 if ($sub_r = $this->x('(\!\=|\=\=|\=|\<\=|\>\=|\<|\>)', $sub_v)) {
                     $op = $sub_r[1];

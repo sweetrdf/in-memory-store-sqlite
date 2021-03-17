@@ -14,7 +14,7 @@
 namespace sweetrdf\InMemoryStoreSqlite\Store;
 
 use Exception;
-use sweetrdf\InMemoryStoreSqlite\Logger;
+use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
@@ -38,18 +38,17 @@ class InMemoryStoreSqlite
         'http://www.w3.org/2004/02/skos/core#prefLabel',
         'http://xmlns.com/foaf/0.1/nick',
     ];
+    private LoggerPool $loggerPool;
 
-    private Logger $logger;
-
-    public function __construct(PDOSQLiteAdapter $db, Logger $logger)
+    public function __construct(PDOSQLiteAdapter $db, LoggerPool $loggerPool)
     {
         $this->db = $db;
-        $this->logger = $logger;
+        $this->loggerPool = $loggerPool;
     }
 
-    public function getLogger(): Logger
+    public function getLoggerPool(): LoggerPool
     {
-        return $this->logger;
+        return $this->loggerPool;
     }
 
     public function getDBObject(): ?PDOSQLiteAdapter
@@ -86,7 +85,7 @@ class InMemoryStoreSqlite
         }
 
         $infos = ['query' => ['url' => $g, 'target_graph' => $g]];
-        $h = new LoadQueryHandler($this);
+        $h = new LoadQueryHandler($this, $this->loggerPool->createNewLogger('Load'));
 
         return $h->runQuery($infos, $data, $keep_bnode_ids);
     }
@@ -95,7 +94,7 @@ class InMemoryStoreSqlite
     {
         if (!$doc) {
             $infos = ['query' => ['target_graphs' => [$g]]];
-            $h = new DeleteQueryHandler($this);
+            $h = new DeleteQueryHandler($this, $this->loggerPool->createNewLogger('Delete'));
             $r = $h->runQuery($infos);
 
             return $r;
@@ -108,19 +107,21 @@ class InMemoryStoreSqlite
      * @param string $q              SPARQL query
      * @param string $result_format  Possible values: infos, raw, rows, row
      * @param string $src
-     * @param int    $keep_bnode_ids Keep blank node IDs? Default is 0
      *
      * @return array|int array if query returned a result, 0 otherwise
      */
-    public function query($q, $result_format = '', $src = '', $keep_bnode_ids = 0)
+    public function query($q, $result_format = '', $src = '')
     {
+        $errors = [];
+
         if (preg_match('/^dump/i', $q)) {
             $infos = ['query' => ['type' => 'dump']];
         } else {
-            $p = new SPARQLPlusParser();
+            $parserLogger = $this->loggerPool->createNewLogger('SPARQL');
+            $p = new SPARQLPlusParser($parserLogger);
             $p->parse($q, $src);
             $infos = $p->getQueryInfos();
-            $errors = $p->getErrors();
+            $errors = $parserLogger->getEntries('error');
         }
 
         if ('infos' == $result_format) {
@@ -150,7 +151,8 @@ class InMemoryStoreSqlite
                 throw new Exception('Inalid query $type given.');
             }
 
-            $result = (new $cls($this))->runQuery($infos);
+            $queryHandlerLogger = $this->loggerPool->createNewLogger('QueryHandler');
+            $result = (new $cls($this, $queryHandlerLogger))->runQuery($infos);
 
             $r = ['query_type' => $qt, 'result' => $result];
             $r['query_time'] = 0;
