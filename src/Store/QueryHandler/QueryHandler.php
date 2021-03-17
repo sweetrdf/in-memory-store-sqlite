@@ -51,7 +51,7 @@ abstract class QueryHandler
         /* via hash */
         if (preg_match('/^(s2val|o2val)$/', $tbl)) {
             $rows = $this->store->getDBObject()->fetchList(
-                'SELECT id, val FROM '.$tbl." WHERE val_hash = ? ORDER BY id",
+                'SELECT id, val FROM '.$tbl.' WHERE val_hash = ? ORDER BY id',
                 [$this->getValueHash($val)]
             );
             if (\is_array($rows) && 0 < \count($rows)) {
@@ -66,7 +66,7 @@ abstract class QueryHandler
 
         /* exact match */
         else {
-            $sql = 'SELECT id FROM '.$tbl." WHERE val = ? LIMIT 1";
+            $sql = 'SELECT id FROM '.$tbl.' WHERE val = ? LIMIT 1';
             $row = $this->store->getDBObject()->fetchRow($sql, [$val]);
 
             if (null !== $row && isset($row['id'])) {

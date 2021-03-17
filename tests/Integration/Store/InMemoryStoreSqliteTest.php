@@ -27,30 +27,6 @@ class InMemoryStoreSqliteTest extends TestCase
         $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new Logger());
     }
 
-    /**
-     * Returns a list of all available graph URIs of the store. It can also respect access control,
-     * to only returned available graphs in the current context. But that depends on the implementation
-     * and can differ.
-     *
-     * @return array simple array of key-value-pairs, which consists of graph URIs as values
-     */
-    protected function getGraphs()
-    {
-        // collects all values which have an ID (column g) in the g2t table.
-        $query = 'SELECT id2val.val AS graphUri FROM g2t LEFT JOIN id2val ON g2t.g = id2val.id GROUP BY g';
-
-        // send SQL query
-        $list = $this->subjectUnderTest->getDBObject()->fetchList($query);
-        $graphs = [];
-
-        // collect graph URI's
-        foreach ($list as $row) {
-            $graphs[] = $row['graphUri'];
-        }
-
-        return $graphs;
-    }
-
     /*
      * Tests for delete
      */
@@ -77,7 +53,9 @@ class InMemoryStoreSqliteTest extends TestCase
      * Tests for getDBVersion
      */
 
-    // just check pattern
+    /**
+     * just check pattern
+     */
     public function testGetDBVersion()
     {
         $pattern = '/[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}/';
@@ -85,132 +63,7 @@ class InMemoryStoreSqliteTest extends TestCase
         $this->assertEquals(1, $result);
     }
 
-    /*
-     * Tests for getResourceLabel
-     */
-
-    public function testGetResourceLabel()
-    {
-        // test data
-        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
-            <http://s> <http://p1> "baz" .
-            <http://s> <http://xmlns.com/foaf/0.1/name> "label1" .
-        }');
-
-        $res = $this->subjectUnderTest->getResourceLabel('http://s');
-
-        $this->assertEquals('label1', $res);
-    }
-
-    public function testGetResourceLabelNoData()
-    {
-        // test data
-        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
-            <http://s> <http://p1> "baz" .
-        }');
-
-        $res = $this->subjectUnderTest->getResourceLabel('http://s');
-
-        $this->assertEquals('s', $res);
-    }
-
-    /*
-     * Tests for getResourcePredicates
-     */
-
-    public function testGetResourcePredicates()
-    {
-        // test data
-        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
-            <http://s> <http://p1> "baz" .
-            <http://s> <http://p2> "bar" .
-        }');
-
-        $res = $this->subjectUnderTest->getResourcePredicates('http://s');
-
-        $this->assertEquals(
-            [
-                'http://p1' => [],
-                'http://p2' => [],
-            ],
-            $res
-        );
-    }
-
-    public function testGetResourcePredicatesMultipleGraphs()
-    {
-        // test data
-        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
-            <http://s> <http://p1> "baz" .
-            <http://s> <http://p2> "bar" .
-        }');
-
-        $this->subjectUnderTest->query('INSERT INTO <http://example.com/2> {
-            <http://s> <http://p3> "baz" .
-            <http://s> <http://p4> "bar" .
-        }');
-
-        $res = $this->subjectUnderTest->getResourcePredicates('http://s');
-
-        $this->assertEquals(
-            [
-                'http://p1' => [],
-                'http://p2' => [],
-                'http://p3' => [],
-                'http://p4' => [],
-            ],
-            $res
-        );
-    }
-
-    /*
-     * Tests for getPredicateRange
-     */
-
-    public function testGetPredicateRange()
-    {
-        // test data
-        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
-            <http://p1> <http://www.w3.org/2000/01/rdf-schema#range> <http://foobar> .
-        }');
-
-        $res = $this->subjectUnderTest->getPredicateRange('http://p1');
-
-        $this->assertEquals('http://foobar', $res);
-    }
-
-    public function testGetPredicateRangeNotFound()
-    {
-        $res = $this->subjectUnderTest->getPredicateRange('http://not-available');
-
-        $this->assertEquals('', $res);
-    }
-
-    /*
-     * Tests for getIDValue
-     */
-
-    public function testGetIDValue()
-    {
-        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
-            <http://p1> <http://www.w3.org/2000/01/rdf-schema#range> <http://foobar> .
-        }');
-
-        $res = $this->subjectUnderTest->getIDValue(1);
-
-        $this->assertEquals('http://example.com/', $res);
-    }
-
-    public function testGetIDValueNoData()
-    {
-        $res = $this->subjectUnderTest->getIDValue(1);
-
-        $this->assertEquals(0, $res);
-    }
-
     /**
-     * Saft frameworks ARC2 addition fails to run with ARC2 2.4.
-     *
      * https://github.com/SaftIng/Saft/tree/master/src/Saft/Addition/ARC2
      *
      * @group linux
@@ -233,11 +86,7 @@ class InMemoryStoreSqliteTest extends TestCase
     }
 
     /**
-     * Saft frameworks ARC2 addition fails to run with ARC2 2.4.
-     *
-     * https://github.com/SaftIng/Saft/tree/master/src/Saft/Addition/ARC2
-     *
-     * This tests checks gathering of freshly created resources.
+     * This test checks gathering of freshly created resources.
      */
     public function testInsertSaftRegressionTest2()
     {
@@ -254,8 +103,6 @@ class InMemoryStoreSqliteTest extends TestCase
     }
 
     /**
-     * Saft frameworks ARC2 addition fails to run with ARC2 2.4.
-     *
      * This test checks side effects of update operations on different graphs.
      *
      * We add 1 triple to 1 and another to another graph.
