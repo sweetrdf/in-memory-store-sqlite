@@ -50,7 +50,7 @@ For more information please read [SPARQL-support.md](doc/SPARQL-support.md).
 
 ## Performance
 
-At around 1000+ triples you may experience increasing execution time.
+At around 1000+ triples you may experience increased execution time.
 
 ## License
 

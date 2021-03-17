@@ -28,9 +28,9 @@ class SPARQLParser extends TurtleParser
         $this->bnode_pattern_index = ['patterns' => [], 'bnodes' => []];
     }
 
-    public function parse($q, $src = ''): void
+    public function parse(string $q, string $path = ''): void
     {
-        $this->base = $src ? calcBase($src) : NamespaceHelper::BASE_NAMESPACE;
+        $this->base = $path ? calcBase($path) : NamespaceHelper::BASE_NAMESPACE;
         $this->r = [
             'base' => '',
             'vars' => [],

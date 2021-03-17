@@ -30,7 +30,7 @@ class TurtleParser extends BaseParser
         $this->max_parsing_loops = 500;
     }
 
-    public function x($re, $v, $options = 'si')
+    protected function x($re, $v, $options = 'si')
     {
         $v = preg_replace('/^[\xA0\xC2]+/', ' ', $v);
 
@@ -65,7 +65,7 @@ class TurtleParser extends BaseParser
         return $this->unparsed_code;
     }
 
-    public function parse($path, $data = ''): void
+    public function parse(string $path, string $data = ''): void
     {
         $this->reader = new StringReader();
         $this->reader->init($path, $data);
