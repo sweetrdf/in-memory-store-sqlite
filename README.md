@@ -1,5 +1,9 @@
 # sweetrdf - RDF In-Memory Quad Store (SQLite)
 
+![CI](https://github.com/sweetrdf/in-memory-store-sqlite/workflows/Tests/badge.svg)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/sweetrdf/in-memory-store-sqlite/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/sweetrdf/in-memory-store-sqlite/?branch=master)
+[![Code Coverage](https://scrutinizer-ci.com/g/sweetrdf/in-memory-store-sqlite/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/sweetrdf/in-memory-store-sqlite/?branch=master)
+
 RDF In-memory quad store implementation using PDO and SQLite.
 
 ## Performance

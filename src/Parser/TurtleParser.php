@@ -562,7 +562,12 @@ class TurtleParser extends BaseParser
             $r = $sub_r;
             if ((list($sub_r, $sub_v) = $this->xLANGTAG($sub_v)) && $sub_r) {
                 $r['lang'] = $sub_r;
-            } elseif (!$this->x('\s', $sub_v) && ($sub_r = $this->x('\^\^', $sub_v)) && (list($sub_r, $sub_v) = $this->xIRIref($sub_r[1])) && $sub_r[1]) {
+            } elseif (
+                !$this->x('\s', $sub_v)
+                && ($sub_r = $this->x('\^\^', $sub_v))
+                && (list($sub_r, $sub_v) = $this->xIRIref($sub_r[1]))
+                && $sub_r[1]
+            ) {
                 $r['datatype'] = $sub_r;
             }
 
