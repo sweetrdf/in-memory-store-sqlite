@@ -30,14 +30,6 @@ class InMemoryStoreSqlite
 {
     private PDOSQLiteAdapter $db;
 
-    private array $labelProperties = [
-        'http://www.w3.org/2000/01/rdf-schema#label',
-        'http://xmlns.com/foaf/0.1/name',
-        'http://purl.org/dc/elements/1.1/title',
-        'http://purl.org/rss/1.0/title',
-        'http://www.w3.org/2004/02/skos/core#prefLabel',
-        'http://xmlns.com/foaf/0.1/nick',
-    ];
     private LoggerPool $loggerPool;
 
     public function __construct(PDOSQLiteAdapter $db, LoggerPool $loggerPool)

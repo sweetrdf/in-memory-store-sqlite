@@ -1,7 +1,7 @@
 {
     "name": "sweetrdf/in-memory-store-sqlite",
     "type": "library",
-    "description": "TODO",
+    "description": "RDF in-memory quad store implementation using PDO and SQLite.",
     "keywords": ["rdf","sparql", "in-memory store"],
     "homepage": "https://github.com/sweetrdf/in-memory-store-sqlite",
     "license": ["GPL-3.0-or-later"],
