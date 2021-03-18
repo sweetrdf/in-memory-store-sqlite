@@ -12,6 +12,7 @@ namespace sweetrdf\InMemoryStoreSqlite\Rdf;
  * file that was distributed with this source code.
  */
 
+use Exception;
 use rdfInterface\BlankNode as iBlankNode;
 use rdfInterface\DataFactory as iDataFactory;
 use rdfInterface\DefaultGraph as iDefaultGraph;
@@ -35,8 +36,9 @@ class DataFactory implements iDataFactory
         return new NamedNode($iri);
     }
 
-    public static function defaultGraph(string | Stringable | null $iri = null): iDefaultGraph
-    {
+    public static function defaultGraph(
+        string | Stringable | null $iri = null
+    ): iDefaultGraph {
         return new DefaultGraph($iri);
     }
 
@@ -52,7 +54,7 @@ class DataFactory implements iDataFactory
         iTerm $subject,
         iNamedNode $predicate,
         iTerm $object,
-        iNamedNode | iBlankNode | null $graphIri = null
+        iNamedNode | iBlankNode | iDefaultGraph | null $graphIri = null
     ): iQuad {
         return new Quad($subject, $predicate, $object, $graphIri);
     }
@@ -61,13 +63,13 @@ class DataFactory implements iDataFactory
         iTerm | null $subject = null,
         iNamedNode | null $predicate = null,
         iTerm | null $object = null,
-        iNamedNode | iBlankNode | null $graphIri = null
+        iNamedNode | iBlankNode | iDefaultGraph | null $graphIri = null
     ): iQuadTemplate {
-        throw new RdfException('quadTemplate is not implemented yet.');
+        throw new Exception('quadTemplate is not implemented yet.');
     }
 
     public static function variable(string | Stringable $name): iVariable
     {
-        throw new RdfException('variable is not implemented yet.');
+        throw new Exception('variable is not implemented yet.');
     }
 }

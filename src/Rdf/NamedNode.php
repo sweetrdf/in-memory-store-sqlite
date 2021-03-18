@@ -14,7 +14,6 @@ namespace sweetrdf\InMemoryStoreSqlite\Rdf;
 
 use rdfInterface\NamedNode as iNamedNode;
 use rdfInterface\Term;
-use rdfInterface\TYPE_NAMED_NODE;
 
 class NamedNode implements iNamedNode
 {
@@ -37,11 +36,11 @@ class NamedNode implements iNamedNode
 
     public function getType(): string
     {
-        return TYPE_NAMED_NODE;
+        return \rdfInterface\TYPE_NAMED_NODE;
     }
 
     public function equals(Term $term): bool
     {
-        return $this === $term;
+        return $this == $term;
     }
 }

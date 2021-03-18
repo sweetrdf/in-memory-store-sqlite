@@ -14,7 +14,6 @@ namespace sweetrdf\InMemoryStoreSqlite\Rdf;
 
 use rdfInterface\BlankNode as iBlankNode;
 use rdfInterface\Term;
-use rdfInterface\TYPE_BLANK_NODE;
 
 class BlankNode implements iBlankNode
 {
@@ -41,12 +40,12 @@ class BlankNode implements iBlankNode
 
     public function equals(Term $term): bool
     {
-        return $this === $term;
+        return $this == $term;
     }
 
     public function getType(): string
     {
-        return TYPE_BLANK_NODE;
+        return \rdfInterface\TYPE_BLANK_NODE;
     }
 
     public function getValue(): string

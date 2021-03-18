@@ -15,7 +15,6 @@ namespace sweetrdf\InMemoryStoreSqlite\Rdf;
 use Exception;
 use rdfInterface\Literal as iLiteral;
 use rdfInterface\Term;
-use rdfInterface\TYPE_LITERAL;
 use Stringable;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
@@ -33,8 +32,10 @@ class Literal implements iLiteral
         ?string $datatype = null
     ) {
         $this->value = $value;
-        $this->lang = $lang;
-        $this->datatype = $datatype;
+        // TODO later check with feedback on
+        // https://github.com/sweetrdf/rdfInterface/issues/14
+        $this->lang = !empty($lang) ? $lang : null;
+        $this->datatype = $datatype ?? NamespaceHelper::NAMESPACE_XSD.'string';
     }
 
     public function __toString(): string
@@ -61,17 +62,17 @@ class Literal implements iLiteral
 
     public function getDatatype(): string
     {
-        return $this->datatype ?? NamespaceHelper::NAMESPACE_XSD;
+        return $this->datatype;
     }
 
     public function getType(): string
     {
-        return TYPE_LITERAL;
+        return \rdfInterface\TYPE_LITERAL;
     }
 
     public function equals(Term $term): bool
     {
-        return $this === $term;
+        return $this == $term;
     }
 
     public function withValue(int | float | string | bool | Stringable $value): self

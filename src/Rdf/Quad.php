@@ -15,6 +15,7 @@ namespace sweetrdf\InMemoryStoreSqlite\Rdf;
 use BadMethodCallException;
 use Exception;
 use rdfInterface\BlankNode as iBlankNode;
+use rdfInterface\DefaultGraph as iDefaultGraph;
 use rdfInterface\Literal as iLiteral;
 use rdfInterface\NamedNode as iNamedNode;
 use rdfInterface\Quad as iQuad;
@@ -28,13 +29,13 @@ class Quad implements iQuad
 
     private iTerm $object;
 
-    private iNamedNode | iBlankNode | null $graphIri;
+    private iNamedNode | iBlankNode | iDefaultGraph | null $graphIri;
 
     public function __construct(
         iTerm $subject,
         iNamedNode $predicate,
         iTerm $object,
-        iNamedNode | iBlankNode | null $graphIri = null
+        iNamedNode | iBlankNode | iDefaultGraph | null $graphIri = null
     ) {
         if ($subject instanceof iLiteral) {
             throw new BadMethodCallException('Subject must be of type NamedNode or BlankNode');
@@ -57,7 +58,7 @@ class Quad implements iQuad
 
     public function equals(iTerm $term): bool
     {
-        return $this === $term;
+        return $this == $term;
     }
 
     public function getValue(): string
@@ -134,8 +135,9 @@ class Quad implements iQuad
         throw new Exception('withObject not implemented yet.');
     }
 
-    public function withGraphIri(iNamedNode | iBlankNode $graphIri): iQuad
-    {
+    public function withGraphIri(
+        iNamedNode | iBlankNode | iDefaultGraph | null $graphIri
+    ): iQuad {
         throw new Exception('withGraphIri not implemented yet.');
     }
 }

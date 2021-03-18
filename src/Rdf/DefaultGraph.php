@@ -12,7 +12,7 @@ namespace sweetrdf\InMemoryStoreSqlite\Rdf;
  * file that was distributed with this source code.
  */
 
-use rdfInterface\DefaultGraph;
+use rdfInterface\DefaultGraph as iDefaultGraph;
 use rdfInterface\Term;
 use rdfInterface\TYPE_DEFAULT_GRAPH;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
