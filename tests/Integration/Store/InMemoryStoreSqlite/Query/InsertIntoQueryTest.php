@@ -649,6 +649,6 @@ class InsertIntoQueryTest extends TestCase
 
         $timeUsed = microtime(true) - $startTime;
         $info = 'Test took longer than expected: '.$timeUsed.' sec.';
-        $this->assertTrue(1.6 > $timeUsed, $info);
+        $this->assertTrue(1.75 > $timeUsed, $info);
     }
 }
