@@ -15,6 +15,7 @@ namespace sweetrdf\InMemoryStoreSqlite\Store;
 
 use Exception;
 use rdfInterface\Term;
+use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
@@ -34,12 +35,15 @@ class InMemoryStoreSqlite
 {
     private PDOSQLiteAdapter $db;
 
+    private KeyValueBag $rowCache;
+
     private LoggerPool $loggerPool;
 
-    public function __construct(PDOSQLiteAdapter $db, LoggerPool $loggerPool)
+    public function __construct(PDOSQLiteAdapter $db, LoggerPool $loggerPool, KeyValueBag $rowCache)
     {
         $this->db = $db;
         $this->loggerPool = $loggerPool;
+        $this->rowCache = $rowCache;
     }
 
     /**
@@ -47,7 +51,7 @@ class InMemoryStoreSqlite
      */
     public static function createInstance()
     {
-        return new self(new PDOSQLiteAdapter(), new LoggerPool());
+        return new self(new PDOSQLiteAdapter(), new LoggerPool(), new KeyValueBag());
     }
 
     public function getLoggerPool(): LoggerPool
@@ -99,6 +103,7 @@ class InMemoryStoreSqlite
         if (!$doc) {
             $infos = ['query' => ['target_graphs' => [$g]]];
             $h = new DeleteQueryHandler($this, $this->loggerPool->createNewLogger('Delete'));
+            $this->rowCache->reset();
             $r = $h->runQuery($infos);
 
             return $r;
@@ -129,20 +134,20 @@ class InMemoryStoreSqlite
             }
         }
 
-        $qt = $infos['query']['type'];
+        $queryType = $infos['query']['type'];
         $validTypes = ['select', 'ask', 'describe', 'construct', 'load', 'insert', 'delete', 'dump'];
-        if (!\in_array($qt, $validTypes)) {
-            throw new Exception('Unsupported query type "'.$qt.'"');
+        if (!\in_array($queryType, $validTypes)) {
+            throw new Exception('Unsupported query type "'.$queryType.'"');
         }
 
-        $cls = match (ucfirst($qt)) {
-            'Ask' => AskQueryHandler::class,
-            'Construct' => ConstructQueryHandler::class,
-            'Describe' => DescribeQueryHandler::class,
-            'Delete' => DeleteQueryHandler::class,
-            'Insert' => InsertQueryHandler::class,
-            'Load' => LoadQueryHandler::class,
-            'Select' => SelectQueryHandler::class,
+        $cls = match ($queryType) {
+            'ask' => AskQueryHandler::class,
+            'construct' => ConstructQueryHandler::class,
+            'describe' => DescribeQueryHandler::class,
+            'delete' => DeleteQueryHandler::class,
+            'insert' => InsertQueryHandler::class,
+            'load' => LoadQueryHandler::class,
+            'select' => SelectQueryHandler::class,
         };
 
         if (empty($cls)) {
@@ -150,12 +155,20 @@ class InMemoryStoreSqlite
         }
 
         $queryHandlerLogger = $this->loggerPool->createNewLogger('QueryHandler');
-        $queryResult = (new $cls($this, $queryHandlerLogger))->runQuery($infos);
+        $queryHandler = new $cls($this, $queryHandlerLogger);
+
+        if ('insert' == $queryType) {
+            $queryHandler->setRowCache($this->rowCache);
+        } elseif ('delete' == $queryType) {
+            $this->rowCache->reset();
+        }
+
+        $queryResult = $queryHandler->runQuery($infos);
 
         $result = null;
         if ('raw' == $format) {
             // use plain old ARC2 format which is an array of arrays
-            $result = ['query_type' => $qt, 'result' => $queryResult];
+            $result = ['query_type' => $queryType, 'result' => $queryResult];
         } elseif ('instances' == $format) {
             // use rdfInstance instance(s) to represent result entries
             if (\is_array($queryResult)) {

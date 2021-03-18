@@ -13,8 +13,6 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
-use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
-use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
 
@@ -27,7 +25,7 @@ class AskQueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
+        $this->subjectUnderTest = InMemoryStoreSqlite::createInstance();
     }
 
     public function testAskDefaultGraph()

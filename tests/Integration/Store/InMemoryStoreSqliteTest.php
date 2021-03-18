@@ -13,6 +13,7 @@
 
 namespace Tests\Integration\Store;
 
+use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
@@ -24,7 +25,7 @@ class InMemoryStoreSqliteTest extends TestCase
     {
         parent::setUp();
 
-        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
+        $this->subjectUnderTest = InMemoryStoreSqlite::createInstance();
     }
 
     /*
@@ -35,7 +36,7 @@ class InMemoryStoreSqliteTest extends TestCase
     {
         $this->assertEquals(
             InMemoryStoreSqlite::createInstance(),
-            new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool())
+            new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool(), new KeyValueBag())
         );
     }
 

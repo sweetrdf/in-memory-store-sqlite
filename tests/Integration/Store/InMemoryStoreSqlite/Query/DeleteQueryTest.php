@@ -13,8 +13,6 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
-use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
-use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
 
@@ -27,7 +25,7 @@ class DeleteQueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
+        $this->subjectUnderTest = InMemoryStoreSqlite::createInstance();
     }
 
     protected function runSPOQuery($g = null)
@@ -85,7 +83,7 @@ class DeleteQueryTest extends TestCase
         $this->assertEquals(0, \count($this->runSPOQuery()['result']['rows']));
     }
 
-    public function testDeleteWhere()
+    public function testDeleteWhere1()
     {
         // test data
         $this->subjectUnderTest->query('INSERT INTO <http://example.com/1> {

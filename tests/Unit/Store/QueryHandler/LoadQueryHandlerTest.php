@@ -13,6 +13,7 @@
 
 namespace Tests\Unit\Store\QueryHandler;
 
+use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
@@ -27,7 +28,7 @@ class LoadQueryHandlerTest extends TestCase
 
         $loggerPool = new LoggerPool();
 
-        $store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), $loggerPool);
+        $store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), $loggerPool, new KeyValueBag());
 
         $this->subjectUnderTest = new LoadQueryHandler($store, $loggerPool->createNewLogger('test'));
     }

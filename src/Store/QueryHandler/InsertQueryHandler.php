@@ -13,8 +13,15 @@
 
 namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
 
+use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
+
 class InsertQueryHandler extends QueryHandler
 {
+    /**
+     * When set it is used to store term information to speed up insert into operations.
+     */
+    private KeyValueBag $rowCache;
+
     /**
      * Is being used for blank nodes to generate a hash which is not only dependent on
      * blank node ID and graph, but also on a random value.
@@ -22,20 +29,17 @@ class InsertQueryHandler extends QueryHandler
      */
     private ?string $sessionId = null;
 
-    public function runQuery(array $infos)
+    public function setRowCache(KeyValueBag $rowCache): void
     {
-        $this->addTriplesToGraph(
-            $infos['query']['construct_triples'],
-            $infos['query']['target_graph']
-        );
+        $this->rowCache = $rowCache;
     }
 
-    public function addTriplesToGraph(array $triples, string $graph): void
+    public function runQuery(array $infos)
     {
         $this->sessionId = bin2hex(random_bytes(8));
 
-        foreach ($triples as $triple) {
-            $this->addTripleToGraph($triple, $graph);
+        foreach ($infos['query']['construct_triples'] as $triple) {
+            $this->addTripleToGraph($triple, $infos['query']['target_graph']);
         }
 
         $this->sessionId = null;
@@ -280,7 +284,16 @@ class InsertQueryHandler extends QueryHandler
         // id (predicate or graph)
         if ('id' == $quadPart) {
             $sql = 'SELECT id, val FROM id2val WHERE val = ?';
-            $entry = $this->store->getDBObject()->fetchRow($sql, [$value]);
+
+            $hashKey = md5($sql.json_encode([$value]));
+            if (false === $this->rowCache->has($hashKey)) {
+                $row = $this->store->getDBObject()->fetchRow($sql, [$value]);
+                if (\is_array($row)) {
+                    $this->rowCache->set($hashKey, $row);
+                }
+            }
+
+            $entry = $this->rowCache->get($hashKey);
 
             // entry found, use its ID
             if (\is_array($entry)) {
@@ -293,7 +306,16 @@ class InsertQueryHandler extends QueryHandler
             $table = 'subject' == $quadPart ? 's2val' : 'o2val';
             $sql = 'SELECT id, val FROM '.$table.' WHERE val_hash = ?';
             $params = [$this->getValueHash($value)];
-            $entry = $this->store->getDBObject()->fetchRow($sql, $params);
+
+            $hashKey = md5($sql.json_encode($params));
+            if (false === $this->rowCache->has($hashKey)) {
+                $row = $this->store->getDBObject()->fetchRow($sql, $params);
+                if (\is_array($row)) {
+                    $this->rowCache->set($hashKey, $row);
+                }
+            }
+
+            $entry = $this->rowCache->get($hashKey);
 
             // entry found, use its ID
             if (isset($entry['val']) && $entry['val'] == $value) {

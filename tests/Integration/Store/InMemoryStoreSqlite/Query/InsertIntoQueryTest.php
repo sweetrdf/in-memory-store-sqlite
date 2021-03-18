@@ -14,9 +14,7 @@
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
 use Exception;
-use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
-use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
 
@@ -29,7 +27,7 @@ class InsertIntoQueryTest extends TestCase
     {
         parent::setUp();
 
-        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
+        $this->subjectUnderTest = InMemoryStoreSqlite::createInstance();
     }
 
     public function testInsertInto()

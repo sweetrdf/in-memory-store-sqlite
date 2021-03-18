@@ -14,9 +14,7 @@
 namespace Tests\Integration\Store\InMemoryStoreSqlite\SPARQL11;
 
 use sweetrdf\InMemoryStoreSqlite\Log\Logger;
-use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
-use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
 
@@ -65,7 +63,7 @@ abstract class ComplianceTest extends TestCase
         /*
          * Setup a store instance to load test information and data.
          */
-        $this->store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
+        $this->store = InMemoryStoreSqlite::createInstance();
     }
 
     /**

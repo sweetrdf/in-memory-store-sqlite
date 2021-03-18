@@ -25,12 +25,13 @@ After the script ends all your data inside the store will be gone.
 
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 
 // fast way
 $store = InMemoryStoreSqlite::createInstance();
 // or a way with more data control
-$store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
+$store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool(), new KeyValueBag());
 
 // send a SPARQL query which creates two triples
 $store->query('INSERT INTO <http://example.com/> {

@@ -13,9 +13,7 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
-use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
-use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Rdf\BlankNode;
 use sweetrdf\InMemoryStoreSqlite\Rdf\Literal;
 use sweetrdf\InMemoryStoreSqlite\Rdf\NamedNode;
@@ -33,7 +31,7 @@ class SelectQueryOutputInstancesTest extends TestCase
     {
         parent::setUp();
 
-        $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
+        $this->subjectUnderTest = InMemoryStoreSqlite::createInstance();
     }
 
     public function testSelect1()
