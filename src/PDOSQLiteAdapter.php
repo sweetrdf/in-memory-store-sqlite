@@ -30,17 +30,12 @@ class PDOSQLiteAdapter
      */
     private array $queries = [];
 
-    public function __construct(string $dbName = null)
+    public function __construct()
     {
         $this->checkRequirements();
 
-        // set path to SQLite file
-        if (!empty($dbName)) {
-            $dsn = 'sqlite:'.$dbName;
-        } else {
-            // use in-memory
-            $dsn = 'sqlite::memory:';
-        }
+        // use in-memory
+        $dsn = 'sqlite::memory:';
 
         $this->db = new PDO($dsn);
 
@@ -51,6 +46,16 @@ class PDOSQLiteAdapter
 
         // default fetch mode is associative
         $this->db->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
+
+        /*
+         * These PRAGMAs may speed up insert operations a bit.
+         * Because database runs exclusively in memory for a process
+         * journal mode etc. is not relevant.
+         */
+        $this->db->query('PRAGMA synchronous = OFF;');
+        $this->db->query('PRAGMA journal_mode = OFF;');
+        $this->db->query('PRAGMA locking_mode = EXCLUSIVE;');
+        $this->db->query('PRAGMA page_size = 4096;');
 
         /*
          * define CONCAT function (otherwise SQLite will throw an exception)
@@ -340,25 +345,21 @@ class PDOSQLiteAdapter
         $sql .= ') VALUES (';
 
         // add placeholders for each value; collect values
-        $placeholders = [];
-        $params = [];
+        $values = [];
         foreach ($data as $v) {
-            $placeholders[] = '?';
-            $params[] = $v;
+            $values[] = '"'.$v.'"';
         }
-        $sql .= implode(', ', $placeholders);
+        $sql .= implode(', ', $values);
 
         $sql .= ')';
 
         /*
          * SQL looks like the following now:
          *
-         *      INSERT INTO foo (bar) (?)
+         *      INSERT INTO foo (foo) ("bar")
          */
 
-        // Setup and run prepared statement
-        $stmt = $this->db->prepare($sql);
-        $stmt->execute($params);
+        $this->exec($sql);
 
         return $this->db->lastInsertId();
     }

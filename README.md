@@ -16,8 +16,8 @@ Use Composer to install this library using:
 
 Use `InMemoryStoreSqlite::createInstance()` to get a ready-to-use store instance (see example below).
 Sending SPARQL queries can be done via `query` method.
-Your data is stored inside an in-memory SQLite database file per default.
-After the script ends all your data inside the store will be gone.
+Your data is stored inside an in-memory SQLite database file.
+**After the script ends all your data inside the store will be gone**.
 
 ### Example
 
@@ -51,7 +51,18 @@ For more information please read [SPARQL-support.md](doc/SPARQL-support.md).
 
 ## Performance
 
-At around 1000+ triples you may experience increased execution time.
+Store uses an in-memory SQLite file configured with:
+
+* `PRAGMA synchronous = OFF`,
+* `PRAGMA journal_mode = OFF`,
+* `PRAGMA locking_mode = EXCLUSIVE`
+* `PRAGMA page_size = 4096`
+
+Check [PDOSQLiteAdapter.php](src/PDOSQLiteAdapter.php#L45) for more information.
+
+When adding several hundred or more triples at once you may experience increased execution time.
+Local tests showed that per **1000** triples to add store needs around 1 sec.
+If better performance is required consider using a state-of-the-art quad store like Stardog or Virtuoso.
 
 ## License
 

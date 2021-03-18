@@ -33,6 +33,10 @@ use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\SelectQueryHandler;
 
 class InMemoryStoreSqlite
 {
+    private bool $bulkLoadModeIsActive = true;
+
+    private int $bulkLoadModeNextTermId = 1;
+
     private PDOSQLiteAdapter $db;
 
     private KeyValueBag $rowCache;
@@ -159,11 +163,22 @@ class InMemoryStoreSqlite
 
         if ('insert' == $queryType) {
             $queryHandler->setRowCache($this->rowCache);
+
+            if (true === $this->bulkLoadModeIsActive) {
+                $queryHandler->activateBulkLoadMode($this->bulkLoadModeNextTermId);
+            }
         } elseif ('delete' == $queryType) {
+            // reset row cache, because it will not be notified of data changes
             $this->rowCache->reset();
+            $this->bulkLoadModeIsActive = false;
         }
 
         $queryResult = $queryHandler->runQuery($infos);
+
+        if ('insert' == $queryType && true === $this->bulkLoadModeIsActive) {
+            // save latest term ID in case further insert into queries follow
+            $this->bulkLoadModeNextTermId = $queryHandler->getBulkLoadModeNextTermId();
+        }
 
         $result = null;
         if ('raw' == $format) {

@@ -630,16 +630,25 @@ class InsertIntoQueryTest extends TestCase
      */
     public function testAdditionOfManyTriples()
     {
-        $amount = 1500;
+        $amount = 3000;
+
+        $startTime = microtime(true);
 
         // add triples in separate query calls
         for ($i = 0; $i < $amount; ++$i) {
-            $this->subjectUnderTest->query('INSERT INTO <http://ex/> {<http://a> <http://b> "'.$i.'" . }');
+            $this->subjectUnderTest->query('INSERT INTO <http://ex/> {
+                <http://a> <http://b> <http://c'.$i.'> .
+                <http://c'.$i.'> <http://b1> <http://c'.$i++.'> .
+            }');
         }
 
         // check result
         $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> WHERE {?s ?p ?o.}');
 
         $this->assertEquals($amount, \count($res['result']['rows']));
+
+        $timeUsed = microtime(true) - $startTime;
+        $info = 'Test took longer than expected: '.$timeUsed.' sec.';
+        $this->assertTrue(1.6 > $timeUsed, $info);
     }
 }

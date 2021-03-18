@@ -18,6 +18,18 @@ use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 class InsertQueryHandler extends QueryHandler
 {
     /**
+     * If true, store assumes one or more insert into SPARQL queries and will
+     * skip certain DB operations to speed up insertion process.
+     */
+    private bool $bulkLoadModeIsActive = false;
+
+    /**
+     * Is used if $bulkLoadModeIsActive is true. Determines next term ID for
+     * entries in id2val, s2val and o2val.
+     */
+    private int $bulkLoadModeNextTermId = 1;
+
+    /**
      * When set it is used to store term information to speed up insert into operations.
      */
     private KeyValueBag $rowCache;
@@ -29,6 +41,17 @@ class InsertQueryHandler extends QueryHandler
      */
     private ?string $sessionId = null;
 
+    public function activateBulkLoadMode(int $bulkLoadModeNextTermId): void
+    {
+        $this->bulkLoadModeIsActive = true;
+        $this->bulkLoadModeNextTermId = $bulkLoadModeNextTermId;
+    }
+
+    public function getBulkLoadModeNextTermId(): int
+    {
+        return $this->bulkLoadModeNextTermId;
+    }
+
     public function setRowCache(KeyValueBag $rowCache): void
     {
         $this->rowCache = $rowCache;
@@ -36,11 +59,14 @@ class InsertQueryHandler extends QueryHandler
 
     public function runQuery(array $infos)
     {
-        $this->sessionId = bin2hex(random_bytes(8));
+        $this->sessionId = bin2hex(random_bytes(4));
+        $this->store->getDBObject()->getPDO()->beginTransaction();
 
         foreach ($infos['query']['construct_triples'] as $triple) {
             $this->addTripleToGraph($triple, $infos['query']['target_graph']);
         }
+
+        $this->store->getDBObject()->getPDO()->commit();
 
         $this->sessionId = null;
     }
@@ -255,22 +281,26 @@ class InsertQueryHandler extends QueryHandler
      */
     private function getMaxTermId(): int
     {
-        $sql = '';
-        foreach (['id2val', 's2val', 'o2val'] as $table) {
-            $sql .= !empty($sql) ? ' UNION ' : '';
-            $sql .= 'SELECT MAX(id) as id FROM '.$table;
-        }
-        $result = 0;
-
-        $rows = $this->store->getDBObject()->fetchList($sql);
-
-        if (\is_array($rows)) {
-            foreach ($rows as $row) {
-                $result = ($result < $row['id']) ? $row['id'] : $result;
+        if (true === $this->bulkLoadModeIsActive) {
+            return $this->bulkLoadModeNextTermId++;
+        } else {
+            $sql = '';
+            foreach (['id2val', 's2val', 'o2val'] as $table) {
+                $sql .= !empty($sql) ? ' UNION ' : '';
+                $sql .= 'SELECT MAX(id) as id FROM '.$table;
             }
-        }
+            $result = 0;
 
-        return $result + 1;
+            $rows = $this->store->getDBObject()->fetchList($sql);
+
+            if (\is_array($rows)) {
+                foreach ($rows as $row) {
+                    $result = ($result < $row['id']) ? $row['id'] : $result;
+                }
+            }
+
+            return $result + 1;
+        }
     }
 
     /**
