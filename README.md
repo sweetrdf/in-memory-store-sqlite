@@ -10,7 +10,7 @@ RDF in-memory quad store implementation using PDO and SQLite.
 
 Use Composer to install this library using:
 
-> composer install sweetrdf/in-memory-store-sqlite
+> composer require sweetrdf/in-memory-store-sqlite
 
 ## Usage
 
@@ -61,7 +61,7 @@ Store uses an in-memory SQLite file configured with:
 Check [PDOSQLiteAdapter.php](src/PDOSQLiteAdapter.php#L45) for more information.
 
 When adding several hundred or more triples at once you may experience increased execution time.
-Local tests showed that per **1000** triples to add store needs around 1 sec.
+Local tests showed that per second around 1500 triples can be added.
 If better performance is required consider using a state-of-the-art quad store like Stardog or Virtuoso.
 
 ## License

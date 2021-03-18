@@ -638,7 +638,6 @@ class InsertIntoQueryTest extends TestCase
         for ($i = 0; $i < $amount; ++$i) {
             $this->subjectUnderTest->query('INSERT INTO <http://ex/> {
                 <http://a> <http://b> <http://c'.$i.'> .
-                <http://c'.$i.'> <http://b1> <http://c'.$i++.'> .
             }');
         }
 
