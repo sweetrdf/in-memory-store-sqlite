@@ -51,7 +51,6 @@ class ErrorHandlingInQueriesTest extends TestCase
                     'rows' => [
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );

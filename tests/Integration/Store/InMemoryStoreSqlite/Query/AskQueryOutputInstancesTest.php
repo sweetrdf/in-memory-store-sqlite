@@ -15,13 +15,16 @@ namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\Rdf\Literal;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
 
 /**
  * Tests for query method - focus on ASK queries.
+ *
+ * Output format is: instances
  */
-class AskQueryTest extends TestCase
+class AskQueryOutputInstancesTest extends TestCase
 {
     protected function setUp(): void
     {
@@ -30,37 +33,19 @@ class AskQueryTest extends TestCase
         $this->subjectUnderTest = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool());
     }
 
-    public function testAskDefaultGraph()
+    public function testAsk()
     {
         // test data
         $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
             <http://s> <http://p1> "baz" .
         }');
 
-        $res = $this->subjectUnderTest->query('ASK {<http://s> <http://p1> ?o.}');
-        $this->assertEquals(
-            [
-                'query_type' => 'ask',
-                'result' => true,
-            ],
-            $res
-        );
-    }
+        $sparql = 'ASK FROM <http://example.com/> {<http://s> <http://p1> ?o.}';
+        $result = $this->subjectUnderTest->query($sparql, 'instances');
+        $this->assertEquals(new Literal(true), $result);
 
-    public function testAskGraphSpecified()
-    {
-        // test data
-        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
-            <http://s> <http://p1> "baz" .
-        }');
-
-        $res = $this->subjectUnderTest->query('ASK FROM <http://example.com/> {<http://s> <http://p1> ?o.}');
-        $this->assertEquals(
-            [
-                'query_type' => 'ask',
-                'result' => true,
-            ],
-            $res
-        );
+        $sparql = 'ASK FROM <http://example.com/> {<http://foo> <http://bar> ?o.}';
+        $result = $this->subjectUnderTest->query($sparql, 'instances');
+        $this->assertEquals(new Literal(false), $result);
     }
 }

@@ -51,7 +51,6 @@ class DescribeQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -78,7 +77,6 @@ class DescribeQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -105,7 +103,6 @@ class DescribeQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );

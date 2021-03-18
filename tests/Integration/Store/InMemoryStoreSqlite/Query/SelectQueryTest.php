@@ -21,6 +21,8 @@ use Tests\TestCase;
 
 /**
  * Tests for query method - focus on SELECT queries.
+ *
+ * Output format is: raw
  */
 class SelectQueryTest extends TestCase
 {
@@ -53,7 +55,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -81,7 +82,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -183,7 +183,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -211,7 +210,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -244,7 +242,6 @@ class SelectQueryTest extends TestCase
                     ],
                     'rows' => [],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -280,7 +277,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -317,7 +313,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -353,7 +348,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -382,7 +376,6 @@ class SelectQueryTest extends TestCase
                     ],
                     'rows' => [],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -418,7 +411,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -447,7 +439,6 @@ class SelectQueryTest extends TestCase
                     ],
                     'rows' => [],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -483,7 +474,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -512,7 +502,6 @@ class SelectQueryTest extends TestCase
                     ],
                     'rows' => [],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -548,7 +537,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -577,7 +565,6 @@ class SelectQueryTest extends TestCase
                     ],
                     'rows' => [],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -616,7 +603,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -655,7 +641,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -692,7 +677,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -729,7 +713,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -768,7 +751,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -799,7 +781,6 @@ class SelectQueryTest extends TestCase
                     ],
                     'rows' => [],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -833,7 +814,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -867,7 +847,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -926,7 +905,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -960,7 +938,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -999,7 +976,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -1047,7 +1023,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -1097,7 +1072,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -1143,7 +1117,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -1189,7 +1162,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -1243,7 +1215,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -1293,7 +1264,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -1345,7 +1315,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -1392,7 +1361,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -1446,7 +1414,6 @@ class SelectQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );

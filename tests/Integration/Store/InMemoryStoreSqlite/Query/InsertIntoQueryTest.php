@@ -351,7 +351,6 @@ class InsertIntoQueryTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );

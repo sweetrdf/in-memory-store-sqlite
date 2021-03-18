@@ -77,7 +77,6 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
                     ],
                     'rows' => [],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res
         );
@@ -144,7 +143,6 @@ class KnownNotWorkingSparqlQueriesTest extends TestCase
                         ],
                     ],
                 ],
-                'query_time' => $res['query_time'],
             ],
             $res,
             '',

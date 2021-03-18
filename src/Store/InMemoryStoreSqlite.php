@@ -14,9 +14,13 @@
 namespace sweetrdf\InMemoryStoreSqlite\Store;
 
 use Exception;
+use rdfInterface\Term;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
+use sweetrdf\InMemoryStoreSqlite\Rdf\BlankNode;
+use sweetrdf\InMemoryStoreSqlite\Rdf\Literal;
+use sweetrdf\InMemoryStoreSqlite\Rdf\NamedNode;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\AskQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\ConstructQueryHandler;
@@ -105,11 +109,9 @@ class InMemoryStoreSqlite
      * Executes a SPARQL query.
      *
      * @param string $q      SPARQL query
-     * @param string $format One of: array, instances
-     *
-     * @return array|int array if query returned a result, 0 otherwise
+     * @param string $format One of: raw, instances
      */
-    public function query(string $q, string $format = '')
+    public function query(string $q, string $format = 'raw'): array | bool | Term
     {
         $errors = [];
 
@@ -148,11 +150,41 @@ class InMemoryStoreSqlite
         }
 
         $queryHandlerLogger = $this->loggerPool->createNewLogger('QueryHandler');
-        $result = (new $cls($this, $queryHandlerLogger))->runQuery($infos);
+        $queryResult = (new $cls($this, $queryHandlerLogger))->runQuery($infos);
 
-        $r = ['query_type' => $qt, 'result' => $result];
-        $r['query_time'] = 0;
+        $result = null;
+        if ('raw' == $format) {
+            // use plain old ARC2 format which is an array of arrays
+            $result = ['query_type' => $qt, 'result' => $queryResult];
+        } elseif ('instances' == $format) {
+            // use rdfInstance instance(s) to represent result entries
+            if (\is_array($queryResult)) {
+                $variables = $queryResult['variables'];
 
-        return $r;
+                foreach ($queryResult['rows'] as $row) {
+                    $resultEntry = [];
+                    foreach ($variables as $variable) {
+                        if ('uri' == $row[$variable.' type']) {
+                            $resultEntry[$variable] = new NamedNode($row[$variable]);
+                        } elseif ('bnode' == $row[$variable.' type']) {
+                            $resultEntry[$variable] = new BlankNode($row[$variable]);
+                        } elseif ('literal' == $row[$variable.' type']) {
+                            $resultEntry[$variable] = new Literal(
+                                $row[$variable],
+                                $row[$variable.' lang'] ?? null,
+                                $row[$variable.' datatype'] ?? null
+                            );
+                        } else {
+                            throw new Exception('Invalid type given: '.$row[$variable.' type']);
+                        }
+                    }
+                    $result[] = $resultEntry;
+                }
+            } else {
+                $result = new Literal($queryResult);
+            }
+        }
+
+        return $result;
     }
 }
