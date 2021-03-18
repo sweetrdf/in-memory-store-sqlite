@@ -8,7 +8,7 @@ RDF in-memory quad store implementation using PDO and SQLite.
 
 ## Installation
 
-Use Composer to install this library using:
+To install this library use Composer via:
 
 > composer require sweetrdf/in-memory-store-sqlite
 

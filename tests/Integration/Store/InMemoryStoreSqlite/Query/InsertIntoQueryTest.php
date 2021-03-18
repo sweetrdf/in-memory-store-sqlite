@@ -632,8 +632,6 @@ class InsertIntoQueryTest extends TestCase
     {
         $amount = 3000;
 
-        $startTime = microtime(true);
-
         // add triples in separate query calls
         for ($i = 0; $i < $amount; ++$i) {
             $this->subjectUnderTest->query('INSERT INTO <http://ex/> {
@@ -645,9 +643,5 @@ class InsertIntoQueryTest extends TestCase
         $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> WHERE {?s ?p ?o.}');
 
         $this->assertEquals($amount, \count($res['result']['rows']));
-
-        $timeUsed = microtime(true) - $startTime;
-        $info = 'Test took longer than expected: '.$timeUsed.' sec.';
-        $this->assertTrue(2 > $timeUsed, $info);
     }
 }
