@@ -23,15 +23,16 @@ Your data is stored inside an in-memory SQLite database file.
 
 ```php
 
-use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
+use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
+use sweetrdf\InMemoryStoreSqlite\Rdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 
 // fast way
 $store = InMemoryStoreSqlite::createInstance();
 // or a way with more data control
-$store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new LoggerPool(), new KeyValueBag());
+$store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new DataFactory(), new LoggerPool(), new KeyValueBag());
 
 // send a SPARQL query which creates two triples
 $store->query('INSERT INTO <http://example.com/> {
