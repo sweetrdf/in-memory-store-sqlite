@@ -289,7 +289,7 @@ class PDOSQLiteAdapter
         return $rowCount;
     }
 
-    public function simpleQuery(string $sql): bool
+    public function simpleQuery(string $sql, array $params = []): bool
     {
         // save query
         $this->queries[] = [
@@ -297,7 +297,7 @@ class PDOSQLiteAdapter
             'by_function' => 'simpleQuery',
         ];
 
-        $stmt = $this->db->prepare($sql);
+        $stmt = $this->db->prepare($sql, $params);
         $stmt->execute();
         $this->lastRowCount = $stmt->rowCount();
         $stmt->closeCursor();
@@ -345,21 +345,24 @@ class PDOSQLiteAdapter
         $sql .= ') VALUES (';
 
         // add placeholders for each value; collect values
-        $values = [];
+        $placeholders = [];
+        $params = [];
         foreach ($data as $v) {
-            $values[] = '"'.$v.'"';
+            $placeholders[] = '?';
+            $params[] = $v;
         }
-        $sql .= implode(', ', $values);
+        $sql .= implode(', ', $placeholders);
 
         $sql .= ')';
 
         /*
          * SQL looks like the following now:
-         *
-         *      INSERT INTO foo (foo) ("bar")
+         *      INSERT INTO foo (bar) (?)
          */
 
-        $this->exec($sql);
+        // Setup and run prepared statement
+        $stmt = $this->db->prepare($sql);
+        $stmt->execute($params);
 
         return $this->db->lastInsertId();
     }

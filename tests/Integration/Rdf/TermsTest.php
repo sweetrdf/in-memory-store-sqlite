@@ -23,6 +23,11 @@ class TermsTest extends _TermsTest
         return new DataFactory();
     }
 
+    public function testLiteralFactory(): void
+    {
+        $this->markTestSkipped('Skipped for now. Wait until feedback/merge of https://github.com/sweetrdf/rdfInterface/pull/17.');
+    }
+
     public function testLiteralWith(): void
     {
         $this->markTestSkipped('Function to test not implemented yet.');

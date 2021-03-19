@@ -624,6 +624,15 @@ class InsertIntoQueryTest extends TestCase
         $this->assertEquals(3, \count($res['result']['rows']));
     }
 
+    public function testValueEscape()
+    {
+        $this->subjectUnderTest->query('INSERT INTO <http://graph1/> {<http://foo/1> <http://foo/2> \'"foobar";\' . }');
+        $this->subjectUnderTest->query('INSERT INTO <http://graph1/> {<http://foo/1> <http://foo/2> "\'foobar2\'" . }');
+
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://graph1/> WHERE {?s ?p ?o.}');
+        $this->assertEquals(2, \count($res['result']['rows']));
+    }
+
     /**
      * Adds bulk of triples to test behavior.
      * May take at least one second to finish.

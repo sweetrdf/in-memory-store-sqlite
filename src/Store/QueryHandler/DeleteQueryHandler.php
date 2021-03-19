@@ -170,7 +170,7 @@ class DeleteQueryHandler extends QueryHandler
                                 LEFT JOIN g2t G ON G.t = T.t
                             WHERE G.t IS NULL';
             $sql .= ')';
-            $this->store->getDBObject()->simpleQuery($sql);
+            $this->store->getDBObject()->exec($sql);
         }
         /* check for unconnected graph refs */
         if ((1 == rand(1, 10))) {
@@ -185,7 +185,7 @@ class DeleteQueryHandler extends QueryHandler
                     LEFT JOIN triple T ON (T.t = G.t)
                     WHERE T.t IS NULL
                 ';
-                $this->store->getDBObject()->simpleQuery($sql);
+                $this->store->getDBObject()->exec($sql);
             }
         }
     }

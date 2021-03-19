@@ -349,9 +349,9 @@ class LoadQueryHandler extends QueryHandler
         foreach (['triple', 'g2t', 'id2val', 's2val', 'o2val'] as $tbl) {
             $buffer_size = isset($this->sql_buffers[$tbl]) ? 1 : 0;
             if ($buffer_size && $force_write) {
-                $this->store->getDBObject()->simpleQuery($this->sql_buffers[$tbl]);
+                $this->store->getDBObject()->exec($this->sql_buffers[$tbl]);
                 /* table error */
-                $error = $this->store->getDBObject()->getErrorMessage();
+                $this->store->getDBObject()->getErrorMessage();
                 unset($this->sql_buffers[$tbl]);
 
                 /* reset term id buffers */

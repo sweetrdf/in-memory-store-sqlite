@@ -32,10 +32,17 @@ class Literal implements iLiteral
         ?string $datatype = null
     ) {
         $this->value = $value;
-        // TODO later check with feedback on
-        // https://github.com/sweetrdf/rdfInterface/issues/14
-        $this->lang = !empty($lang) ? $lang : null;
-        $this->datatype = $datatype ?? NamespaceHelper::NAMESPACE_XSD.'string';
+
+        /*
+         * @see https://www.w3.org/TR/rdf11-concepts/#section-Graph-Literal
+         */
+        if (!empty($lang)) {
+            $this->lang = $lang;
+            $this->datatype = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#langString';
+        } else {
+            $this->lang = null;
+            $this->datatype = $datatype ?? NamespaceHelper::NAMESPACE_XSD.'string';
+        }
     }
 
     public function __toString(): string

@@ -33,7 +33,7 @@ class SelectQueryHandler extends QueryHandler
         $r = $this->getFinalQueryResult($q_sql, $tmp_tbl);
 
         /* remove intermediate results */
-        $this->store->getDBObject()->simpleQuery('DROP TABLE IF EXISTS '.$tmp_tbl);
+        $this->store->getDBObject()->exec('DROP TABLE IF EXISTS '.$tmp_tbl);
 
         return $r;
     }
