@@ -32,7 +32,12 @@ use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 // fast way
 $store = InMemoryStoreSqlite::createInstance();
 // or a way with more data control
-$store = new InMemoryStoreSqlite(new PDOSQLiteAdapter(), new DataFactory(), new LoggerPool(), new KeyValueBag());
+$store = new InMemoryStoreSqlite(
+    new PDOSQLiteAdapter(),
+    new DataFactory(),
+    new LoggerPool(),
+    new KeyValueBag()
+);
 
 // send a SPARQL query which creates two triples
 $store->query('INSERT INTO <http://example.com/> {
