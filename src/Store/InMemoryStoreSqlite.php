@@ -14,14 +14,13 @@
 namespace sweetrdf\InMemoryStoreSqlite\Store;
 
 use Exception;
+use rdfInterface\DataFactory as iDataFactory;
 use rdfInterface\Term;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
-use sweetrdf\InMemoryStoreSqlite\Rdf\BlankNode;
-use sweetrdf\InMemoryStoreSqlite\Rdf\Literal;
-use sweetrdf\InMemoryStoreSqlite\Rdf\NamedNode;
+use sweetrdf\InMemoryStoreSqlite\Rdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\AskQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\ConstructQueryHandler;
@@ -39,13 +38,20 @@ class InMemoryStoreSqlite
 
     private PDOSQLiteAdapter $db;
 
+    private iDataFactory $dataFactory;
+
     private KeyValueBag $rowCache;
 
     private LoggerPool $loggerPool;
 
-    public function __construct(PDOSQLiteAdapter $db, LoggerPool $loggerPool, KeyValueBag $rowCache)
-    {
+    public function __construct(
+        PDOSQLiteAdapter $db,
+        iDataFactory $dataFactory,
+        LoggerPool $loggerPool,
+        KeyValueBag $rowCache
+    ) {
         $this->db = $db;
+        $this->dataFactory = $dataFactory;
         $this->loggerPool = $loggerPool;
         $this->rowCache = $rowCache;
     }
@@ -55,7 +61,7 @@ class InMemoryStoreSqlite
      */
     public static function createInstance()
     {
-        return new self(new PDOSQLiteAdapter(), new LoggerPool(), new KeyValueBag());
+        return new self(new PDOSQLiteAdapter(), new DataFactory(), new LoggerPool(), new KeyValueBag());
     }
 
     public function getLoggerPool(): LoggerPool
@@ -193,11 +199,11 @@ class InMemoryStoreSqlite
                     $resultEntry = [];
                     foreach ($variables as $variable) {
                         if ('uri' == $row[$variable.' type']) {
-                            $resultEntry[$variable] = new NamedNode($row[$variable]);
+                            $resultEntry[$variable] = $this->dataFactory->namedNode($row[$variable]);
                         } elseif ('bnode' == $row[$variable.' type']) {
-                            $resultEntry[$variable] = new BlankNode($row[$variable]);
+                            $resultEntry[$variable] = $this->dataFactory->blankNode($row[$variable]);
                         } elseif ('literal' == $row[$variable.' type']) {
-                            $resultEntry[$variable] = new Literal(
+                            $resultEntry[$variable] = $this->dataFactory->literal(
                                 $row[$variable],
                                 $row[$variable.' lang'] ?? null,
                                 $row[$variable.' datatype'] ?? null
@@ -209,7 +215,7 @@ class InMemoryStoreSqlite
                     $result[] = $resultEntry;
                 }
             } else {
-                $result = new Literal($queryResult);
+                $result = $this->dataFactory->literal($queryResult);
             }
         }
 
