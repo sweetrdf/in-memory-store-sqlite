@@ -67,6 +67,50 @@ function calcBase(string $path): string
 }
 
 /**
+ * Normalize value for ORDER BY operations.
+ */
+function getNormalizedValue(string $val): string
+{
+    /* try date (e.g. 21 August 2007) */
+    if (
+        preg_match('/^[0-9]{1,2}\s+[a-z]+\s+[0-9]{4}/i', $val)
+        && ($uts = strtotime($val))
+        && (-1 !== $uts)
+    ) {
+        return (string) date("Y-m-d\TH:i:s", $uts);
+    }
+
+    /* xsd date (e.g. 2009-05-28T18:03:38+09:00 2009-05-28T18:03:38GMT) */
+    if (true === (bool) strtotime($val)) {
+        return (string) date('Y-m-d\TH:i:s\Z', strtotime($val));
+    }
+
+    if (is_numeric($val)) {
+        $val = sprintf('%f', $val);
+        if (preg_match("/([\-\+])([0-9]*)\.([0-9]*)/", $val, $m)) {
+            return $m[1].sprintf('%018s', $m[2]).'.'.sprintf('%-015s', $m[3]);
+        }
+        if (preg_match("/([0-9]*)\.([0-9]*)/", $val, $m)) {
+            return '+'.sprintf('%018s', $m[1]).'.'.sprintf('%-015s', $m[2]);
+        }
+
+        return $val;
+    }
+
+    /* any other string: remove tags, linebreaks etc., but keep MB-chars */
+    // [\PL\s]+ ( = non-Letters) kills digits
+    $re = '/[\PL\s]+/isu';
+    $re = '/[\s\'\"\´\`]+/is';
+    $val = trim(preg_replace($re, '-', strip_tags($val)));
+    if (\strlen($val) > 35) {
+        $fnc = \function_exists('mb_substr') ? 'mb_substr' : 'substr';
+        $val = $fnc($val, 0, 17).'-'.$fnc($val, -17);
+    }
+
+    return $val;
+}
+
+/**
  * @return array<string,string>
  */
 function splitURI($v): array

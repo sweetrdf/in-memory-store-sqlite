@@ -14,6 +14,7 @@
 namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
 
 use function sweetrdf\InMemoryStoreSqlite\calcURI;
+use function sweetrdf\InMemoryStoreSqlite\getNormalizedValue;
 use sweetrdf\InMemoryStoreSqlite\Store\TurtleLoader;
 
 class LoadQueryHandler extends QueryHandler
@@ -72,7 +73,7 @@ class LoadQueryHandler extends QueryHandler
             'p' => $this->getStoredTermID($p, '0', 'id'),
             'o' => $this->getStoredTermID($o, $type_ids[$o_type], 'o'),
             'o_lang_dt' => $this->getStoredTermID($o_dt.$o_lang, $o_dt ? '0' : '2', 'id'),
-            'o_comp' => $this->getOComp($o),
+            'o_comp' => getNormalizedValue($o),
             's_type' => $type_ids[$s_type],
             'o_type' => $type_ids[$o_type],
         ];
@@ -234,47 +235,6 @@ class LoadQueryHandler extends QueryHandler
 
             return $this->triple_ids[$val];
         }
-    }
-
-    public function getOComp($val)
-    {
-        /* try date (e.g. 21 August 2007) */
-        if (
-            preg_match('/^[0-9]{1,2}\s+[a-z]+\s+[0-9]{4}/i', $val)
-            && ($uts = strtotime($val))
-            && (-1 !== $uts)
-        ) {
-            return date("Y-m-d\TH:i:s", $uts);
-        }
-
-        /* xsd date (e.g. 2009-05-28T18:03:38+09:00 2009-05-28T18:03:38GMT) */
-        if (true === (bool) strtotime($val)) {
-            return date('Y-m-d\TH:i:s\Z', strtotime($val));
-        }
-
-        if (is_numeric($val)) {
-            $val = sprintf('%f', $val);
-            if (preg_match("/([\-\+])([0-9]*)\.([0-9]*)/", $val, $m)) {
-                return $m[1].sprintf('%018s', $m[2]).'.'.sprintf('%-015s', $m[3]);
-            }
-            if (preg_match("/([0-9]*)\.([0-9]*)/", $val, $m)) {
-                return '+'.sprintf('%018s', $m[1]).'.'.sprintf('%-015s', $m[2]);
-            }
-
-            return $val;
-        }
-
-        /* any other string: remove tags, linebreaks etc., but keep MB-chars */
-        // [\PL\s]+ ( = non-Letters) kills digits
-        $re = '/[\PL\s]+/isu';
-        $re = '/[\s\'\"\´\`]+/is';
-        $val = trim(preg_replace($re, '-', strip_tags($val)));
-        if (\strlen($val) > 35) {
-            $fnc = \function_exists('mb_substr') ? 'mb_substr' : 'substr';
-            $val = $fnc($val, 0, 17).'-'.$fnc($val, -17);
-        }
-
-        return $val;
     }
 
     public function bufferTripleSQL($t)
