@@ -32,10 +32,7 @@ abstract class BaseParser
 
     protected Logger $logger;
 
-    /**
-     * @var array<string, string>
-     */
-    protected array $prefixes;
+    protected NamespaceHelper $namespaceHelper;
 
     /**
      * Query infos container.
@@ -53,8 +50,7 @@ abstract class BaseParser
 
         $this->logger = $logger;
 
-        // TODO make it a constructor param
-        $this->prefixes = $namespaceHelper->getNamespaces();
+        $this->namespaceHelper = $namespaceHelper;
 
         // generates random prefix for blank nodes
         $this->bnode_prefix = bin2hex(random_bytes(4)).'b';

@@ -148,7 +148,7 @@ class TurtleParser extends BaseParser
                 $r = 1;
             }
             while ((list($sub_r, $v) = $this->xPrefixDecl($v)) && $sub_r) {
-                $this->prefixes[$sub_r['prefix']] = $sub_r['uri'];
+                $this->namespaceHelper->setPrefix($sub_r['prefix'], $sub_r['uri']);
                 $r = 1;
             }
         }
@@ -670,7 +670,9 @@ class TurtleParser extends BaseParser
         if ((list($r, $v) = $this->xPNAME_LN($v)) && $r) {
             return [$r, $v];
         } elseif ((list($r, $sub_v) = $this->xPNAME_NS($v)) && $r) {
-            return isset($this->prefixes[$r]) ? [$this->prefixes[$r], $sub_v] : [0, $v];
+            return $this->namespaceHelper->hasPrefix($r)
+                ? [$this->namespaceHelper->getNamespace($r), $sub_v]
+                : [0, $v];
         }
 
         return [0, $v];
@@ -722,11 +724,11 @@ class TurtleParser extends BaseParser
     {
         if ((list($r, $sub_v) = $this->xPNAME_NS($v)) && $r) {
             if (!$this->x('\s', $sub_v) && (list($sub_r, $sub_v) = $this->xPN_LOCAL($sub_v)) && $sub_r) {
-                if (!isset($this->prefixes[$r])) {
+                if (!$this->namespaceHelper->hasPrefix($r)) {
                     return [0, $v];
                 }
 
-                return [$this->prefixes[$r].$sub_r, $sub_v];
+                return [$this->namespaceHelper->getNamespace($r).$sub_r, $sub_v];
             }
         }
 

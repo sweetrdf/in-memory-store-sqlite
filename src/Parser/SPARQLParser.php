@@ -44,7 +44,7 @@ class SPARQLParser extends TurtleParser
         } elseif (!$this->logger->hasEntries('error') && !$this->unparsed_code) {
             $this->logger->error('Query not properly closed');
         }
-        $this->r['prefixes'] = $this->prefixes;
+        $this->r['prefixes'] = $this->namespaceHelper->getNamespaces();
         $this->r['base'] = $this->base;
         /* remove trailing comments */
         while (preg_match('/^\s*(\#[^\xd\xa]*)(.*)$/si', $this->unparsed_code, $m)) {
@@ -82,7 +82,7 @@ class SPARQLParser extends TurtleParser
             $r = 1;
         }
         while ((list($sub_r, $v) = $this->xPrefixDecl($v)) && $sub_r) {
-            $this->prefixes[$sub_r['prefix']] = $sub_r['uri'];
+            $this->namespaceHelper->setPrefix($sub_r['prefix'], $sub_r['uri']);
             $r = 1;
         }
 

@@ -24,7 +24,12 @@ final class NamespaceHelper
     const NAMESPACE_XML = 'http://www.w3.org/XML/1998/namespace';
     const NAMESPACE_XSD = 'http://www.w3.org/2001/XMLSchema#';
 
-    private $namespaces = [
+    /**
+     * List of known and new namespaces + prefixes.
+     *
+     * @var array<string,string>
+     */
+    private array $namespaces = [
         'owl:' => 'http://www.w3.org/2002/07/owl#',
         'rdf:' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
         'rdfs:' => 'http://www.w3.org/2000/01/rdf-schema#',
@@ -32,14 +37,31 @@ final class NamespaceHelper
     ];
 
     /**
-     * @return array<string, string>
+     * @return array<string,string>
      */
     public function getNamespaces(): array
     {
         return $this->namespaces;
     }
 
-    public function getPrefix($namespace): ?string
+    /**
+     * Get namespace by prefix.
+     */
+    public function getNamespace(string $prefix): ?string
+    {
+        foreach ($this->namespaces as $p => $ns) {
+            if ($prefix == $p) {
+                return $ns;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Get prefix by namespace.
+     */
+    public function getPrefix(string $namespace): ?string
     {
         foreach ($this->namespaces as $prefix => $ns) {
             if ($namespace == $ns) {
@@ -48,5 +70,15 @@ final class NamespaceHelper
         }
 
         return null;
+    }
+
+    public function hasPrefix(string $prefix): bool
+    {
+        return true === isset($this->namespaces[$prefix]);
+    }
+
+    public function setPrefix(string $prefix, string $namespace): void
+    {
+        $this->namespaces[$prefix] = $namespace;
     }
 }
