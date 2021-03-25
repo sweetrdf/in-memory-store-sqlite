@@ -16,6 +16,7 @@ namespace Tests\Integration\Store;
 use simpleRdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
@@ -38,6 +39,7 @@ class InMemoryStoreSqliteTest extends TestCase
         $expected = new InMemoryStoreSqlite(
             new PDOSQLiteAdapter(),
             new DataFactory(),
+            new NamespaceHelper(),
             new LoggerPool(),
             new KeyValueBag()
         );

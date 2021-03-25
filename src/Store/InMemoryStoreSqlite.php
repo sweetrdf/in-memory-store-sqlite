@@ -19,6 +19,7 @@ use rdfInterface\Term as iTerm;
 use simpleRdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
@@ -40,6 +41,8 @@ class InMemoryStoreSqlite
 
     private iDataFactory $dataFactory;
 
+    private NamespaceHelper $namespaceHelper;
+
     private KeyValueBag $rowCache;
 
     private LoggerPool $loggerPool;
@@ -47,12 +50,14 @@ class InMemoryStoreSqlite
     public function __construct(
         PDOSQLiteAdapter $db,
         iDataFactory $dataFactory,
+        NamespaceHelper $namespaceHelper,
         LoggerPool $loggerPool,
         KeyValueBag $rowCache
     ) {
         $this->db = $db;
         $this->dataFactory = $dataFactory;
         $this->loggerPool = $loggerPool;
+        $this->namespaceHelper = $namespaceHelper;
         $this->rowCache = $rowCache;
     }
 
@@ -61,12 +66,23 @@ class InMemoryStoreSqlite
      */
     public static function createInstance()
     {
-        return new self(new PDOSQLiteAdapter(), new DataFactory(), new LoggerPool(), new KeyValueBag());
+        return new self(
+            new PDOSQLiteAdapter(),
+            new DataFactory(),
+            new NamespaceHelper(),
+            new LoggerPool(),
+            new KeyValueBag()
+        );
     }
 
     public function getLoggerPool(): LoggerPool
     {
         return $this->loggerPool;
+    }
+
+    public function getNamespaceHelper(): NamespaceHelper
+    {
+        return $this->namespaceHelper;
     }
 
     public function getDBObject(): ?PDOSQLiteAdapter
@@ -134,7 +150,7 @@ class InMemoryStoreSqlite
             $infos = ['query' => ['type' => 'dump']];
         } else {
             $parserLogger = $this->loggerPool->createNewLogger('SPARQL');
-            $p = new SPARQLPlusParser($parserLogger);
+            $p = new SPARQLPlusParser($parserLogger, $this->namespaceHelper);
             $p->parse($q);
             $infos = $p->getQueryInfos();
             $errors = $parserLogger->getEntries('error');

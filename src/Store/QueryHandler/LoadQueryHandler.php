@@ -37,7 +37,7 @@ class LoadQueryHandler extends QueryHandler
 
         // remove parameters
         $parserLogger = $this->store->getLoggerPool()->createNewLogger('Turtle');
-        $loader = new TurtleLoader($parserLogger);
+        $loader = new TurtleLoader($parserLogger, $this->store->getNamespaceHelper());
         $loader->setCaller($this);
 
         /* logging */

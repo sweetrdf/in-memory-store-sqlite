@@ -21,9 +21,9 @@ use sweetrdf\InMemoryStoreSqlite\StringReader;
 
 class TurtleParser extends BaseParser
 {
-    public function __construct(Logger $logger)
+    public function __construct(Logger $logger, NamespaceHelper $namespaceHelper)
     {
-        parent::__construct($logger);
+        parent::__construct($logger, $namespaceHelper);
 
         $this->state = 0;
         $this->unparsed_code = '';

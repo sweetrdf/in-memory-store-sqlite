@@ -19,9 +19,9 @@ use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 
 class SPARQLParser extends TurtleParser
 {
-    public function __construct(Logger $logger)
+    public function __construct(Logger $logger, NamespaceHelper $namespaceHelper)
     {
-        parent::__construct($logger);
+        parent::__construct($logger, $namespaceHelper);
 
         $this->bnode_prefix = 'arc'.substr(md5(uniqid(rand())), 0, 4).'b';
         $this->bnode_id = 0;

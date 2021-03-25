@@ -23,8 +23,9 @@ Your data is stored inside an in-memory SQLite database file.
 
 ```php
 
-use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
+use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\Rdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
@@ -35,6 +36,7 @@ $store = InMemoryStoreSqlite::createInstance();
 $store = new InMemoryStoreSqlite(
     new PDOSQLiteAdapter(),
     new DataFactory(),
+    new NamespaceHelper(),
     new LoggerPool(),
     new KeyValueBag()
 );

@@ -46,7 +46,7 @@ abstract class BaseParser
 
     protected int $t_count = 0;
 
-    public function __construct(Logger $logger)
+    public function __construct(Logger $logger, NamespaceHelper $namespaceHelper)
     {
         // TODO pass as constructor param
         $this->reader = new StringReader();
@@ -54,7 +54,7 @@ abstract class BaseParser
         $this->logger = $logger;
 
         // TODO make it a constructor param
-        $this->prefixes = (new NamespaceHelper())->getNamespaces();
+        $this->prefixes = $namespaceHelper->getNamespaces();
 
         // generates random prefix for blank nodes
         $this->bnode_prefix = bin2hex(random_bytes(4)).'b';
