@@ -28,6 +28,7 @@ use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\DeleteQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\DescribeQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\InsertQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\SelectQueryHandler;
+use sweetrdf\InMemoryStoreSqlite\StringReader;
 
 class InMemoryStoreSqlite
 {
@@ -39,24 +40,28 @@ class InMemoryStoreSqlite
 
     private iDataFactory $dataFactory;
 
+    private LoggerPool $loggerPool;
+
     private NamespaceHelper $namespaceHelper;
 
     private KeyValueBag $rowCache;
 
-    private LoggerPool $loggerPool;
+    private StringReader $stringReader;
 
     public function __construct(
         PDOSQLiteAdapter $db,
         iDataFactory $dataFactory,
         NamespaceHelper $namespaceHelper,
         LoggerPool $loggerPool,
-        KeyValueBag $rowCache
+        KeyValueBag $rowCache,
+        StringReader $stringReader
     ) {
         $this->db = $db;
         $this->dataFactory = $dataFactory;
         $this->loggerPool = $loggerPool;
         $this->namespaceHelper = $namespaceHelper;
         $this->rowCache = $rowCache;
+        $this->stringReader = $stringReader;
     }
 
     /**
@@ -69,7 +74,8 @@ class InMemoryStoreSqlite
             new DataFactory(),
             new NamespaceHelper(),
             new LoggerPool(),
-            new KeyValueBag()
+            new KeyValueBag(),
+            new StringReader()
         );
     }
 
@@ -91,18 +97,6 @@ class InMemoryStoreSqlite
     public function getDBVersion()
     {
         return $this->db->getServerVersion();
-    }
-
-    public function delete($doc, $g)
-    {
-        if (!$doc) {
-            $infos = ['query' => ['target_graphs' => [$g]]];
-            $h = new DeleteQueryHandler($this, $this->loggerPool->createNewLogger('Delete'));
-            $this->rowCache->reset();
-            $r = $h->runQuery($infos);
-
-            return $r;
-        }
     }
 
     /**
@@ -153,7 +147,7 @@ class InMemoryStoreSqlite
             $infos = ['query' => ['type' => 'dump']];
         } else {
             $parserLogger = $this->loggerPool->createNewLogger('SPARQL');
-            $p = new SPARQLPlusParser($parserLogger, $this->namespaceHelper);
+            $p = new SPARQLPlusParser($parserLogger, $this->namespaceHelper, $this->stringReader);
             $p->parse($q);
             $infos = $p->getQueryInfos();
             $errors = $parserLogger->getEntries('error');

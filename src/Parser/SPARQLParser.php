@@ -16,12 +16,13 @@ namespace sweetrdf\InMemoryStoreSqlite\Parser;
 use function sweetrdf\InMemoryStoreSqlite\calcBase;
 use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
+use sweetrdf\InMemoryStoreSqlite\StringReader;
 
 class SPARQLParser extends TurtleParser
 {
-    public function __construct(Logger $logger, NamespaceHelper $namespaceHelper)
+    public function __construct(Logger $logger, NamespaceHelper $namespaceHelper, StringReader $stringReader)
     {
-        parent::__construct($logger, $namespaceHelper);
+        parent::__construct($logger, $namespaceHelper, $stringReader);
 
         $this->bnode_prefix = 'arc'.substr(md5(uniqid(rand())), 0, 4).'b';
         $this->bnode_id = 0;

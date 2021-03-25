@@ -16,7 +16,7 @@ namespace sweetrdf\InMemoryStoreSqlite;
 /**
  * Provides a way to read a given string in chunks.
  */
-final class StringReader
+class StringReader
 {
     private ?string $base;
 

@@ -39,14 +39,15 @@ abstract class BaseParser
      */
     protected array $r = [];
 
+    protected StringReader $stringReader;
+
     protected array $triples = [];
 
     protected int $t_count = 0;
 
-    public function __construct(Logger $logger, NamespaceHelper $namespaceHelper)
+    public function __construct(Logger $logger, NamespaceHelper $namespaceHelper, StringReader $stringReader)
     {
-        // TODO pass as constructor param
-        $this->reader = new StringReader();
+        $this->reader = $stringReader;
 
         $this->logger = $logger;
 

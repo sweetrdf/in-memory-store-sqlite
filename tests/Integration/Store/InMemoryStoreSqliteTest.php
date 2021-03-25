@@ -19,6 +19,7 @@ use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
+use sweetrdf\InMemoryStoreSqlite\StringReader;
 use Tests\TestCase;
 
 class InMemoryStoreSqliteTest extends TestCase
@@ -41,31 +42,10 @@ class InMemoryStoreSqliteTest extends TestCase
             new DataFactory(),
             new NamespaceHelper(),
             new LoggerPool(),
-            new KeyValueBag()
+            new KeyValueBag(),
+            new StringReader()
         );
         $this->assertEquals($expected, InMemoryStoreSqlite::createInstance());
-    }
-
-    /*
-     * Tests for delete
-     */
-
-    public function testDelete()
-    {
-        // test data
-        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
-            <http://s> <http://p1> "baz" .
-            <http://s> <http://xmlns.com/foaf/0.1/name> "label1" .
-        }');
-
-        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
-        $this->assertEquals(2, \count($res['result']['rows']));
-
-        // remove graph
-        $this->subjectUnderTest->delete(false, 'http://example.com/');
-
-        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
-        $this->assertEquals(0, \count($res['result']['rows']));
     }
 
     /*
