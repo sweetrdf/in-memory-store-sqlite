@@ -22,13 +22,11 @@ use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
-use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\AskQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\ConstructQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\DeleteQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\DescribeQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\InsertQueryHandler;
-use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\LoadQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\SelectQueryHandler;
 
 class InMemoryStoreSqlite
@@ -95,35 +93,6 @@ class InMemoryStoreSqlite
         return $this->db->getServerVersion();
     }
 
-    private function toTurtle($v): string
-    {
-        $ser = new TurtleSerializer();
-
-        return (isset($v[0]) && isset($v[0]['s']))
-            ? $ser->getSerializedTriples($v)
-            : $ser->getSerializedIndex($v);
-    }
-
-    /**
-     * @todo remove?
-     */
-    public function insert($data, $g, $keep_bnode_ids = 0)
-    {
-        if (\is_array($data)) {
-            $data = $this->toTurtle($data);
-        }
-
-        if (empty($data)) {
-            // TODO required to throw something here?
-            return;
-        }
-
-        $infos = ['query' => ['url' => $g, 'target_graph' => $g]];
-        $h = new LoadQueryHandler($this, $this->loggerPool->createNewLogger('Load'));
-
-        return $h->runQuery($infos, $data, $keep_bnode_ids);
-    }
-
     public function delete($doc, $g)
     {
         if (!$doc) {
@@ -134,6 +103,40 @@ class InMemoryStoreSqlite
 
             return $r;
         }
+    }
+
+    /**
+     * Adds an array of raw triple-arrays to the store.
+     *
+     * Each triple in $triples has to look similar to:
+     *
+     *      [
+     *          's' => 'http...',
+     *          'p' => '...',
+     *          'o' => '...',
+     *          's_type' => 'uri',
+     *          'o_type' => '...',
+     *          'o_lang' => '...',
+     *          'o_datatype' => '...',
+     *      ]
+     */
+    public function addRawTriples(array $triples, string $graphIri): void
+    {
+        $queryHandlerLogger = $this->loggerPool->createNewLogger('QueryHandler');
+        $queryHandler = new InsertQueryHandler($this, $queryHandlerLogger);
+
+        $queryHandler->setRowCache($this->rowCache);
+
+        if (true === $this->bulkLoadModeIsActive) {
+            $queryHandler->activateBulkLoadMode($this->bulkLoadModeNextTermId);
+        }
+
+        $queryHandler->runQuery([
+            'query' => [
+                'construct_triples' => $triples,
+                'target_graph' => $graphIri,
+            ],
+        ]);
     }
 
     /**
@@ -172,7 +175,6 @@ class InMemoryStoreSqlite
             'describe' => DescribeQueryHandler::class,
             'delete' => DeleteQueryHandler::class,
             'insert' => InsertQueryHandler::class,
-            'load' => LoadQueryHandler::class,
             'select' => SelectQueryHandler::class,
         };
 

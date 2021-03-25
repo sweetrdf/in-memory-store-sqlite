@@ -4,7 +4,7 @@ namespace sweetrdf\InMemoryStoreSqlite\Log;
 
 use Exception;
 
-final class LoggerPool
+class LoggerPool
 {
     /**
      * @var array<int,\sweetrdf\InMemoryStoreSqlite\Log\Logger>

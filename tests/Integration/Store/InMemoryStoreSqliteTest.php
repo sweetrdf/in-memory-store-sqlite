@@ -83,28 +83,6 @@ class InMemoryStoreSqliteTest extends TestCase
     }
 
     /**
-     * https://github.com/SaftIng/Saft/tree/master/src/Saft/Addition/ARC2
-     *
-     * @group linux
-     */
-    public function testInsertSaftRegressionTest1()
-    {
-        $res = $this->subjectUnderTest->query('SELECT * FROM <http://example.com/> WHERE { ?s ?p ?o. } ');
-        $this->assertEquals(0, \count($res['result']['rows']));
-
-        $this->subjectUnderTest->insert(
-            file_get_contents($this->rootPath.'/data/nt/saft-arc2-addition-regression1.nt'),
-            'http://example.com/'
-        );
-
-        $res1 = $this->subjectUnderTest->query('SELECT * FROM <http://example.com/> WHERE { ?s ?p ?o. } ');
-        $this->assertEquals(442, \count($res1['result']['rows']));
-
-        $res2 = $this->subjectUnderTest->query('SELECT * WHERE { ?s ?p ?o. } ');
-        $this->assertEquals(442, \count($res2['result']['rows']));
-    }
-
-    /**
      * This test checks gathering of freshly created resources.
      */
     public function testInsertSaftRegressionTest2()

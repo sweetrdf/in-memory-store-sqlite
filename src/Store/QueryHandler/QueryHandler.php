@@ -33,6 +33,11 @@ abstract class QueryHandler
         $this->store = $store;
     }
 
+    public function getStore(): InMemoryStoreSqlite
+    {
+        return $this->store;
+    }
+
     public function getTermID($val, $term = '')
     {
         /* mem cache */

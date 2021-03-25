@@ -100,10 +100,8 @@ abstract class ComplianceTest extends TestCase
      * Helper function to load data for a given test.
      *
      * @param string $testUri
-     *
-     * @return array parsed file content
      */
-    protected function getTestData($testUri)
+    protected function getTestData($testUri): array
     {
         /*
             example:
@@ -128,9 +126,9 @@ abstract class ComplianceTest extends TestCase
             $uri = $file['result']['rows'][0]['file'];
             $parser->parse($uri, $data);
 
-            return $parser->getSimpleIndex();
+            return $parser->getTriples();
         } else {
-            return null;
+            return [];
         }
     }
 
@@ -311,7 +309,7 @@ abstract class ComplianceTest extends TestCase
         $data = file_get_contents($folderPath.'/manifest.ttl');
         $uri = $folderPath.'/manifest.ttl';
         $parser->parse($uri, $data);
-        $this->store->insert($parser->getSimpleIndex(), $this->manifestGraphUri);
+        $this->store->addRawTriples($parser->getTriples(), $this->manifestGraphUri);
     }
 
     /**
@@ -354,10 +352,10 @@ abstract class ComplianceTest extends TestCase
             // test has to be SUCCESSFUL
         } else {
             // get test data
-            $data = $this->getTestData($this->testPref.$testName);
+            $triples = $this->getTestData($this->testPref.$testName);
 
             // load test data into graph
-            $this->store->insert($data, $this->dataGraphUri);
+            $this->store->addRawTriples($triples, $this->dataGraphUri);
 
             // get query to test
             $testQuery = $this->getTestQuery($this->testPref.$testName);

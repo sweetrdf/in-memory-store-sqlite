@@ -15,6 +15,8 @@ namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
 
 use function sweetrdf\InMemoryStoreSqlite\getNormalizedValue;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
+use sweetrdf\InMemoryStoreSqlite\Log\Logger;
+use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 
 class InsertQueryHandler extends QueryHandler
 {
@@ -41,6 +43,14 @@ class InsertQueryHandler extends QueryHandler
      * Otherwise blank nodes inserted in different "insert-sessions" will have the same reference.
      */
     private ?string $sessionId = null;
+
+    public function __construct(InMemoryStoreSqlite $store, Logger $logger)
+    {
+        parent::__construct($store, $logger);
+
+        // default value; will be overridden when running inside InMemoryStoreSqlite
+        $this->rowCache = new KeyValueBag();
+    }
 
     public function activateBulkLoadMode(int $bulkLoadModeNextTermId): void
     {
@@ -72,9 +82,6 @@ class InsertQueryHandler extends QueryHandler
         $this->sessionId = null;
     }
 
-    /**
-     * @todo cache once loaded triples/quads
-     */
     private function addTripleToGraph(array $triple, string $graph): void
     {
         /*
