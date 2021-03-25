@@ -13,7 +13,7 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
-use sweetrdf\InMemoryStoreSqlite\Rdf\Literal;
+use simpleRdf\Literal;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
 

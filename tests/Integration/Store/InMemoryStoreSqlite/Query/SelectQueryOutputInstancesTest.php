@@ -13,10 +13,10 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
+use simpleRdf\BlankNode;
+use simpleRdf\Literal;
+use simpleRdf\NamedNode;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
-use sweetrdf\InMemoryStoreSqlite\Rdf\BlankNode;
-use sweetrdf\InMemoryStoreSqlite\Rdf\Literal;
-use sweetrdf\InMemoryStoreSqlite\Rdf\NamedNode;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
 

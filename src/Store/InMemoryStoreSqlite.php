@@ -15,12 +15,12 @@ namespace sweetrdf\InMemoryStoreSqlite\Store;
 
 use Exception;
 use rdfInterface\DataFactory as iDataFactory;
-use rdfInterface\Term;
+use rdfInterface\Term as iTerm;
+use simpleRdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
 use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
-use sweetrdf\InMemoryStoreSqlite\Rdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\Serializer\TurtleSerializer;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\AskQueryHandler;
 use sweetrdf\InMemoryStoreSqlite\Store\QueryHandler\ConstructQueryHandler;
@@ -126,7 +126,7 @@ class InMemoryStoreSqlite
      * @param string $q      SPARQL query
      * @param string $format One of: raw, instances
      */
-    public function query(string $q, string $format = 'raw'): array | bool | Term
+    public function query(string $q, string $format = 'raw'): array | bool | iTerm
     {
         $errors = [];
 
