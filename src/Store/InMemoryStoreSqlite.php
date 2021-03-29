@@ -14,7 +14,10 @@
 namespace sweetrdf\InMemoryStoreSqlite\Store;
 
 use Exception;
+use rdfInterface\BlankNode;
 use rdfInterface\DataFactory as iDataFactory;
+use rdfInterface\NamedNode;
+use rdfInterface\QuadIterator;
 use rdfInterface\Term as iTerm;
 use simpleRdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
@@ -99,10 +102,54 @@ class InMemoryStoreSqlite
         return $this->db->getServerVersion();
     }
 
+    public function addQuads(iterable | QuadIterator $quads): void
+    {
+        $triples = [];
+
+        foreach ($quads as $quad) {
+            $graphIri = NamespaceHelper::BASE_NAMESPACE;
+            if (null !== $quad->getGraph()) {
+                $graphIri = $quad->getGraph()->getValue();
+            }
+
+            if (!isset($triples[$graphIri])) {
+                $triples[$graphIri] = [];
+            }
+
+            $triple = [
+                's' => $quad->getSubject()->getValue(),
+                'p' => $quad->getPredicate()->getValue(),
+                'o' => $quad->getObject()->getValue(),
+                'o_lang' => '',
+                'o_datatype' => '',
+            ];
+
+            // s
+            $triple['s_type'] = $quad->getSubject() instanceof NamedNode ? 'uri' : 'bnode';
+
+            // o
+            if ($quad->getObject() instanceof NamedNode) {
+                $triple['o_type'] = 'uri';
+            } elseif ($quad->getObject() instanceof BlankNode) {
+                $triple['o_type'] = 'bnode';
+            } else {
+                $triple['o_type'] = 'literal';
+                $triple['o_lang'] = $quad->getObject()->getLang();
+                $triple['o_dataype'] = $quad->getObject()->getDatatype();
+            }
+
+            $triples[$graphIri][] = $triple;
+        }
+
+        foreach ($triples as $graphIri => $entries) {
+            $this->addRawTriples($entries, $graphIri);
+        }
+    }
+
     /**
      * Adds an array of raw triple-arrays to the store.
      *
-     * Each triple in $triples has to look similar to:
+     * Each triple-array in $triples has to look similar to:
      *
      *      [
      *          's' => 'http...',
@@ -139,7 +186,7 @@ class InMemoryStoreSqlite
      * @param string $q      SPARQL query
      * @param string $format One of: raw, instances
      */
-    public function query(string $q, string $format = 'raw'): array | bool | iTerm
+    public function query(string $q, string $format = 'raw'): array | iTerm
     {
         $errors = [];
 

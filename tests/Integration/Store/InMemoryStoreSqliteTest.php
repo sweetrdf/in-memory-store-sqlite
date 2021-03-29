@@ -101,4 +101,62 @@ class InMemoryStoreSqliteTest extends TestCase
         $res = $this->subjectUnderTest->query('SELECT * FROM <http://second-graph/> WHERE {?s ?p ?o.}');
         $this->assertEquals(1, \count($res['result']['rows']));
     }
+
+    public function testAddQuads()
+    {
+        // check data at the beginning
+        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
+        $this->assertCount(0, $res['result']['rows']);
+
+        /*
+         * add quads
+         */
+        $df = new DataFactory();
+        $graph = 'http://graph';
+
+        // q1
+        $q1 = $df->quad(
+            $df->namedNode('http://a'),
+            $df->namedNode('http://b'),
+            $df->namedNode('http://c'),
+            $df->namedNode($graph)
+        );
+
+        // q2
+        $q2 = $df->quad(
+            $df->blankNode('123'),
+            $df->namedNode('http://b'),
+            $df->literal('foobar', 'de'),
+            $df->namedNode($graph)
+        );
+
+        $quads = [$q1, $q2];
+
+        $this->subjectUnderTest->addQuads($quads);
+
+        // check after quads were added
+        $res = $this->subjectUnderTest->query('SELECT * FROM <'.$graph.'> WHERE {?s ?p ?o.}');
+        $this->assertEquals(
+            [
+                [
+                    's' => 'http://a',
+                    's type' => 'uri',
+                    'p' => 'http://b',
+                    'p type' => 'uri',
+                    'o' => 'http://c',
+                    'o type' => 'uri',
+                ],
+                [
+                    's' => $res['result']['rows'][1]['s'], // dynamic value
+                    's type' => 'bnode',
+                    'p' => 'http://b',
+                    'p type' => 'uri',
+                    'o' => 'foobar',
+                    'o type' => 'literal',
+                    'o lang' => 'de',
+                ],
+            ],
+            $res['result']['rows']
+        );
+    }
 }
