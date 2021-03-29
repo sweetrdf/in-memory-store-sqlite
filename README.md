@@ -21,7 +21,11 @@ Your data is stored inside an in-memory SQLite database file.
 
 ### Example
 
+Create a store instance, load a few triples into it and run a query.
+
 ```php
+use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
+
 // get ready to use store instance
 $store = InMemoryStoreSqlite::createInstance();
 
@@ -33,7 +37,9 @@ $store->query('INSERT INTO <http://example.com/> {
 
 // send another SPARQL query asking for all triples
 $res = $store->query('SELECT * WHERE {?s ?p ?o.}');
-echo \count($res['result']['rows']); // outputs: 2
+$triples = $res['result']['rows'];
+echo \count($triples); // outputs: 2
+// $triples contains result set, which consists of arrays and scalar values
 ```
 
 ## SPARQL support
@@ -54,7 +60,6 @@ Check [PDOSQLiteAdapter.php](src/PDOSQLiteAdapter.php#L45) for more information.
 
 When adding several hundred or more triples at once you may experience increased execution time.
 Local tests showed that per second around 1500 triples can be added.
-If better performance is required consider using a state-of-the-art quad store like Stardog or Virtuoso.
 
 ## License
 
