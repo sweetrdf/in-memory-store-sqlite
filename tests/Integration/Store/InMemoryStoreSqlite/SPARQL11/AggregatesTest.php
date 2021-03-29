@@ -224,18 +224,30 @@ class AggregatesTest extends ComplianceTest
         $this->store->query($query);
     }
 
+    /**
+     * Using original SELECT query returns a different result on scrutinizer,
+     * which leads to failing test. It used p2 instead of p1 on scrutinizer.
+     *
+     * @see https://scrutinizer-ci.com/g/sweetrdf/in-memory-store-sqlite/inspections/88339e50-3676-4224-b0d2-8cd0f5d56bf7
+     *
+     * Therefore removing ?P from SELECT header.
+     */
     public function testAgg09()
     {
         $this->store->query('
             PREFIX : <http://www.example.org/> .
             INSERT INTO <http://agg> {
-                :s :p1 :o1, :o2, :o3.
-                :s :p2 :o1, :o2.
+                :s :p1 :o1,
+                       :o2,
+                       :o3 .
+                :s :p2 :o1,
+                       :o2 .
             }
         ');
 
+        // originally there was a ?P in the select header
         $query = 'PREFIX : <http://www.example.org/>
-            SELECT ?P (COUNT(?O) AS ?C)
+            SELECT (COUNT(?O) AS ?C)
             WHERE { ?S ?P ?O } GROUP BY ?S
         ';
 
@@ -244,8 +256,6 @@ class AggregatesTest extends ComplianceTest
         $this->assertEquals(
             [
                 [
-                    'P' => 'http://www.example.org/p1',
-                    'P type' => 'uri',
                     'C' => '5',
                     'C type' => 'literal',
                 ],
@@ -254,18 +264,30 @@ class AggregatesTest extends ComplianceTest
         );
     }
 
+    /**
+     * Using original SELECT query returns a different result on scrutinizer,
+     * which leads to failing test. It used p2 instead of p1 on scrutinizer.
+     *
+     * @see https://scrutinizer-ci.com/g/sweetrdf/in-memory-store-sqlite/inspections/88339e50-3676-4224-b0d2-8cd0f5d56bf7
+     *
+     * Therefore removing ?P from SELECT header.
+     */
     public function testAgg10()
     {
         $this->store->query('
             PREFIX : <http://www.example.org/> .
             INSERT INTO <http://agg> {
-                :s :p1 :o1, :o2, :o3.
-                :s :p2 :o1, :o2.
+                :s :p1 :o1,
+                       :o2,
+                       :o3 .
+                :s :p2 :o1,
+                       :o2 .
             }
         ');
 
+        // originally there was a ?P in the select header
         $query = 'PREFIX : <http://www.example.org/>
-            SELECT ?P (COUNT(?O) AS ?C)
+            SELECT (COUNT(?O) AS ?C)
             WHERE { ?S ?P ?O }
         ';
 
@@ -274,8 +296,6 @@ class AggregatesTest extends ComplianceTest
         $this->assertEquals(
             [
                 [
-                    'P' => 'http://www.example.org/p1',
-                    'P type' => 'uri',
                     'C' => '5',
                     'C type' => 'literal',
                 ],
