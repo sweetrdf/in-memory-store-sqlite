@@ -118,14 +118,13 @@ class InMemoryStoreSqlite
 
             $triple = [
                 's' => $quad->getSubject()->getValue(),
+                's_type' => $quad->getSubject() instanceof NamedNode ? 'uri' : 'bnode',
                 'p' => $quad->getPredicate()->getValue(),
                 'o' => $quad->getObject()->getValue(),
+                'o_type' => '',
                 'o_lang' => '',
                 'o_datatype' => '',
             ];
-
-            // s
-            $triple['s_type'] = $quad->getSubject() instanceof NamedNode ? 'uri' : 'bnode';
 
             // o
             if ($quad->getObject() instanceof NamedNode) {
@@ -135,7 +134,7 @@ class InMemoryStoreSqlite
             } else {
                 $triple['o_type'] = 'literal';
                 $triple['o_lang'] = $quad->getObject()->getLang();
-                $triple['o_dataype'] = $quad->getObject()->getDatatype();
+                $triple['o_datatype'] = $quad->getObject()->getDatatype();
             }
 
             $triples[$graphIri][] = $triple;

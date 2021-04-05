@@ -146,9 +146,20 @@ class InsertQueryHandler extends QueryHandler
 
         /*
          * o_lang_dt
+         *
+         * Note: only one of these two should be set, but it may happen that it looks like:
+         *
+         *      o_lang => de
+         *      o_datatype => http://www.w3.org/1999/02/22-rdf-syntax-ns#langString
+         *
+         * If o_lang is set, we always ignore o_datatype.
          */
-        // notice: only one of these two is set
-        $oLangDt = $triple['o_datatype'].$triple['o_lang'];
+        if (isset($triple['o_lang']) && !empty($triple['o_lang'])) {
+            $oLangDt = $triple['o_lang'];
+        } else {
+            $oLangDt = $triple['o_datatype'];
+        }
+
         $oLangDtId = $this->getIdOfExistingTerm($oLangDt, 'id');
         if (null == $oLangDtId) {
             $oLangDtId = $this->getMaxTermId();
@@ -230,7 +241,6 @@ class InsertQueryHandler extends QueryHandler
         if ('bnode' == $triple['o_type']) {
             // transforms _:foo to _:b671320391_foo
             $o = $triple['o'];
-            // TODO make bnode ID only unique for this session, not in general
             $triple['o'] = '_:b'.$this->getValueHash($this->sessionId.$graph.$o).'_';
             $triple['o'] .= substr($o, 2);
         }
