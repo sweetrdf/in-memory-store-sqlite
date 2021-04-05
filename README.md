@@ -68,4 +68,5 @@ This work is licensed under the terms of the GPL 3 or later.
 ## Acknowledgement
 
 This work is based on the code of ARC2 from https://github.com/semsol/arc2 (by Benjamin Nowak and contributors).
+To see what was extracted check pull request #1.
 ARC2 is dual licensed under the terms of GPL 2 (or later) as well as W3C Software License.
