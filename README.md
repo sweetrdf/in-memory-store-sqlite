@@ -94,8 +94,8 @@ For more information please read [SPARQL-support.md](doc/SPARQL-support.md).
 
 Store uses an in-memory SQLite file configured with:
 
-* `PRAGMA synchronous = OFF`,
-* `PRAGMA journal_mode = OFF`,
+* `PRAGMA synchronous = OFF`
+* `PRAGMA journal_mode = OFF`
 * `PRAGMA locking_mode = EXCLUSIVE`
 * `PRAGMA page_size = 4096`
 
