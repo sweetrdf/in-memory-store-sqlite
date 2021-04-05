@@ -19,7 +19,9 @@ Sending SPARQL queries can be done via `query` method.
 Your data is stored inside an in-memory SQLite database file.
 **After the script ends all your data inside the store will be gone**.
 
-### Example
+## Examples
+
+### Example 1 (First steps)
 
 Create a store instance, load a few triples into it and run a query.
 
@@ -40,6 +42,47 @@ $res = $store->query('SELECT * WHERE {?s ?p ?o.}');
 $triples = $res['result']['rows'];
 echo \count($triples); // outputs: 2
 // $triples contains result set, which consists of arrays and scalar values
+```
+
+### Example 2 (Consume SPARQL client result)
+
+Use `sweetrdf/sparql-client` and a PSR-7-compatible library (like `guzzlehttp/guzzle`) to query a SPARQL endpoint.
+For now you have to "transform" SPARQL result set to a quad-list manually.
+Afterwards add quads to store and query it.
+Check test `testSparqlClientCompatibility` in [InMemoryStoreSqliteTest.php](tests/Integration/Store/InMemoryStoreSqliteTest.php) for a working example.
+
+```php
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
+use simpleRdf\Connection;
+use simpleRdf\DataFactory;
+
+/*
+ * get data from a SPARQL endpoint
+ */
+$httpClient = new Client();
+$dataFactory = new DataFactory();
+$connection = new Connection($httpClient, $dataFactory);
+$query = 'SELECT * WHERE {?s ?p ?o} limit 5';
+// set SPARQL endpoint URL
+$url = 'https://arche-sparql.acdh-dev.oeaw.ac.at/sparql?query=';
+$query = new Request('GET', $url.rawurlencode($query));
+$statement = $connection->query($query);
+
+/*
+ * add result to the store
+ */
+$quads = [];
+foreach ($statement as $entry) {
+    // $entry is an object; s, p and o are variables from your query
+    $quads[] = $dataFactory->quad($entry->s, $entry->p, $entry->o);
+}
+$store = InMemoryStoreSqlite::createInstance();
+$store->addQuads($quads);
+
+// send query and check result
+$result = $store->query('SELECT * WHERE {?s ?p ?o.}');
+echo count($result['result']['rows']); // outputs 5
 ```
 
 ## SPARQL support

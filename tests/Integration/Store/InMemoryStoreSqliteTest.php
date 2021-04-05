@@ -184,7 +184,6 @@ class InMemoryStoreSqliteTest extends TestCase
         /*
          * add result to the store
          */
-        $dataFactory = new DataFactory();
         $quads = [];
         foreach ($statement as $entry) {
             $quads[] = $dataFactory->quad($entry->s, $entry->p, $entry->o);
