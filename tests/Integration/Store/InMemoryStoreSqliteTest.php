@@ -13,7 +13,10 @@
 
 namespace Tests\Integration\Store;
 
+use GuzzleHttp\Client;
+use GuzzleHttp\Psr7\Request;
 use simpleRdf\DataFactory;
+use sparqlClient\Connection;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
@@ -158,5 +161,41 @@ class InMemoryStoreSqliteTest extends TestCase
             ],
             $res['result']['rows']
         );
+    }
+
+    /**
+     * Tests compatibility with sweetrdf/sparqlClient.
+     *
+     * It queries a SPARQL endpoint and adds result to store.
+     */
+    public function testSparqlClientCompatibility()
+    {
+        /*
+         * get data from a SPARQL endpoint
+         */
+        $httpClient = new Client();
+        $dataFactory = new DataFactory();
+        $connection = new Connection($httpClient, $dataFactory);
+        $query = 'SELECT * WHERE {?s ?p ?o} limit 5';
+        $url = 'https://arche-sparql.acdh-dev.oeaw.ac.at/sparql?query=';
+        $query = new Request('GET', $url.rawurlencode($query));
+        $statement = $connection->query($query);
+
+        /*
+         * add result to the store
+         */
+        $dataFactory = new DataFactory();
+        $quads = [];
+        foreach ($statement as $entry) {
+            $quads[] = $dataFactory->quad($entry->s, $entry->p, $entry->o);
+        }
+
+        $store = InMemoryStoreSqlite::createInstance();
+        $store->addQuads($quads);
+
+        /*
+         * check result
+         */
+        $this->assertCount(5, $store->query('SELECT * WHERE {?s ?p ?o.}')['result']['rows']);
     }
 }
