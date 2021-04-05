@@ -29,7 +29,7 @@ class ConstructQueryHandler extends SelectQueryHandler
         return $this->getResultIndex($sub_r);
     }
 
-    public function buildResultVars()
+    private function buildResultVars()
     {
         $r = [];
         foreach ($this->infos['query']['construct_triples'] as $t) {
@@ -44,7 +44,7 @@ class ConstructQueryHandler extends SelectQueryHandler
         $this->infos['query']['result_vars'] = $r;
     }
 
-    public function getResultIndex($qr)
+    private function getResultIndex($qr)
     {
         $r = [];
         $added = [];

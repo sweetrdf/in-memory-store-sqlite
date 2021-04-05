@@ -55,7 +55,7 @@ class DescribeQueryHandler extends SelectQueryHandler
         return $this->r;
     }
 
-    public function mergeSubResults($index, $is_sub_describe = 1)
+    private function mergeSubResults($index, $is_sub_describe = 1)
     {
         foreach ($index as $s => $ps) {
             if (!isset($this->r[$s])) {

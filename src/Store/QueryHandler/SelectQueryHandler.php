@@ -38,7 +38,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getSQL()
+    private function getSQL()
     {
         $r = '';
         $nl = "\n";
@@ -87,7 +87,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function buildInitialIndexes()
+    private function buildInitialIndexes()
     {
         $this->dependency_log = [];
         $this->index = $this->getEmptyIndex();
@@ -145,7 +145,7 @@ class SelectQueryHandler extends QueryHandler
         ];
     }
 
-    public function getTempTableDefForSQLite($q_sql)
+    private function getTempTableDefForSQLite($q_sql)
     {
         $col_part = preg_replace('/^SELECT\s*(DISTINCT)?(.*)FROM.*$/s', '\\2', $q_sql);
         $parts = explode(',', $col_part);
@@ -170,7 +170,10 @@ class SelectQueryHandler extends QueryHandler
         return $r ? $r."\n" : '';
     }
 
-    public function getFinalQueryResult($q_sql, $tmp_tbl)
+    /**
+     * It is protected because AskQueryHandler needs and overrides this function.
+     */
+    protected function getFinalQueryResult($q_sql, $tmp_tbl)
     {
         /* var names */
         $vars = [];
@@ -231,7 +234,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function buildIndex($pattern, $id)
+    private function buildIndex($pattern, $id)
     {
         $pattern['id'] = $id;
         $type = $pattern['type'] ?? '';
@@ -269,7 +272,7 @@ class SelectQueryHandler extends QueryHandler
         $this->index['patterns'][$id] = $pattern;
     }
 
-    public function analyzeIndex($pattern)
+    private function analyzeIndex($pattern)
     {
         $type = $pattern['type'] ?? '';
         if (!$type) {
@@ -332,7 +335,7 @@ class SelectQueryHandler extends QueryHandler
         }
     }
 
-    public function getGraphInfos($id)
+    private function getGraphInfos($id)
     {
         $r = [];
         if ($id) {
@@ -360,7 +363,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getPattern($id): array
+    private function getPattern($id): array
     {
         if (\is_array($id)) {
             return $id;
@@ -369,12 +372,12 @@ class SelectQueryHandler extends QueryHandler
         return $this->index['patterns'][$id] ?? [];
     }
 
-    public function getInitialPattern($id): array
+    private function getInitialPattern($id): array
     {
         return $this->initial_index['patterns'][$id] ?? [];
     }
 
-    public function getUnionIndexes($pre_index)
+    private function getUnionIndexes($pre_index)
     {
         $r = [];
         $branches = [];
@@ -416,7 +419,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function isOptionalPattern($id)
+    private function isOptionalPattern($id)
     {
         $pattern = $this->getPattern($id);
         $type = $pattern['type'] ?? '';
@@ -432,7 +435,7 @@ class SelectQueryHandler extends QueryHandler
         return $this->isOptionalPattern($pattern['parent_id']);
     }
 
-    public function getOptionalPattern($id)
+    private function getOptionalPattern($id)
     {
         $pn = $this->getPattern($id);
         do {
@@ -442,12 +445,12 @@ class SelectQueryHandler extends QueryHandler
         return $pn['id'];
     }
 
-    public function sameOptional($id, $id2)
+    private function sameOptional($id, $id2)
     {
         return $this->getOptionalPattern($id) == $this->getOptionalPattern($id2);
     }
 
-    public function isUnionPattern($id)
+    private function isUnionPattern($id)
     {
         $pattern = $this->getPattern($id);
 
@@ -464,17 +467,17 @@ class SelectQueryHandler extends QueryHandler
         return $this->isUnionPattern($parentId);
     }
 
-    public function getValueTable($col)
+    private function getValueTable($col)
     {
         return preg_match('/^(s|o)$/', $col) ? $col.'2val' : 'id2val';
     }
 
-    public function getGraphTable()
+    private function getGraphTable()
     {
         return 'g2t';
     }
 
-    public function getQuerySQL()
+    private function getQuerySQL()
     {
         $nl = "\n";
         $where_sql = $this->getWHERESQL();  /* pre-fills $index['sub_joins'] $index['constraints'] */
@@ -496,7 +499,7 @@ class SelectQueryHandler extends QueryHandler
                     ).$nl.'';
     }
 
-    public function getDistinctSQL()
+    private function getDistinctSQL()
     {
         $distinct = $this->infos['query']['distinct'] ?? 0;
         $reduced = $this->infos['query']['reduced'] ?? 0;
@@ -509,7 +512,7 @@ class SelectQueryHandler extends QueryHandler
         return $check ? ' DISTINCT' : '';
     }
 
-    public function getResultVarsSQL()
+    private function getResultVarsSQL()
     {
         $r = '';
         $vars = $this->infos['query']['result_vars'];
@@ -588,7 +591,7 @@ class SelectQueryHandler extends QueryHandler
         return $r ? $r : '1 AS `success`';
     }
 
-    public function getVarTableInfos($var, $ignore_initial_index = 1)
+    private function getVarTableInfos($var, $ignore_initial_index = 1)
     {
         if ('*' == $var) {
             return ['table' => '', 'col' => '', 'table_alias' => '*'];
@@ -622,7 +625,7 @@ class SelectQueryHandler extends QueryHandler
         return 0;
     }
 
-    public function getFROMSQL()
+    private function getFROMSQL()
     {
         $from_ids = $this->index['from'];
         $r = '';
@@ -634,12 +637,12 @@ class SelectQueryHandler extends QueryHandler
         return $r ? 'FROM '.$r : '';
     }
 
-    public function getOrderedJoinIDs()
+    private function getOrderedJoinIDs()
     {
         return array_merge($this->index['from'], $this->index['join'], $this->index['left_join']);
     }
 
-    public function getJoinInfos($id)
+    private function getJoinInfos($id)
     {
         $r = [];
         $tbl_ids = $this->getOrderedJoinIDs();
@@ -664,7 +667,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getAllJoinsSQL()
+    private function getAllJoinsSQL()
     {
         $js = $this->getJoins();
         $ljs = $this->getLeftJoins();
@@ -712,7 +715,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getJoins()
+    private function getJoins()
     {
         $r = [];
         $nl = "\n";
@@ -729,7 +732,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getLeftJoins()
+    private function getLeftJoins()
     {
         $r = [];
         $nl = "\n";
@@ -746,7 +749,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getJoinConditionSQL($id)
+    private function getJoinConditionSQL($id)
     {
         $r = '';
         $nl = "\n";
@@ -783,7 +786,7 @@ class SelectQueryHandler extends QueryHandler
     /**
      * A log of identified table join dependencies in getJoinConditionSQL.
      */
-    public function logDependency($id, $tbl)
+    private function logDependency($id, $tbl)
     {
         if (!isset($this->dependency_log[$id])) {
             $this->dependency_log[$id] = [];
@@ -797,7 +800,7 @@ class SelectQueryHandler extends QueryHandler
      * checks whether entries in the dependecy log could perhaps be optimized
      * (triggers re-ordering of patterns.
      */
-    public function problematicDependencies()
+    private function problematicDependencies()
     {
         foreach ($this->dependency_log as $id => $tbls) {
             if (\count($tbls) > 1) {
@@ -808,7 +811,7 @@ class SelectQueryHandler extends QueryHandler
         return 0;
     }
 
-    public function isJoinedBefore($tbl_1, $tbl_2)
+    private function isJoinedBefore($tbl_1, $tbl_2)
     {
         $tbl_ids = $this->getOrderedJoinIDs();
         foreach ($tbl_ids as $id) {
@@ -821,7 +824,7 @@ class SelectQueryHandler extends QueryHandler
         }
     }
 
-    public function joinDependsOn($id, $id2)
+    private function joinDependsOn($id, $id2)
     {
         if (\in_array($id2, array_merge($this->index['from'], $this->index['join']))) {
             return 1;
@@ -837,7 +840,7 @@ class SelectQueryHandler extends QueryHandler
         return 0;
     }
 
-    public function getDependentJoins($id)
+    private function getDependentJoins($id)
     {
         $r = [];
         /* sub joins */
@@ -862,7 +865,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getRequiredSubJoinSQL($id, $prefix = '')
+    private function getRequiredSubJoinSQL($id, $prefix = '')
     {
         /* id is a triple pattern id. Optional FILTERS and GRAPHs are getting added to the join directly */
         $nl = "\n";
@@ -929,7 +932,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getWHERESQL()
+    private function getWHERESQL()
     {
         $r = '';
         $nl = "\n";
@@ -976,7 +979,7 @@ class SelectQueryHandler extends QueryHandler
         return $r ? $nl.'WHERE '.$r : '';
     }
 
-    public function addConstraintSQLEntry($id, $sql)
+    private function addConstraintSQLEntry($id, $sql)
     {
         if (!isset($this->index['constraints'][$id])) {
             $this->index['constraints'][$id] = [];
@@ -986,7 +989,7 @@ class SelectQueryHandler extends QueryHandler
         }
     }
 
-    public function getConstraintSQL($id)
+    private function getConstraintSQL($id)
     {
         $r = '';
         $nl = "\n";
@@ -998,7 +1001,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getPatternSQL($pattern, $context)
+    private function getPatternSQL($pattern, $context)
     {
         $type = $pattern['type'] ?? '';
         if (!$type) {
@@ -1012,7 +1015,7 @@ class SelectQueryHandler extends QueryHandler
             : $this->getDefaultPatternSQL($pattern, $context);
     }
 
-    public function getDefaultPatternSQL($pattern, $context)
+    private function getDefaultPatternSQL($pattern, $context)
     {
         $r = '';
         $nl = "\n";
@@ -1025,7 +1028,7 @@ class SelectQueryHandler extends QueryHandler
         return $r ? $r : '';
     }
 
-    public function getTriplePatternSQL($pattern, $context)
+    private function getTriplePatternSQL($pattern, $context)
     {
         $r = '';
         $nl = "\n";
@@ -1129,7 +1132,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getFilterPatternSQL($pattern, $context)
+    private function getFilterPatternSQL($pattern, $context)
     {
         $r = '';
         $id = $pattern['id'];
@@ -1179,7 +1182,7 @@ class SelectQueryHandler extends QueryHandler
     /**
      * Checks if vars in the given (filter) pattern are used within the filter's scope.
      */
-    public function hasUnconnectedFilterVars($filter_pattern_id)
+    private function hasUnconnectedFilterVars($filter_pattern_id)
     {
         $scope_id = $this->getFilterScope($filter_pattern_id);
         $vars = $this->getFilterVars($filter_pattern_id);
@@ -1202,7 +1205,7 @@ class SelectQueryHandler extends QueryHandler
     /**
      * Returns the given filter pattern's scope (the id of the parent group pattern).
      */
-    public function getFilterScope($filter_pattern_id)
+    private function getFilterScope($filter_pattern_id)
     {
         $patterns = $this->initial_index['patterns'];
         $r = '';
@@ -1227,7 +1230,7 @@ class SelectQueryHandler extends QueryHandler
     /**
      * Builds a list of vars used in the given (filter) pattern.
      */
-    public function getFilterVars($filter_pattern_id)
+    private function getFilterVars($filter_pattern_id)
     {
         $r = [];
         $patterns = $this->initial_index['patterns'];
@@ -1253,7 +1256,7 @@ class SelectQueryHandler extends QueryHandler
     /**
      * Checks if $var_name appears as result projection alias.
      */
-    public function isAliasVar($var_name)
+    private function isAliasVar($var_name)
     {
         foreach ($this->infos['query']['result_vars'] as $r_var) {
             if ($r_var['alias'] == $var_name) {
@@ -1267,7 +1270,7 @@ class SelectQueryHandler extends QueryHandler
     /**
      * Checks if $var_name is used in a triple pattern in the given scope.
      */
-    public function isUsedTripleVar($var_name, $scope_id = '0')
+    private function isUsedTripleVar($var_name, $scope_id = '0')
     {
         $patterns = $this->initial_index['patterns'];
         foreach ($patterns as $id => $p) {
@@ -1288,7 +1291,7 @@ class SelectQueryHandler extends QueryHandler
         }
     }
 
-    public function getExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
+    private function getExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
     {
         $r = '';
         $type = $pattern['type'] ?? '';
@@ -1341,7 +1344,7 @@ class SelectQueryHandler extends QueryHandler
         return $r ? '('.$r.')' : $r;
     }
 
-    public function detectExpressionValueType($pattern_ids)
+    private function detectExpressionValueType($pattern_ids)
     {
         foreach ($pattern_ids as $id) {
             $pattern = $this->getPattern($id);
@@ -1357,7 +1360,7 @@ class SelectQueryHandler extends QueryHandler
         return '';
     }
 
-    public function getRelationalExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
+    private function getRelationalExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
     {
         $r = '';
         $val_type = $this->detectExpressionValueType($pattern['patterns']);
@@ -1391,7 +1394,7 @@ class SelectQueryHandler extends QueryHandler
         return $r ? '('.$r.')' : $r;
     }
 
-    public function getAdditiveExpressionSQL($pattern, $context, $val_type = '')
+    private function getAdditiveExpressionSQL($pattern, $context, $val_type = '')
     {
         $r = '';
         $val_type = $this->detectExpressionValueType($pattern['patterns']);
@@ -1411,7 +1414,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getMultiplicativeExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
+    private function getMultiplicativeExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
     {
         $r = '';
         $val_type = $this->detectExpressionValueType($pattern['patterns']);
@@ -1431,7 +1434,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getVarExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
+    private function getVarExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
     {
         $var = $pattern['value'];
         $info = $this->getVarTableInfos($var);
@@ -1499,7 +1502,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getUriExpressionSQL($pattern)
+    private function getUriExpressionSQL($pattern)
     {
         $val = $pattern['uri'];
         $r = $pattern['operator'];
@@ -1508,7 +1511,7 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getLiteralExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
+    private function getLiteralExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
     {
         $val = $pattern['value'];
         $r = $pattern['operator'];
@@ -1565,7 +1568,7 @@ class SelectQueryHandler extends QueryHandler
         return trim($r);
     }
 
-    public function findSiblingVarExpression($id)
+    private function findSiblingVarExpression($id)
     {
         $pattern = $this->getPattern($id);
         do {
@@ -1583,7 +1586,7 @@ class SelectQueryHandler extends QueryHandler
         return '';
     }
 
-    public function getFunctionExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
+    private function getFunctionExpressionSQL($pattern, $context, $val_type = '', $parent_type = '')
     {
         $fnc_uri = $pattern['uri'];
         $op = $pattern['operator'] ?? '';
@@ -1599,7 +1602,7 @@ class SelectQueryHandler extends QueryHandler
         return '';
     }
 
-    public function getBuiltInCallSQL($pattern, $context)
+    private function getBuiltInCallSQL($pattern, $context)
     {
         $call = $pattern['call'];
         $m = 'get'.ucfirst($call).'CallSQL';
@@ -1612,7 +1615,7 @@ class SelectQueryHandler extends QueryHandler
         return '';
     }
 
-    public function getBoundCallSQL($pattern, $context)
+    private function getBoundCallSQL($pattern, $context)
     {
         $r = '';
         $var = $pattern['args'][0]['value'];
@@ -1629,7 +1632,7 @@ class SelectQueryHandler extends QueryHandler
         return $tbl_alias.' IS NOT NULL';
     }
 
-    public function getHasTypeCallSQL($pattern, $context, $type)
+    private function getHasTypeCallSQL($pattern, $context, $type)
     {
         $r = '';
         $var = $pattern['args'][0]['value'];
@@ -1645,27 +1648,27 @@ class SelectQueryHandler extends QueryHandler
         return $tbl_alias.' '.$operator.'= '.$type;
     }
 
-    public function getIsliteralCallSQL($pattern, $context)
+    private function getIsliteralCallSQL($pattern, $context)
     {
         return $this->getHasTypeCallSQL($pattern, $context, 2);
     }
 
-    public function getIsblankCallSQL($pattern, $context)
+    private function getIsblankCallSQL($pattern, $context)
     {
         return $this->getHasTypeCallSQL($pattern, $context, 1);
     }
 
-    public function getIsiriCallSQL($pattern, $context)
+    private function getIsiriCallSQL($pattern, $context)
     {
         return $this->getHasTypeCallSQL($pattern, $context, 0);
     }
 
-    public function getIsuriCallSQL($pattern, $context)
+    private function getIsuriCallSQL($pattern, $context)
     {
         return $this->getHasTypeCallSQL($pattern, $context, 0);
     }
 
-    public function getStrCallSQL($pattern, $context)
+    private function getStrCallSQL($pattern, $context)
     {
         $sub_pattern = $pattern['args'][0];
         $sub_type = $sub_pattern['type'];
@@ -1675,7 +1678,7 @@ class SelectQueryHandler extends QueryHandler
         }
     }
 
-    public function getFunctionCallSQL($pattern, $context)
+    private function getFunctionCallSQL($pattern, $context)
     {
         $f_uri = $pattern['uri'];
         if (preg_match('/(integer|double|float|string)$/', $f_uri)) {/* skip conversions */
@@ -1688,10 +1691,11 @@ class SelectQueryHandler extends QueryHandler
         }
     }
 
-    public function getLangDatatypeCallSQL($pattern, $context)
+    private function getLangDatatypeCallSQL($pattern, $context)
     {
         $r = '';
-        if (isset($pattern['patterns'])) { /* proceed with first argument only (assumed as base type for type promotion) */
+        /* proceed with first argument only (assumed as base type for type promotion) */
+        if (isset($pattern['patterns'])) {
             $sub_pattern = ['args' => [$pattern['patterns'][0]]];
 
             return $this->getLangDatatypeCallSQL($sub_pattern, $context);
@@ -1719,17 +1723,17 @@ class SelectQueryHandler extends QueryHandler
         return $r;
     }
 
-    public function getDatatypeCallSQL($pattern, $context)
+    private function getDatatypeCallSQL($pattern, $context)
     {
         return '/* datatype call */ '.$this->getLangDatatypeCallSQL($pattern, $context);
     }
 
-    public function getLangCallSQL($pattern, $context)
+    private function getLangCallSQL($pattern, $context)
     {
         return '/* language call */ '.$this->getLangDatatypeCallSQL($pattern, $context);
     }
 
-    public function getLangmatchesCallSQL($pattern, $context)
+    private function getLangmatchesCallSQL($pattern, $context)
     {
         if (2 == \count($pattern['args'])) {
             $arg_1 = $pattern['args'][0];
@@ -1758,7 +1762,7 @@ class SelectQueryHandler extends QueryHandler
     /**
      * @todo not in use, so remove?
      */
-    public function getSametermCallSQL($pattern, $context)
+    private function getSametermCallSQL($pattern, $context)
     {
         if (2 == \count($pattern['args'])) {
             $arg_1 = $pattern['args'][0];
@@ -1774,7 +1778,7 @@ class SelectQueryHandler extends QueryHandler
         return '';
     }
 
-    public function getRegexCallSQL($pattern, $context)
+    private function getRegexCallSQL($pattern, $context)
     {
         $ac = \count($pattern['args']);
         if ($ac >= 2) {
@@ -1822,7 +1826,7 @@ class SelectQueryHandler extends QueryHandler
         return '';
     }
 
-    public function getGROUPSQL()
+    private function getGROUPSQL()
     {
         $r = '';
         $nl = "\n";
@@ -1845,7 +1849,7 @@ class SelectQueryHandler extends QueryHandler
         return $r ? $nl.$r : $r;
     }
 
-    public function getORDERSQL()
+    private function getORDERSQL()
     {
         $r = '';
         $nl = "\n";
@@ -1869,25 +1873,23 @@ class SelectQueryHandler extends QueryHandler
         return $r ? $nl.'ORDER BY '.$r : '';
     }
 
-    public function getLIMITSQL()
+    private function getLIMITSQL()
     {
         $r = '';
         $nl = "\n";
-        $limit = $this->infos['query']['limit'] ?? -1;
-        $offset = $this->infos['query']['offset'] ?? -1;
-        if (-1 != $limit) {
-            $offset = (-1 == $offset) ? 0 : $this->store->getDBObject()->escape($offset);
+        if (isset($this->infos['query']['limit'])) {
+            $limit = $this->infos['query']['limit'];
+            $offset = (int) ($this->infos['query']['offset'] ?? 0);
             $r = 'LIMIT '.$offset.','.$limit;
-        } elseif (-1 != $offset) {
-            // TODO is that if-else required with SQLite?
-            // mysql doesn't support stand-alone offsets
-            $r = 'LIMIT '.$this->store->getDBObject()->escape($offset).',999999999999';
+        } elseif (isset($this->infos['query']['offset'])) {
+            $offset = (int) $this->infos['query']['offset'];
+            $r = 'LIMIT '.$offset.',999999999999';
         }
 
         return $r ? $nl.$r : '';
     }
 
-    public function getValueSQL($q_tbl, $q_sql)
+    private function getValueSQL($q_tbl, $q_sql)
     {
         $r = '';
         /* result vars */
@@ -1918,13 +1920,13 @@ class SelectQueryHandler extends QueryHandler
             if ($var['aggregate']) {
                 $r .= 'TMP.`'.$var['alias'].'`';
             } else {
-                $join_type = \in_array($tbl, array_merge($this->index['from'], $this->index['join'])) ? 'JOIN' : 'LEFT JOIN'; /* val may be NULL */
+                /* val may be NULL */
+                $join_type = \in_array($tbl, array_merge($this->index['from'], $this->index['join'])) ? 'JOIN' : 'LEFT JOIN';
                 $v_tbls[$join_type][] = ['t_col' => $col, 'q_col' => $var_name, 'vc' => $vc];
                 $r .= 'V'.$vc.'.val AS `'.$var_name.'`';
                 if (\in_array($col, ['s', 'o'])) {
                     if (strpos($q_sql, '`'.$var_name.' type`')) {
                         $r .= ', '.$nl.'    TMP.`'.$var_name.' type` AS `'.$var_name.' type`';
-                    //$r .= ', ' . $nl . '    CASE TMP.`' . $var_name . ' type` WHEN 2 THEN "literal" WHEN 1 THEN "bnode" ELSE "uri" END AS `' . $var_name . ' type`';
                     } else {
                         $r .= ', '.$nl.'    NULL AS `'.$var_name.' type`';
                     }

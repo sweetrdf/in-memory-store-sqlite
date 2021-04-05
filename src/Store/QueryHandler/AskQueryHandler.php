@@ -24,7 +24,7 @@ class AskQueryHandler extends SelectQueryHandler
         return parent::runQuery($this->infos);
     }
 
-    public function buildResultVars()
+    private function buildResultVars()
     {
         $this->infos['query']['result_vars'][] = [
             'var' => '1',
@@ -33,7 +33,7 @@ class AskQueryHandler extends SelectQueryHandler
         ];
     }
 
-    public function getFinalQueryResult($q_sql, $tmp_tbl)
+    protected function getFinalQueryResult($q_sql, $tmp_tbl)
     {
         $row = $this->store->getDBObject()->fetchRow('SELECT success FROM '.$tmp_tbl);
         $r = isset($row['success']) ? $row['success'] : 0;
