@@ -19,6 +19,7 @@ $config
     ->setRules([
         '@PSR12' => true,
         'phpdoc_summary' => false,
+        'no_unused_imports' => true,
     ])
 ;
 

@@ -13,10 +13,7 @@
 
 namespace Tests\Integration\Store;
 
-use GuzzleHttp\Client;
-use GuzzleHttp\Psr7\Request;
 use simpleRdf\DataFactory;
-use sparqlClient\Connection;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
@@ -70,7 +67,7 @@ class InMemoryStoreSqliteTest extends TestCase
      */
     public function testInsertSaftRegressionTest2()
     {
-        $res = $this->subjectUnderTest->query('INSERT INTO <http://localhost/Saft/TestGraph/> {<http://foo/1> <http://foo/2> <http://foo/3> . }');
+        $this->subjectUnderTest->query('INSERT INTO <http://localhost/Saft/TestGraph/> {<http://foo/1> <http://foo/2> <http://foo/3> . }');
 
         $res1 = $this->subjectUnderTest->query('SELECT * FROM <http://localhost/Saft/TestGraph/> WHERE {?s ?p ?o.}');
         $this->assertEquals(1, \count($res1['result']['rows']));

@@ -13,10 +13,7 @@
 
 namespace Tests\Integration\Store\InMemoryStoreSqlite\SPARQL11;
 
-use sweetrdf\InMemoryStoreSqlite\Log\Logger;
-use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
-use sweetrdf\InMemoryStoreSqlite\StringReader;
 use Tests\TestCase;
 
 /**

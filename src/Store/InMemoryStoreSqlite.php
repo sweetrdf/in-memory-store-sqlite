@@ -14,11 +14,11 @@
 namespace sweetrdf\InMemoryStoreSqlite\Store;
 
 use Exception;
-use rdfInterface\BlankNode;
-use rdfInterface\DataFactory as iDataFactory;
-use rdfInterface\NamedNode;
-use rdfInterface\QuadIterator;
-use rdfInterface\Term as iTerm;
+use rdfInterface\BlankNodeInterface;
+use rdfInterface\DataFactoryInterface;
+use rdfInterface\LiteralInterface;
+use rdfInterface\NamedNodeInterface;
+use rdfInterface\QuadIteratorInterface;
 use simpleRdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
@@ -41,7 +41,7 @@ class InMemoryStoreSqlite
 
     private PDOSQLiteAdapter $db;
 
-    private iDataFactory $dataFactory;
+    private DataFactoryInterface $dataFactory;
 
     private LoggerPool $loggerPool;
 
@@ -53,7 +53,7 @@ class InMemoryStoreSqlite
 
     public function __construct(
         PDOSQLiteAdapter $db,
-        iDataFactory $dataFactory,
+        DataFactoryInterface $dataFactory,
         NamespaceHelper $namespaceHelper,
         LoggerPool $loggerPool,
         KeyValueBag $rowCache,
@@ -102,7 +102,7 @@ class InMemoryStoreSqlite
         return $this->db->getServerVersion();
     }
 
-    public function addQuads(iterable | QuadIterator $quads): void
+    public function addQuads(iterable | QuadIteratorInterface $quads): void
     {
         $triples = [];
 
@@ -118,7 +118,7 @@ class InMemoryStoreSqlite
 
             $triple = [
                 's' => $quad->getSubject()->getValue(),
-                's_type' => $quad->getSubject() instanceof NamedNode ? 'uri' : 'bnode',
+                's_type' => $quad->getSubject() instanceof NamedNodeInterface ? 'uri' : 'bnode',
                 'p' => $quad->getPredicate()->getValue(),
                 'o' => $quad->getObject()->getValue(),
                 'o_type' => '',
@@ -127,9 +127,9 @@ class InMemoryStoreSqlite
             ];
 
             // o
-            if ($quad->getObject() instanceof NamedNode) {
+            if ($quad->getObject() instanceof NamedNodeInterface) {
                 $triple['o_type'] = 'uri';
-            } elseif ($quad->getObject() instanceof BlankNode) {
+            } elseif ($quad->getObject() instanceof BlankNodeInterface) {
                 $triple['o_type'] = 'bnode';
             } else {
                 $triple['o_type'] = 'literal';
@@ -185,7 +185,7 @@ class InMemoryStoreSqlite
      * @param string $q      SPARQL query
      * @param string $format One of: raw, instances
      */
-    public function query(string $q, string $format = 'raw'): array | iTerm
+    public function query(string $q, string $format = 'raw'): array | LiteralInterface
     {
         $errors = [];
 
