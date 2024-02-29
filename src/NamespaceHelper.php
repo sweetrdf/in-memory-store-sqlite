@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -18,11 +18,11 @@ namespace sweetrdf\InMemoryStoreSqlite;
  */
 final class NamespaceHelper
 {
-    const BASE_NAMESPACE = 'sweetrdf://in-memory-store-sqlite/';
+    public const BASE_NAMESPACE = 'sweetrdf://in-memory-store-sqlite/';
 
-    const NAMESPACE_RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
-    const NAMESPACE_XML = 'http://www.w3.org/XML/1998/namespace';
-    const NAMESPACE_XSD = 'http://www.w3.org/2001/XMLSchema#';
+    public const NAMESPACE_RDF = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#';
+    public const NAMESPACE_XML = 'http://www.w3.org/XML/1998/namespace';
+    public const NAMESPACE_XSD = 'http://www.w3.org/2001/XMLSchema#';
 
     /**
      * List of known and new namespaces + prefixes.

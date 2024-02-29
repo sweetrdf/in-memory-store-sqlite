@@ -2,8 +2,9 @@
 
 namespace Tests\Unit\functions;
 
-use function sweetrdf\InMemoryStoreSqlite\getNormalizedValue;
 use Tests\TestCase;
+
+use function sweetrdf\InMemoryStoreSqlite\getNormalizedValue;
 
 class getNormalizedValueTest extends TestCase
 {

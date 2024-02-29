@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -16,6 +16,7 @@ namespace Tests\Integration\Store\InMemoryStoreSqlite\SPARQL11;
 use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\Parser\TurtleParser;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
+use sweetrdf\InMemoryStoreSqlite\StringReader;
 use Tests\TestCase;
 
 /**
@@ -25,32 +26,17 @@ use Tests\TestCase;
  *
  * Tests are located in the w3c-tests folder.
  */
-abstract class ComplianceTest extends TestCase
+class ComplianceTestCase extends TestCase
 {
-    /**
-     * @var InMemoryStoreSqlite
-     */
-    protected $store;
+    protected InMemoryStoreSqlite $store;
 
-    /**
-     * @var string
-     */
-    protected $dataGraphUri;
+    protected string $dataGraphUri;
 
-    /**
-     * @var string
-     */
-    protected $manifestGraphUri;
+    protected string $manifestGraphUri;
 
-    /**
-     * @var string
-     */
-    protected $testPref;
+    protected string $testPref;
 
-    /**
-     * @var string
-     */
-    protected $w3cTestsFolderPath;
+    protected string $w3cTestsFolderPath;
 
     protected function setUp(): void
     {
@@ -69,11 +55,9 @@ abstract class ComplianceTest extends TestCase
     /**
      * Helper function to get expected query result.
      *
-     * @param string $testUri
-     *
      * @return \SimpleXMLElement instance of \SimpleXMLElement representing the result
      */
-    protected function getExpectedResult($testUri)
+    protected function getExpectedResult(string $testUri)
     {
         /*
             example:
@@ -93,42 +77,6 @@ abstract class ComplianceTest extends TestCase
             return new \SimpleXMLElement(file_get_contents($res['result']['rows'][0]['resultFile']));
         } else {
             return null;
-        }
-    }
-
-    /**
-     * Helper function to load data for a given test.
-     *
-     * @param string $testUri
-     */
-    protected function getTestData($testUri): array
-    {
-        /*
-            example:
-
-            :group1 mf:action [
-                qt:data   <group-data-1.ttl>
-            ]
-         */
-        $file = $this->store->query('
-            PREFIX mf: <http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#> .
-            PREFIX qt: <http://www.w3.org/2001/sw/DataAccess/tests/test-query#> .
-            SELECT * FROM <'.$this->manifestGraphUri.'> WHERE {
-                <'.$testUri.'> mf:action [ qt:data ?file ] .
-            }
-        ');
-
-        // if no result was given, expect test is of type NegativeSyntaxTest11,
-        // which has no data (group-data-X.ttl) and result (.srx) file.
-        if (0 < \count($file['result']['rows'])) {
-            $parser = new TurtleParser(new Logger(), $this->store->getNamespaceHelper());
-            $data = file_get_contents($file['result']['rows'][0]['file']);
-            $uri = $file['result']['rows'][0]['file'];
-            $parser->parse($uri, $data);
-
-            return $parser->getTriples();
-        } else {
-            return [];
         }
     }
 
@@ -298,78 +246,10 @@ abstract class ComplianceTest extends TestCase
     }
 
     /**
-     * Loads manifest.ttl into manifest graph.
-     *
-     * @param string $folderPath
-     */
-    protected function loadManifestFileIntoStore($folderPath)
-    {
-        // parse manifest.ttl and load its content into $this->manifestGraphUri
-        $parser = new TurtleParser(new Logger(), $this->store->getNamespaceHelper());
-        $data = file_get_contents($folderPath.'/manifest.ttl');
-        $uri = $folderPath.'/manifest.ttl';
-        $parser->parse($uri, $data);
-        $this->store->addRawTriples($parser->getTriples(), $this->manifestGraphUri);
-    }
-
-    /**
      * @param string $query
      */
     protected function makeQueryA1Liner($query)
     {
         return preg_replace('/\s\s+/', ' ', $query);
-    }
-
-    /**
-     * Helper function to run a certain test.
-     *
-     * @param string $testName E.g. group01
-     */
-    protected function runTestFor($testName)
-    {
-        $this->loadManifestFileIntoStore($this->w3cTestsFolderPath);
-
-        // get test type (this determines, if we expect a normal test or one, that must fail)
-        $negTestUri = 'http://www.w3.org/2001/sw/DataAccess/tests/test-manifest#NegativeSyntaxTest11';
-        $type = $this->getTestType($this->testPref.$testName);
-
-        // test has to FAIL
-        if ($negTestUri == $type) {
-            // get query to test
-            $testQuery = $this->getTestQuery($this->testPref.$testName);
-
-            $this->assertFalse(empty($testQuery), 'Can not test, because test query is empty.');
-
-            $result = $this->store->query($testQuery);
-            if (0 == $result) {
-                $this->assertEquals(0, $result);
-            } elseif (isset($result['result']['rows'])) {
-                $this->assertEquals(0, \count($result['result']['rows']));
-            } else {
-                throw new \Exception('Invalid result by query method: '.json_encode($result));
-            }
-
-            // test has to be SUCCESSFUL
-        } else {
-            // get test data
-            $triples = $this->getTestData($this->testPref.$testName);
-
-            // load test data into graph
-            $this->store->addRawTriples($triples, $this->dataGraphUri);
-
-            // get query to test
-            $testQuery = $this->getTestQuery($this->testPref.$testName);
-
-            // get expected result
-            $expectedResult = $this->getExpectedResult($this->testPref.$testName);
-
-            // get actual result for given test query
-            $actualResult = $this->store->query($testQuery);
-            $actualResultAsXml = $this->getXmlVersionOfResult($actualResult);
-
-            $this->assertEquals($expectedResult, $actualResultAsXml);
-        }
-
-        return true;
     }
 }

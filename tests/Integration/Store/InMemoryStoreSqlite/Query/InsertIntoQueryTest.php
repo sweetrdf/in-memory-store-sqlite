@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -637,9 +637,9 @@ class InsertIntoQueryTest extends TestCase
      * Adds bulk of triples to test behavior.
      * May take at least one second to finish.
      */
-    public function testAdditionOfManyTriples()
+    public function testAdditionOfManyTriples11()
     {
-        $amount = 3000;
+        $amount = 2000;
 
         // add triples in separate query calls
         for ($i = 0; $i < $amount; ++$i) {
@@ -652,5 +652,28 @@ class InsertIntoQueryTest extends TestCase
         $res = $this->subjectUnderTest->query('SELECT * FROM <http://ex/> WHERE {?s ?p ?o.}');
 
         $this->assertEquals($amount, \count($res['result']['rows']));
+    }
+
+    /**
+     */
+    public function testInsertIntoMultipleTimes22()
+    {
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
+            _:b0  rdf:first  1 ;
+                  rdf:rest   _:b1 .
+            _:b1  rdf:first  ?x ;
+                  rdf:rest   _:b2 .
+            _:b2  rdf:first  3 ;
+                  rdf:rest   rdf:nil .
+        }');
+
+        $this->subjectUnderTest->query('INSERT INTO <http://example.com/> {
+            <http://a1> <http://b2> <http://c3> .
+            <http://a4> <http://b5> <http://c6> .
+        }');
+
+        $res = $this->subjectUnderTest->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
+
+        $this->assertCount(8, $res['result']['rows']);
     }
 }

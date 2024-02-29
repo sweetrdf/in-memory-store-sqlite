@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -20,7 +20,7 @@ namespace Tests\Integration\Store\InMemoryStoreSqlite\SPARQL11;
  *
  * Tests are located in the w3c-tests folder.
  */
-class DropTest extends ComplianceTest
+class DropTest extends ComplianceTestCase
 {
     protected function setUp(): void
     {

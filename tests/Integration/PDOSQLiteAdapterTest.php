@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -139,8 +139,10 @@ class PDOSQLiteAdapterTest extends TestCase
         // check server version
         $this->assertEquals(
             1,
-            preg_match('/[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}/',
-            'Found: '.$this->subjectUnderTest->getServerVersion())
+            preg_match(
+                '/[0-9]{1,}\.[0-9]{1,}\.[0-9]{1,}/',
+                'Found: '.$this->subjectUnderTest->getServerVersion()
+            )
         );
     }
 

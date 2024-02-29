@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -17,6 +17,8 @@ use Exception;
 
 class DeleteQueryHandler extends QueryHandler
 {
+    private array $infos;
+
     private bool $refs_deleted;
 
     public function runQuery($infos)

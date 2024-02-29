@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowak
@@ -13,10 +13,11 @@
 
 namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
 
-use function sweetrdf\InMemoryStoreSqlite\getNormalizedValue;
 use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
+
+use function sweetrdf\InMemoryStoreSqlite\getNormalizedValue;
 
 class InsertQueryHandler extends QueryHandler
 {

@@ -106,7 +106,7 @@ Local tests showed that per second around 1500 triples can be added.
 
 ## License
 
-This work is licensed under the terms of the GPL 3 or later.
+This work is licensed under the terms of the GPL 2.
 
 ## Acknowledgement
 

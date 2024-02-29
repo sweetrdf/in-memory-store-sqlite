@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -15,6 +15,11 @@ namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
 
 class DescribeQueryHandler extends SelectQueryHandler
 {
+    private array $added_triples;
+    private array $described_ids;
+    private array $ids;
+    private array $r;
+
     public function runQuery($infos)
     {
         $ids = $infos['query']['result_uris'];

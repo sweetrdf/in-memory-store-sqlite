@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -18,6 +18,43 @@ use sweetrdf\InMemoryStoreSqlite\PDOSQLiteAdapter;
 
 class SelectQueryHandler extends QueryHandler
 {
+    private int $cache_results;
+
+    /**
+     * @var array<mixed>
+     */
+    private array $dependency_log;
+
+    private string $engine_type;
+
+    /**
+     * @var array<miyed>
+     */
+    private array $index;
+
+    /**
+     * @var array<miyed>
+     */
+    private array $indexes;
+
+    /**
+     * @var array<miyed>
+     */
+    private array $initial_index;
+
+    private int $is_union_query;
+
+    /**
+     * @var array<miyed>
+     */
+    protected array $infos;
+
+    private $opt_sql;
+
+    private int $opt_sql_pd_count;
+
+    private int $pattern_order_offset;
+
     public function runQuery($infos)
     {
         $this->infos = $infos;
@@ -211,7 +248,7 @@ class SelectQueryHandler extends QueryHandler
                                 \in_array($var, $aggregate_vars)
                                     ? 'literal'
                                     : 'uri'
-                              );
+                            );
                         if (
                             isset($pre_row[$var.' lang_dt'])
                             && ($lang_dt = $pre_row[$var.' lang_dt'])
@@ -486,14 +523,16 @@ class SelectQueryHandler extends QueryHandler
         return ''.(
             $this->is_union_query
                 ? 'SELECT'
-                : 'SELECT'.$this->getDistinctSQL()).$nl.
+                : 'SELECT'.$this->getDistinctSQL()
+        ).$nl.
                     $this->getResultVarsSQL().$nl. /* fills $index['sub_joins'] */
                     $this->getFROMSQL().
                     $this->getAllJoinsSQL().
                     $this->getWHERESQL().
                     $this->getGROUPSQL().
                     $this->getORDERSQL().
-                    ($this->is_union_query
+                    (
+                        $this->is_union_query
                         ? ''
                         : $this->getLIMITSQL()
                     ).$nl.'';
@@ -1172,7 +1211,8 @@ class SelectQueryHandler extends QueryHandler
         /* some really ugly tweaks */
         /* empty language filter: FILTER ( lang(?v) = '' ) */
         $r = preg_replace(
-            '/\(\/\* language call \*\/ ([^\s]+) = ""\)/s', '((\\1 = "") OR (\\1 LIKE "%:%"))',
+            '/\(\/\* language call \*\/ ([^\s]+) = ""\)/s',
+            '((\\1 = "") OR (\\1 LIKE "%:%"))',
             $r
         );
 

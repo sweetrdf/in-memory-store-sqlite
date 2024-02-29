@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -26,6 +26,8 @@ abstract class BaseParser
 
     protected string $base;
 
+    protected string $bnode_prefix;
+
     protected string $bnode_id;
 
     protected array $blocks;
@@ -39,7 +41,7 @@ abstract class BaseParser
      */
     protected array $r = [];
 
-    protected StringReader $stringReader;
+    protected StringReader $reader;
 
     protected array $triples = [];
 

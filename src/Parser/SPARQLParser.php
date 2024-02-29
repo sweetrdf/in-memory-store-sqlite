@@ -1,8 +1,8 @@
 <?php
 
-/*
+/**
  * This file is part of the sweetrdf/InMemoryStoreSqlite package and licensed under
- * the terms of the GPL-3 license.
+ * the terms of the GPL-2 license.
  *
  * (c) Konrad Abicht <hi@inspirito.de>
  * (c) Benjamin Nowack
@@ -13,13 +13,19 @@
 
 namespace sweetrdf\InMemoryStoreSqlite\Parser;
 
-use function sweetrdf\InMemoryStoreSqlite\calcBase;
 use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\StringReader;
 
+use function sweetrdf\InMemoryStoreSqlite\calcBase;
+
 class SPARQLParser extends TurtleParser
 {
+    /**
+     * @var array<mixed>
+     */
+    public array $bnode_pattern_index;
+
     public function __construct(Logger $logger, NamespaceHelper $namespaceHelper, StringReader $stringReader)
     {
         parent::__construct($logger, $namespaceHelper, $stringReader);

@@ -4,7 +4,7 @@
     "description": "RDF in-memory quad store implementation using PDO and SQLite.",
     "keywords": ["rdf","sparql", "in-memory store"],
     "homepage": "https://github.com/sweetrdf/in-memory-store-sqlite",
-    "license": ["GPL-3.0-or-later"],
+    "license": ["GPL-2.0"],
     "authors": [
         {
             "name": "Konrad Abicht",
@@ -19,10 +19,10 @@
         "sweetrdf/simple-rdf": "~0.5"
     },
     "require-dev": {
-        "friendsofphp/php-cs-fixer": "~2.18.1",
+        "friendsofphp/php-cs-fixer": "^3",
         "guzzlehttp/guzzle": "^7.2",
-        "phpunit/phpunit": "~9.0",
-        "sweetrdf/sparql-client": "~0.1"
+        "phpunit/phpunit": "10",
+        "sweetrdf/sparql-client": "^0.1"
     },
     "autoload": {
         "files": ["src/functions.php"],
