@@ -4,7 +4,7 @@ on: push
 
 jobs:
     linux-tests:
-        name: Linux-Tests with PHP ${{ matrix.php-versions }}
+        name: Linux-Tests with PHP ${{ matrix.php }}
         runs-on: ubuntu-latest
 
         env:

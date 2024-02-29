@@ -497,15 +497,26 @@ class AggregatesTest extends ComplianceTestCase
 
         $result = $this->store->query($query);
 
-        $this->assertEquals(
-            [
+        // PHP works differently prior to 8.1.0 therefore the if-else here
+        if (version_compare(PHP_VERSION, '8.1.0', '<')) {
+            $this->assertEquals(
                 [
-                    //       ,---- seems to be too precise
-                    'sum' => 11.100000000000001, 'sum type' => 'literal',
+                    [
+                        'sum' => 11.1, 'sum type' => 'literal',
+                    ],
                 ],
-            ],
-            $result['result']['rows']
-        );
+                $result['result']['rows']
+            );
+        } else {
+            $this->assertEquals(
+                [
+                    [
+                        'sum' => 11.100000000000001, 'sum type' => 'literal',
+                    ],
+                ],
+                $result['result']['rows']
+            );
+        }
     }
 
     public function testAggSum02()
@@ -566,14 +577,23 @@ class AggregatesTest extends ComplianceTestCase
             $result['result']['rows'][3]
         );
 
-        $this->assertEquals(
-            [
-                's' => 'http://www.example.org/mixed2', 's type' => 'uri',
-                //       ,--- seems to be a rounding problem
-                'sum' => 2.4000000000000004, 'sum type' => 'literal',
-            ],
-            $result['result']['rows'][4]
-        );
-
+        // PHP works differently prior to 8.1.0 therefore the if-else here
+        if (version_compare(PHP_VERSION, '8.1.0', '<')) {
+            $this->assertEquals(
+                [
+                    's' => 'http://www.example.org/mixed2', 's type' => 'uri',
+                    'sum' => 2.4, 'sum type' => 'literal',
+                ],
+                $result['result']['rows'][4]
+            );
+        } else {
+            $this->assertEquals(
+                [
+                    's' => 'http://www.example.org/mixed2', 's type' => 'uri',
+                    'sum' => 2.4000000000000004, 'sum type' => 'literal',
+                ],
+                $result['result']['rows'][4]
+            );
+        }
     }
 }
