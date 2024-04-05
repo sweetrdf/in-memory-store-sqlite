@@ -108,6 +108,59 @@ class InsertIntoQueryTest extends TestCase
         );
     }
 
+    /**
+     * Tests handling of rdf:type and a, in context of ":foo a owl:Ontology".
+     */
+    public function testInsertIntoRdfTypeAndA()
+    {
+        // test data
+        $query = '
+            PREFIX ex: <http://ex/>
+            INSERT INTO <http://ex> {
+                <http://foo> rdf:type ex:Person .
+                <http://bar> a ex:Person .
+            }
+        ';
+        $this->subjectUnderTest->query($query);
+
+        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
+        $this->assertEquals(
+            [
+                [
+                    's' => 'http://foo',
+                    's type' => 'uri',
+                    'p' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
+                    'p type' => 'uri',
+                    'o' => 'http://ex/Person',
+                    'o type' => 'uri',
+                ],
+                [
+                    's' => 'http://bar',
+                    's type' => 'uri',
+                    // a was translated to rdf:type on insertion
+                    'p' => 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type',
+                    'p type' => 'uri',
+                    'o' => 'http://ex/Person',
+                    'o type' => 'uri',
+                ],
+            ],
+            $res['result']['rows']
+        );
+
+        // asking for resources via a ...
+        $res = $this->subjectUnderTest->query('SELECT ?iri WHERE {?iri a <http://ex/Person>}');
+        $this->assertEquals(
+            [['iri' => 'http://foo', 'iri type' => 'uri'], ['iri' => 'http://bar', 'iri type' => 'uri'],],
+            $res['result']['rows']
+        );
+        // and rdf:type ...
+        $res = $this->subjectUnderTest->query('SELECT ?iri WHERE {?iri rdf:type <http://ex/Person>}');
+        $this->assertEquals(
+            [['iri' => 'http://foo', 'iri type' => 'uri'], ['iri' => 'http://bar', 'iri type' => 'uri'],],
+            $res['result']['rows']
+        );
+    }
+
     public function testInsertIntoNumbers()
     {
         // test data
