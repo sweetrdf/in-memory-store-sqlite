@@ -13,7 +13,6 @@
 
 namespace sweetrdf\InMemoryStoreSqlite\Store\QueryHandler;
 
-use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\Logger;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 
@@ -22,21 +21,10 @@ use function sweetrdf\InMemoryStoreSqlite\getNormalizedValue;
 class InsertQueryHandler extends QueryHandler
 {
     /**
-     * If true, store assumes one or more insert into SPARQL queries and will
-     * skip certain DB operations to speed up insertion process.
-     */
-    private bool $bulkLoadModeIsActive = false;
-
-    /**
      * Is used if $bulkLoadModeIsActive is true. Determines next term ID for
      * entries in id2val, s2val and o2val.
      */
     private int $bulkLoadModeNextTermId = 1;
-
-    /**
-     * When set it is used to store term information to speed up insert into operations.
-     */
-    private KeyValueBag $rowCache;
 
     /**
      * Is being used for blank nodes to generate a hash which is not only dependent on
@@ -48,25 +36,6 @@ class InsertQueryHandler extends QueryHandler
     public function __construct(InMemoryStoreSqlite $store, Logger $logger)
     {
         parent::__construct($store, $logger);
-
-        // default value; will be overridden when running inside InMemoryStoreSqlite
-        $this->rowCache = new KeyValueBag();
-    }
-
-    public function activateBulkLoadMode(int $bulkLoadModeNextTermId): void
-    {
-        $this->bulkLoadModeIsActive = true;
-        $this->bulkLoadModeNextTermId = $bulkLoadModeNextTermId;
-    }
-
-    public function getBulkLoadModeNextTermId(): int
-    {
-        return $this->bulkLoadModeNextTermId;
-    }
-
-    public function setRowCache(KeyValueBag $rowCache): void
-    {
-        $this->rowCache = $rowCache;
     }
 
     public function runQuery(array $infos)
@@ -100,7 +69,7 @@ class InsertQueryHandler extends QueryHandler
         $graphId = $this->getIdOfExistingTerm($graph, 'id');
         if (null == $graphId) {
             $graphId = $this->store->getDBObject()->insert('id2val', [
-                'id' => $this->getMaxTermId(),
+                'id' => $this->getNextMaxTermId(),
                 'val' => $graph,
                 'val_type' => 0, // = uri
             ]);
@@ -111,7 +80,7 @@ class InsertQueryHandler extends QueryHandler
          */
         $subjectId = $this->getIdOfExistingTerm($triple['s'], 'subject');
         if (null == $subjectId) {
-            $subjectId = $this->getMaxTermId();
+            $subjectId = $this->getNextMaxTermId();
             $this->store->getDBObject()->insert('s2val', [
                 'id' => $subjectId,
                 'val' => $triple['s'],
@@ -124,7 +93,7 @@ class InsertQueryHandler extends QueryHandler
          */
         $predicateId = $this->getIdOfExistingTerm($triple['p'], 'id');
         if (null == $predicateId) {
-            $predicateId = $this->getMaxTermId();
+            $predicateId = $this->getNextMaxTermId();
             $this->store->getDBObject()->insert('id2val', [
                 'id' => $predicateId,
                 'val' => $triple['p'],
@@ -137,7 +106,7 @@ class InsertQueryHandler extends QueryHandler
          */
         $objectId = $this->getIdOfExistingTerm($triple['o'], 'object');
         if (null == $objectId) {
-            $objectId = $this->getMaxTermId();
+            $objectId = $this->getNextMaxTermId();
             $this->store->getDBObject()->insert('o2val', [
                 'id' => $objectId,
                 'val' => $triple['o'],
@@ -163,7 +132,7 @@ class InsertQueryHandler extends QueryHandler
 
         $oLangDtId = $this->getIdOfExistingTerm($oLangDt, 'id');
         if (null == $oLangDtId) {
-            $oLangDtId = $this->getMaxTermId();
+            $oLangDtId = $this->getNextMaxTermId();
             $this->store->getDBObject()->insert('id2val', [
                 'id' => $oLangDtId,
                 'val' => $oLangDt,
@@ -250,32 +219,13 @@ class InsertQueryHandler extends QueryHandler
     }
 
     /**
-     * Generates the next valid ID based on latest values in id2val, s2val and o2val.
+     * Generates the next valid ID.
      *
      * @return int returns 1 or higher
      */
-    private function getMaxTermId(): int
+    private function getNextMaxTermId(): int
     {
-        if (true === $this->bulkLoadModeIsActive) {
-            return $this->bulkLoadModeNextTermId++;
-        } else {
-            $sql = '';
-            foreach (['id2val', 's2val', 'o2val'] as $table) {
-                $sql .= !empty($sql) ? ' UNION ' : '';
-                $sql .= 'SELECT MAX(id) as id FROM '.$table;
-            }
-            $result = 0;
-
-            $rows = $this->store->getDBObject()->fetchList($sql);
-
-            if (\is_array($rows)) {
-                foreach ($rows as $row) {
-                    $result = ($result < $row['id']) ? $row['id'] : $result;
-                }
-            }
-
-            return $result + 1;
-        }
+        return $this->bulkLoadModeNextTermId++;
     }
 
     /**
@@ -290,15 +240,7 @@ class InsertQueryHandler extends QueryHandler
         if ('id' == $quadPart) {
             $sql = 'SELECT id, val FROM id2val WHERE val = ?';
 
-            $hashKey = md5($sql.json_encode([$value]));
-            if (false === $this->rowCache->has($hashKey)) {
-                $row = $this->store->getDBObject()->fetchRow($sql, [$value]);
-                if (\is_array($row)) {
-                    $this->rowCache->set($hashKey, $row);
-                }
-            }
-
-            $entry = $this->rowCache->get($hashKey);
+            $entry = $this->store->getDBObject()->fetchRow($sql, [$value]);
 
             // entry found, use its ID
             if (\is_array($entry)) {
@@ -312,15 +254,7 @@ class InsertQueryHandler extends QueryHandler
             $sql = 'SELECT id, val FROM '.$table.' WHERE val_hash = ?';
             $params = [$this->getValueHash($value)];
 
-            $hashKey = md5($sql.json_encode($params));
-            if (false === $this->rowCache->has($hashKey)) {
-                $row = $this->store->getDBObject()->fetchRow($sql, $params);
-                if (\is_array($row)) {
-                    $this->rowCache->set($hashKey, $row);
-                }
-            }
-
-            $entry = $this->rowCache->get($hashKey);
+            $entry = $this->store->getDBObject()->fetchRow($sql, $params);
 
             // entry found, use its ID
             if (isset($entry['val']) && $entry['val'] == $value) {

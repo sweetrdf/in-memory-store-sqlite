@@ -14,6 +14,7 @@
 namespace Tests\Integration\Store\InMemoryStoreSqlite\Query;
 
 use Exception;
+use simpleRdf\DataFactory;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\Store\InMemoryStoreSqlite;
 use Tests\TestCase;
@@ -728,5 +729,40 @@ class InsertIntoQueryTest extends TestCase
         $res = $this->subjectUnderTest->query('SELECT * FROM <http://example.com/> {?s ?p ?o.}');
 
         $this->assertCount(8, $res['result']['rows']);
+    }
+
+    /**
+     * Calling addQuads lead to the following error in the past:
+     *
+     *      Integrity constraint violation: 19 UNIQUE constraint failed: id2val.id
+     *
+     * Because a max term ID was reset on each call of addQuads.
+     */
+    public function testInsertIntoIntegrityConstraintViolationId2Val()
+    {
+        $df = new DataFactory();
+        $graph = 'http://g';
+
+        $q1 = $df->quad(
+            $df->namedNode('http://a'),
+            $df->namedNode('http://b'),
+            $df->namedNode('http://c'),
+            $df->namedNode($graph)
+        );
+
+        // q2
+        $q2 = $df->quad(
+            $df->blankNode('123'),
+            $df->namedNode('http://b'),
+            $df->literal('foobar', 'de'),
+            $df->namedNode($graph)
+        );
+
+        $this->subjectUnderTest->addQuads([$q1, $q2]);
+        $this->subjectUnderTest->addQuads([$q1]); // re-add the same quad
+
+        $res = $this->subjectUnderTest->query('SELECT * WHERE {?s ?p ?o.}');
+
+        $this->assertCount(2, $res['result']['rows']);
     }
 }

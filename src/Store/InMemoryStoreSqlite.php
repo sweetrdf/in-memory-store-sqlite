@@ -20,7 +20,6 @@ use rdfInterface\LiteralInterface;
 use rdfInterface\NamedNodeInterface;
 use rdfInterface\QuadIteratorInterface;
 use simpleRdf\DataFactory;
-use sweetrdf\InMemoryStoreSqlite\KeyValueBag;
 use sweetrdf\InMemoryStoreSqlite\Log\LoggerPool;
 use sweetrdf\InMemoryStoreSqlite\NamespaceHelper;
 use sweetrdf\InMemoryStoreSqlite\Parser\SPARQLPlusParser;
@@ -35,36 +34,35 @@ use sweetrdf\InMemoryStoreSqlite\StringReader;
 
 class InMemoryStoreSqlite
 {
-    private bool $bulkLoadModeIsActive = true;
-
-    private int $bulkLoadModeNextTermId = 1;
-
     private PDOSQLiteAdapter $db;
 
     private DataFactoryInterface $dataFactory;
+
+    private InsertQueryHandler $insertQueryHandler;
 
     private LoggerPool $loggerPool;
 
     private NamespaceHelper $namespaceHelper;
 
-    private KeyValueBag $rowCache;
-
     private StringReader $stringReader;
 
+    /**
+     * @internal Don't use the constructor directly because parameters may change. Use createInstance() instead.
+     */
     public function __construct(
         PDOSQLiteAdapter $db,
         DataFactoryInterface $dataFactory,
         NamespaceHelper $namespaceHelper,
         LoggerPool $loggerPool,
-        KeyValueBag $rowCache,
         StringReader $stringReader
     ) {
         $this->db = $db;
         $this->dataFactory = $dataFactory;
         $this->loggerPool = $loggerPool;
         $this->namespaceHelper = $namespaceHelper;
-        $this->rowCache = $rowCache;
         $this->stringReader = $stringReader;
+
+        $this->insertQueryHandler = new InsertQueryHandler($this, $this->loggerPool->createNewLogger('QueryHandler'));
     }
 
     /**
@@ -77,7 +75,6 @@ class InMemoryStoreSqlite
             new DataFactory(),
             new NamespaceHelper(),
             new LoggerPool(),
-            new KeyValueBag(),
             new StringReader()
         );
     }
@@ -162,16 +159,7 @@ class InMemoryStoreSqlite
      */
     public function addRawTriples(array $triples, string $graphIri): void
     {
-        $queryHandlerLogger = $this->loggerPool->createNewLogger('QueryHandler');
-        $queryHandler = new InsertQueryHandler($this, $queryHandlerLogger);
-
-        $queryHandler->setRowCache($this->rowCache);
-
-        if (true === $this->bulkLoadModeIsActive) {
-            $queryHandler->activateBulkLoadMode($this->bulkLoadModeNextTermId);
-        }
-
-        $queryHandler->runQuery([
+        $this->insertQueryHandler->runQuery([
             'query' => [
                 'construct_triples' => $triples,
                 'target_graph' => $graphIri,
@@ -222,27 +210,17 @@ class InMemoryStoreSqlite
             throw new Exception('Inalid query $type given.');
         }
 
-        $queryHandlerLogger = $this->loggerPool->createNewLogger('QueryHandler');
-        $queryHandler = new $cls($this, $queryHandlerLogger);
-
         if ('insert' == $queryType) {
-            $queryHandler->setRowCache($this->rowCache);
-
-            if (true === $this->bulkLoadModeIsActive) {
-                $queryHandler->activateBulkLoadMode($this->bulkLoadModeNextTermId);
-            }
-        } elseif ('delete' == $queryType) {
-            // reset row cache, because it will not be notified of data changes
-            $this->rowCache->reset();
-            $this->bulkLoadModeIsActive = false;
+            // reuse InsertQueryHandler because its max term ID
+            // when it gets recreated everytime the max term ID start by 1 and we get:
+            // Integrity constraint violation: 19 UNIQUE constraint failed: id2val.id
+            $queryHandler = $this->insertQueryHandler;
+        } else {
+            $queryHandlerLogger = $this->loggerPool->createNewLogger('QueryHandler');
+            $queryHandler = new $cls($this, $queryHandlerLogger);
         }
 
         $queryResult = $queryHandler->runQuery($infos);
-
-        if ('insert' == $queryType && true === $this->bulkLoadModeIsActive) {
-            // save latest term ID in case further insert into queries follow
-            $this->bulkLoadModeNextTermId = $queryHandler->getBulkLoadModeNextTermId();
-        }
 
         $result = null;
         if ('raw' == $format) {

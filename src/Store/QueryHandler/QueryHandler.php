@@ -69,10 +69,8 @@ abstract class QueryHandler
                     }
                 }
             }
-        }
-
-        /* exact match */
-        else {
+        } else {
+            /* exact match */
             $sql = 'SELECT id FROM '.$tbl.' WHERE val = ? LIMIT 1';
             $row = $this->store->getDBObject()->fetchRow($sql, [$val]);
 

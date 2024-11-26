@@ -835,8 +835,7 @@ class SPARQLParser extends TurtleParser
         } elseif ($r = $this->x('\<([^\<\>\s\"\|\^`]*)\>', $v)) {
             return [$r[1] ? $r[1] : true, $r[2]];
         }
-        /* allow reserved chars in obvious IRIs */
-        elseif ($r = $this->x('\<(https?\:[^\s][^\<\>]*)\>', $v)) {
+        /* allow reserved chars in obvious IRIs */ elseif ($r = $this->x('\<(https?\:[^\s][^\<\>]*)\>', $v)) {
             return [$r[1] ? $r[1] : true, $r[2]];
         }
 
